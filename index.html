@@ -268,6 +268,10 @@
         <div><span class="eyebrow">EDITOR DE EXÁMENES</span><h2 id="exam-modal-title">Crear examen</h2></div>
         <button class="btn primary editor-save" type="submit" form="exam-editor-form">Guardar examen</button>
       </div>
+      <nav class="exam-editor-nav" aria-label="Secciones del editor">
+        <button class="exam-editor-tab active" data-editor-section="editor-settings-section" type="button">Detalles</button>
+        <button class="exam-editor-tab" data-editor-section="editor-questions-section" type="button">Preguntas</button>
+      </nav>
       <form id="exam-editor-form"><input type="hidden" id="editor-exam-id">
         <section class="editor-section editor-settings-section" aria-labelledby="editor-settings-title">
           <div class="editor-section-head"><div><span class="eyebrow">CONFIGURACIÓN</span><h3 id="editor-settings-title">Datos del examen</h3></div><p>Define cómo se presentará la evaluación al alumno.</p></div>
@@ -347,6 +351,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260722-4"></script>
+  <script src="app.js?v=20260730-1"></script>
 </body>
 </html>

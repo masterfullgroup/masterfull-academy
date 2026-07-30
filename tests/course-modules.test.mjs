@@ -4,6 +4,11 @@ import vm from "node:vm";
 
 const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
 const htmlSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+assert.match(appSource, /renderTeacherCourseModulesCanvas/, "El curso docente debe usar la estructura compacta de módulos");
+assert.match(appSource, /collapse-all-modules/, "Los módulos deben poder contraerse en conjunto");
+assert.match(appSource, /row-action-menu/, "Las acciones de filas deben agruparse en menús verticales");
+assert.match(appSource, /\["settings", "Configuraci/, "La navegación del curso debe incluir configuración");
+assert.match(htmlSource, /class="exam-editor-nav"/, "El editor debe separar detalles y preguntas");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
