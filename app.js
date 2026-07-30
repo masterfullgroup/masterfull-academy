@@ -316,6 +316,8 @@ function menuIcon(name) {
   const paths = {
     sound: `<path d="M11 5 6.5 8.5H3v7h3.5L11 19z"/><path d="M15 9.5a4 4 0 0 1 0 5M18 7a7.5 7.5 0 0 1 0 10"/>`,
     muted: `<path d="M11 5 6.5 8.5H3v7h3.5L11 19z"/><path d="m16 10 5 5m0-5-5 5"/>`,
+    courses: `<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/>`,
+    grades: `<path d="M5 4h14v16H5z"/><path d="m8 13 2 2 5-6M8 7h4"/>`,
     profile: `<circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>`,
     logout: `<path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/>`
   };
@@ -491,12 +493,18 @@ function renderApp() {
     return;
   }
   const activeTeacherTab = $("#teacher-view .tab-content.active")?.id || "teacher-home";
+  const activeStudentTab = $("#student-view .tab-content.active")?.id || "student-courses";
   const teacherNavigation = isTeacher ? `<nav class="shell-teacher-nav" aria-label="Secciones del profesor">
     <div class="shell-nav-label"><strong>Espacio docente</strong><small>Gestión académica</small></div>
     <button class="shell-nav-item ${activeTeacherTab === "teacher-home" || activeTeacherTab === "teacher-courses" ? "active" : ""}" data-teacher-tab="teacher-home" type="button"><span aria-hidden="true">▣</span>Cursos <b id="courses-tab-count">0</b></button>
   </nav>` : "";
+  const studentNavigation = !isTeacher ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
+    <div class="shell-nav-label"><strong>Mi aprendizaje</strong><small>Espacio del alumno</small></div>
+    <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
+    <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
+  </nav>` : "";
   const soundControl = isTeacher ? "" : `<button id="sound-btn" class="btn ghost sound-btn" aria-pressed="${soundEnabled}" title="${soundEnabled ? "Silenciar sonidos" : "Activar sonidos"}">${menuIcon(soundEnabled ? "sound" : "muted")}<span>${soundEnabled ? "Sonido activado" : "Sonido silenciado"}</span></button>`;
-  $("#session-area").innerHTML = `${teacherNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions">${soundControl}<button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div></div>`;
+  $("#session-area").innerHTML = `${teacherNavigation}${studentNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions">${soundControl}<button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div></div>`;
   $("#sound-btn")?.addEventListener("click", toggleSound);
   $("#profile-btn").addEventListener("click", openProfile);
   $("#logout-btn").addEventListener("click", logout);
@@ -507,6 +515,15 @@ function renderApp() {
       renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     }
     switchTab("teacher", button.dataset.teacherTab, button);
+  }));
+  $$("#session-area [data-student-tab]").forEach(button => button.addEventListener("click", () => {
+    if (button.dataset.studentTab === "student-courses") {
+      activeStudentCourseId = null;
+      $("#student-course-list")?.classList.remove("hidden");
+      $("#student-course-workspace")?.classList.add("hidden");
+      $("#student-overview")?.classList.remove("hidden");
+    }
+    switchTab("student", button.dataset.studentTab, button);
   }));
   if (isTeacher) renderTeacher(); else renderStudent();
 }
@@ -1192,9 +1209,8 @@ function renderStudent() {
   const myGrades = results.filter(grade => grade.studentId === currentUser.id);
   const courses = publishedCourses.filter(course => publishedExams.some(exam => exam.courseId === course.id) || normalizeModules(course.modules).length);
   const summaries = courses.map(courseStudentSummary);
-  const pendingExams = publishedExams.filter(exam => !myGrades.some(grade => grade.examId === exam.id)).length;
   $("#student-stats").innerHTML = "";
-  renderStudentOverview(courses, myGrades, summaries, pendingExams);
+  renderStudentOverview(courses, summaries);
   const activeStudentCourse = courses.find(course => course.id === activeStudentCourseId);
   if (activeStudentCourseId && !activeStudentCourse) activeStudentCourseId = null;
   $("#student-course-list").classList.toggle("hidden", Boolean(activeStudentCourse));
@@ -1224,14 +1240,16 @@ function renderStudentCourseDirectory(courses, summaries) {
     const summary = summaries.find(item => item.course.id === course.id) || { total:0, completed:0, percent:0 };
     const modules = normalizeModules(course.modules);
     const examCount = publishedExams.filter(exam => exam.courseId === course.id).length;
-    return `<article class="student-library-card tone-${index % 4}"><div class="student-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${quantity(modules.length, "módulo", "módulos")}</small></div><div class="student-course-card-body"><span class="eyebrow">${esc(course.teacherName || "Profesor")}</span><h4>${esc(course.name)}</h4><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p><div class="student-card-progress"><span><b>${summary.percent}%</b> completado</span><div class="course-progress-track"><i style="width:${summary.percent}%"></i></div></div><div class="student-card-footer"><small>${summary.total} actividades · ${examCount} evaluaciones</small><button class="open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso →</button></div></div></article>`;
+    const progressMarkup = summary.total ? `<div class="student-card-progress"><span><b>${summary.percent}%</b><span>completado</span></span><div class="course-progress-track"><i style="width:${summary.percent}%"></i></div></div>` : `<div class="student-card-empty-progress">Contenido en preparación</div>`;
+    const contentMeta = [summary.total ? quantity(summary.total, "actividad") : "", examCount ? quantity(examCount, "evaluación", "evaluaciones") : ""].filter(Boolean).join(" · ") || "Sin actividades disponibles";
+    return `<article class="student-library-card tone-${index % 4}"><div class="student-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${modules.length ? quantity(modules.length, "módulo", "módulos") : "En preparación"}</small></div><div class="student-course-card-body"><span class="eyebrow">${esc(course.teacherName || "Profesor")}</span><h4>${esc(course.name)}</h4><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p>${progressMarkup}<div class="student-card-footer"><small>${esc(contentMeta)}</small><button class="open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso <span aria-hidden="true">→</span></button></div></div></article>`;
   }).join("")}</div>`;
 }
 function renderStudentCourseWorkspace(course, myGrades) {
   const modules = normalizeModules(course.modules).filter(module => module.published);
   const activities = modules.flatMap(module => module.activities.filter(activity => activity.published && activity.type !== "heading")).length;
   const exams = publishedExams.filter(exam => exam.courseId === course.id);
-  return `<div class="student-course-page"><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button><header class="student-course-hero"><div class="student-course-hero-mark">${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</div><div><span class="eyebrow">ESPACIO DEL CURSO</span><h3>${esc(course.name)}</h3><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p><small>Profesor: ${esc(course.teacherName || "Profesor")}</small></div><div class="student-course-hero-stats"><span><b>${modules.length}</b> módulos</span><span><b>${activities}</b> actividades</span><span><b>${exams.length}</b> evaluaciones</span></div></header><nav class="course-workspace-nav student-course-nav"><button class="course-subpage active" type="button">Curso</button><button class="course-subpage" type="button" disabled>Actividades (${activities})</button><button class="course-subpage" type="button" disabled>Evaluaciones (${exams.length})</button><button class="course-subpage student-course-grades" type="button">Calificaciones</button></nav><section class="student-course-content"><div class="student-course-content-head"><div><span class="eyebrow">CONTENIDO</span><h4>Módulos del curso</h4><p>Avanza por las páginas, archivos y actividades preparadas por tu profesor.</p></div></div>${renderStudentCourseModules(course, myGrades)}${exams.length ? `<div class="exam-rows student-course-exams"><h4>Evaluaciones del curso</h4>${exams.map(exam => renderStudentExamRow(exam, myGrades)).join("")}</div>` : ""}</section></div>`;
+  return `<div class="student-course-page"><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button><header class="student-course-hero"><div class="student-course-hero-mark">${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</div><div><span class="eyebrow">ESPACIO DEL CURSO</span><h3>${esc(course.name)}</h3><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p><small>Profesor: ${esc(course.teacherName || "Profesor")}</small></div><div class="student-course-hero-stats"><span><b>${modules.length}</b> módulos</span><span><b>${activities}</b> actividades</span><span><b>${exams.length}</b> evaluaciones</span></div></header><section class="student-course-content"><div class="student-course-content-head"><div><span class="eyebrow">CONTENIDO</span><h4>Módulos del curso</h4><p>Avanza por las páginas, archivos y actividades preparadas por tu profesor.</p></div><button class="btn secondary student-course-grades" type="button">${modernIcon("results")} Ver calificaciones</button></div>${renderStudentCourseModules(course, myGrades)}${exams.length ? `<div class="exam-rows student-course-exams"><h4>Evaluaciones del curso</h4>${exams.map(exam => renderStudentExamRow(exam, myGrades)).join("")}</div>` : ""}</section></div>`;
 }
 function courseStudentSummary(course) {
   const activities = normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(activity => activity.published && activity.type !== "heading" && activity.completionRule !== "none"));
@@ -1248,14 +1266,11 @@ function activityCompleted(activity, progress, myGrades = []) {
   }
   return Boolean(progress.completed?.[activity.id]);
 }
-function renderStudentOverview(courses, myGrades, summaries, pendingExams) {
+function renderStudentOverview(courses, summaries) {
   const nextCandidates = courses.flatMap(course => accessibleCourseActivities(course).filter(activity => !courseProgress[course.id]?.completed?.[activity.id]).map(activity => ({ course, activity })));
   const next = nextCandidates[0];
-  const allActivities = courses.flatMap(course => normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(activity => activity.published && activity.type !== "heading").map(activity => ({ course, activity }))));
-  const last = allActivities.find(item => courseProgress[item.course.id]?.lastActivityId === item.activity.id);
-  const pendingList = publishedExams.filter(exam => !myGrades.some(grade => grade.examId === exam.id)).slice(0, 5);
   const overall = summaries.length ? Math.round(summaries.reduce((total, summary) => total + summary.percent, 0) / summaries.length) : 0;
-  $("#student-overview").innerHTML = `<div class="student-home-layout"><section class="overview-panel student-resume-panel"><div class="overview-panel-head"><div><span class="eyebrow">CONTINUAR</span><h3>Actividad actual</h3></div><span class="student-overall-progress">${overall}% general</span></div>${next ? `<div class="student-resume-body"><span class="activity-type-icon">${modernIcon(next.activity.type)}</span><div><small>${esc(next.course.name)}</small><h4>${esc(next.activity.title)}</h4><p>${activityTypeLabel(next.activity.type)} · ${esc(next.activity.moduleTitle)}</p><div class="course-progress-track"><span style="width:${overall}%"></span></div></div><button class="btn primary continue-course" data-course-id="${esc(next.course.id)}" data-activity-id="${esc(next.activity.id)}" type="button">Continuar →</button></div>` : `<div class="lms-empty-state"><strong>${courses.length ? "Todo está al día" : "No hay cursos disponibles"}</strong><p>Las próximas actividades aparecerán aquí.</p></div>`}${last ? `<div class="student-last-row"><span>Última actividad</span><strong>${esc(last.activity.title)}</strong><small>${esc(last.course.name)}</small></div>` : ""}</section><aside class="overview-panel student-todo-panel"><div class="overview-panel-head"><div><span class="eyebrow">POR HACER</span><h3>Evaluaciones pendientes</h3></div><span class="todo-count">${pendingExams}</span></div><div class="student-todo-list">${pendingList.length ? pendingList.map(exam => `<button class="start-exam" data-id="${esc(exam.id)}" type="button"><span>${modernIcon("quiz")}</span><span><strong>${esc(exam.title)}</strong><small>${esc(findCourse(exam.courseId)?.name || "Curso")} · ${exam.minutes} min</small></span><b>›</b></button>`).join("") : `<p class="lms-empty-note">No tienes evaluaciones pendientes.</p>`}</div></aside></div>`;
+  $("#student-overview").innerHTML = `<div class="student-home-layout"><section class="overview-panel student-resume-panel"><div class="overview-panel-head"><div><span class="eyebrow">CONTINUAR</span><h3>${next ? "Retoma tu aprendizaje" : "Tu aprendizaje"}</h3></div><span class="student-overall-progress">${overall}% general</span></div>${next ? `<div class="student-resume-body"><span class="activity-type-icon">${modernIcon(next.activity.type)}</span><div><small>${esc(next.course.name)}</small><h4>${esc(next.activity.title)}</h4><p>${activityTypeLabel(next.activity.type)} · ${esc(next.activity.moduleTitle)}</p><div class="course-progress-track"><span style="width:${overall}%"></span></div></div><button class="btn primary continue-course" data-course-id="${esc(next.course.id)}" data-activity-id="${esc(next.activity.id)}" type="button">Continuar <span aria-hidden="true">→</span></button></div>` : `<div class="lms-empty-state"><strong>${courses.length ? "Todo está al día" : "No hay cursos disponibles"}</strong><p>Cuando tengas una actividad disponible aparecerá aquí.</p></div>`}</section></div>`;
 }
 function renderStudentCourseModules(course, myGrades) {
   const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published) }));

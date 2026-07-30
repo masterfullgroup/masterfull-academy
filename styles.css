@@ -3803,3 +3803,245 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
     grid-template-columns:24px minmax(0,1fr);
   }
 }
+
+/* Simplified student LMS dashboard */
+.shell-student-nav {
+  display:grid;
+  width:100%;
+  gap:5px;
+  margin:22px 0;
+}
+.shell-student-nav .shell-nav-item {
+  grid-template-columns:27px minmax(0,1fr);
+}
+.shell-student-nav .shell-nav-item .menu-icon {
+  width:18px;
+  height:18px;
+  color:#91aabe;
+}
+.shell-student-nav .shell-nav-item > span {
+  color:inherit;
+  font-size:12px;
+  text-align:left;
+}
+.shell-student-nav .shell-nav-item.active .menu-icon {
+  color:#fff;
+}
+.app-shell-mode #student-view {
+  max-width:1280px;
+}
+.app-shell-mode #student-view > .tabs {
+  display:none;
+}
+.student-dashboard-overview {
+  margin:26px 0 30px;
+}
+.student-home-layout {
+  grid-template-columns:minmax(0,1fr);
+  gap:0;
+}
+.student-home-layout .overview-panel {
+  border-color:#d7e2e8;
+  border-radius:15px;
+  box-shadow:0 8px 24px #17324d0a;
+}
+.student-resume-panel {
+  padding:24px 28px;
+}
+.student-home-layout .overview-panel-head {
+  padding-bottom:16px;
+}
+.student-home-layout .overview-panel-head h3 {
+  margin-top:5px;
+  font-size:19px;
+  font-weight:680;
+}
+.student-home-layout .overview-panel-head .eyebrow {
+  color:#0b8399;
+  font-size:10px;
+}
+.student-overall-progress {
+  padding:6px 10px;
+  color:#0b7d92;
+  border-radius:99px;
+  background:#eaf7f9;
+  font-size:11px;
+}
+.student-resume-body {
+  grid-template-columns:52px minmax(0,1fr) auto;
+  min-height:108px;
+  gap:18px;
+  padding:20px 0 2px;
+}
+.student-resume-body .activity-type-icon {
+  width:48px;
+  height:48px;
+}
+.student-resume-body h4 {
+  margin:4px 0 5px;
+  font-size:18px;
+  font-weight:680;
+}
+.student-resume-body small,
+.student-resume-body p {
+  font-size:12px;
+}
+.student-resume-body .course-progress-track {
+  max-width:680px;
+  height:7px;
+  margin-top:14px;
+}
+.student-resume-body .btn {
+  min-height:42px;
+  padding:10px 16px;
+  border-radius:9px;
+  background:#0d8da3;
+  font-size:13px;
+}
+.student-last-row,
+.student-todo-panel {
+  display:none !important;
+}
+.student-library-head {
+  align-items:center;
+  margin:0 0 18px;
+}
+.student-library-head h3 {
+  margin:5px 0 6px;
+  font-size:25px;
+  font-weight:700;
+}
+.student-library-head p {
+  font-size:13px;
+  line-height:1.5;
+}
+.student-library-head > span {
+  padding:8px 12px;
+  font-size:11px;
+}
+.student-course-gallery {
+  gap:22px;
+  margin-bottom:30px;
+}
+.student-library-card {
+  border-color:#d6e2e9;
+  border-radius:16px;
+  box-shadow:0 8px 24px #17324d0d;
+}
+.student-course-cover {
+  height:112px;
+  padding:16px;
+}
+.student-course-cover > span {
+  width:46px;
+  height:46px;
+  font-size:22px;
+}
+.student-course-cover small {
+  padding:6px 9px;
+  font-size:9.5px;
+}
+.student-course-card-body {
+  min-height:0;
+  padding:19px 18px 18px;
+}
+.student-course-card-body .eyebrow {
+  font-size:9.5px;
+}
+.student-course-card-body h4 {
+  margin:7px 0;
+  font-size:18px;
+  font-weight:680;
+}
+.student-course-card-body > p {
+  min-height:39px;
+  font-size:12.5px;
+  line-height:1.5;
+}
+.student-card-progress {
+  gap:9px;
+  margin:18px 0;
+}
+.student-card-progress > span {
+  align-items:center;
+  font-size:11px;
+}
+.student-card-progress b {
+  font-size:12px;
+}
+.student-card-progress .course-progress-track {
+  height:7px;
+}
+.student-card-empty-progress {
+  margin:18px 0;
+  padding:10px 12px;
+  color:#708092;
+  border-radius:9px;
+  background:#f2f6f8;
+  font-size:11px;
+  font-weight:600;
+}
+.student-card-footer {
+  margin-top:0;
+  padding-top:15px;
+}
+.student-card-footer small {
+  font-size:10.5px;
+}
+.student-card-footer button {
+  min-height:38px;
+  padding:8px 11px;
+  border-radius:8px;
+  font-size:11.5px;
+}
+.student-course-content-head {
+  align-items:center;
+}
+.student-course-content-head > .student-course-grades {
+  display:inline-flex;
+  min-height:40px;
+  align-items:center;
+  gap:7px;
+  padding:9px 13px;
+  border-radius:8px;
+  font-size:12px;
+}
+.student-course-content-head > .student-course-grades .modern-icon {
+  width:17px;
+  height:17px;
+}
+
+@media (max-width:760px) {
+  .shell-student-nav {
+    margin:18px 0;
+  }
+  .student-dashboard-overview {
+    margin:20px 0 24px;
+  }
+  .student-resume-panel {
+    padding:20px;
+  }
+  .student-resume-body {
+    grid-template-columns:46px minmax(0,1fr);
+  }
+  .student-resume-body .btn {
+    grid-column:1 / -1;
+    width:100%;
+  }
+  .student-library-head {
+    align-items:flex-start;
+    flex-direction:column;
+    gap:12px;
+  }
+  .student-library-head h3 {
+    font-size:23px;
+  }
+  .student-course-content-head {
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .student-course-content-head > .student-course-grades {
+    width:100%;
+    justify-content:center;
+  }
+}

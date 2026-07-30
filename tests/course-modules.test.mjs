@@ -80,5 +80,8 @@ for (const field of ["activity-published","activity-completion-rule","activity-e
 }
 assert.match(appSource, /Sin asignar a un módulo/, "Las evaluaciones históricas sin módulo deben identificarse");
 assert.match(appSource, /Filtro de las tareas ya ubicadas en los módulos/, "La vista global de tareas debe ser un filtro");
+assert.doesNotMatch(appSource, /student-todo-panel/, "El panel del alumno no debe mostrar el bloque de evaluaciones pendientes");
+assert.doesNotMatch(htmlSource, /<div class="tabs">\s*<button class="tab active" data-student-tab/, "El panel del alumno no debe duplicar la navegación en una barra horizontal");
+assert.match(appSource, /shell-student-nav/, "Cursos y calificaciones deben estar disponibles desde la navegación lateral");
 
 console.log("OK: arquitectura de módulos, publicación, progreso, tareas y evaluaciones");
