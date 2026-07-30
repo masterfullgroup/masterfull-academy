@@ -15,9 +15,9 @@ Plataforma educativa estática para GitHub Pages con cursos y exámenes cargados
 El panel del profesor está organizado como un espacio de gestión académica:
 
 - **Cursos** es la pantalla inicial del profesor y muestra directamente todos los cursos creados.
-- **Cursos** permite crear, editar, publicar y eliminar espacios de aprendizaje.
-- **Evaluaciones** reúne el constructor, la importación y la exportación JSON.
-- **Calificaciones** centraliza intentos, filtros, revisión y exportación CSV.
+- La navegación principal del profesor se concentra en **Cursos**.
+- Cada curso integra su resumen, módulos, evaluaciones y banco de preguntas en una página propia.
+- El botón **Volver a cursos** regresa directamente al tablero anterior.
 
 La reorganización visual no elimina la portabilidad de los JSON. `data/catalog.json` y `data/exams/` continúan funcionando como catálogo estático, mientras que la publicación directa y los resultados usan Supabase cuando está configurado.
 
