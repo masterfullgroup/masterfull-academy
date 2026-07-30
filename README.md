@@ -17,6 +17,11 @@ El panel del profesor está organizado como un espacio de gestión académica:
 - **Cursos** es la pantalla inicial del profesor y muestra directamente todos los cursos creados.
 - La navegación principal del profesor se concentra en **Cursos**.
 - Cada curso integra su resumen, módulos, evaluaciones y banco de preguntas en una página propia.
+- **Módulos** es la fuente única del recorrido académico. Las pantallas de tareas y evaluaciones son filtros y no duplican actividades.
+- Los módulos y sus elementos admiten estado publicado/borrador, disponibilidad, reglas de finalización, orden persistente y movimiento entre módulos.
+- Una evaluación se vincula desde un elemento de tipo `quiz` mediante `examId`; las evaluaciones históricas sin vínculo se muestran como **Sin asignar a un módulo** hasta que el profesor elija su ubicación.
+- Los encabezados organizan el contenido pero no generan progreso ni calificación.
+- Las tareas conservan una combinación extensible de entregas (`file`, `text`, `url`, `questions` o `none`) dentro del JSONB del curso.
 - **Vista del alumno** permite comprobar el contenido del curso en modo de solo lectura antes de publicarlo.
 - El botón **Volver a cursos** regresa directamente al tablero anterior.
 
@@ -107,6 +112,18 @@ Luego abre:
 ```text
 http://localhost:5500/
 ```
+
+### Comprobaciones
+
+El proyecto no requiere instalar paquetes. Usa Node.js para validar sintaxis y ejecutar las pruebas del contrato de módulos:
+
+```bash
+node --check app.js
+node tests/course-modules.test.mjs
+git diff --check
+```
+
+Las pruebas comprueban normalización compatible, contenido publicado, encabezados sin progreso, referencias a evaluaciones, entregas mixtas y las vistas globales como filtros.
 
 ## Subir cursos y exámenes JSON
 

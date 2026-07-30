@@ -3312,3 +3312,76 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
   .student-preview-head { align-items:flex-start; flex-direction:column; }
   .student-preview-counts { width:100%; justify-content:space-between; }
 }
+
+/* Module-centered course architecture */
+.teacher-module-card > summary {
+  display:grid;
+  grid-template-columns:24px 40px minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:12px;
+  min-height:68px;
+  padding:12px 14px;
+  cursor:pointer;
+  list-style:none;
+  border-bottom:1px solid transparent;
+  background:#f4f6f8;
+}
+.teacher-module-card > summary::-webkit-details-marker { display:none; }
+.teacher-module-card[open] > summary { border-bottom-color:#dbe2e7; }
+.teacher-module-card > summary h3 { margin:0; color:#17283a; font-size:14px; line-height:1.25; }
+.teacher-module-card > summary small { display:block; margin-top:4px; color:#68798a; font-size:10px; }
+.teacher-module-card > summary .status { white-space:nowrap; }
+.teacher-activity-row.is-draft { background:#fbfcfd; }
+.teacher-activity-row.is-draft > *:not(.activity-actions) { opacity:.72; }
+.module-heading-row {
+  grid-template-columns:22px minmax(0,1fr) auto;
+  margin-top:8px;
+  border-top:1px solid #cbd5e1;
+  border-bottom:0;
+  background:#f8fafc;
+}
+.module-heading-row strong { color:#334155; font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.student-module-heading {
+  margin:14px 15px 5px;
+  padding:9px 0 6px;
+  color:#475569;
+  border-bottom:1px solid #dbe3e9;
+  font-size:10px;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+.student-activity-state {
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  color:#64748b;
+  border:1px solid #cbd5e1;
+  border-radius:50%;
+}
+.activity-config-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.activity-submission-types {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 16px;
+  margin:0;
+  padding:13px;
+  border:1px solid #d9e2e8;
+  border-radius:8px;
+}
+.activity-submission-types legend { padding:0 6px; color:#334155; font-weight:650; }
+.activity-submission-types label { flex-direction:row; align-items:center; gap:7px; margin:0; font-weight:500; }
+.activity-submission-types input { width:auto; }
+.exam-assigned { color:#176b4d; }
+.exam-unassigned { color:#9a5a12; font-weight:700; }
+
+@media (max-width:760px) {
+  .teacher-module-card > summary { grid-template-columns:22px 34px minmax(0,1fr); }
+  .teacher-module-card > summary > .status { justify-self:start; grid-column:3; }
+  .teacher-module-card > summary .module-actions { grid-column:2 / -1; }
+  .activity-config-grid { grid-template-columns:1fr; }
+  .teacher-activity-row { grid-template-columns:20px 32px minmax(0,1fr); }
+  .teacher-activity-row > .status { grid-column:3; justify-self:start; }
+  .teacher-activity-row .activity-actions { grid-column:2 / -1; }
+  .module-heading-row { grid-template-columns:20px minmax(0,1fr); }
+}

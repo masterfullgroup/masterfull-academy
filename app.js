@@ -60,17 +60,27 @@ function savePending() { localStorage.setItem(PENDING_RESULTS_KEY, JSON.stringif
 function saveCourseProgress() { localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(courseProgress)); }
 function normalizeModules(value) {
   if (!Array.isArray(value)) return [];
+  const supportedTypes = ["page","lesson","file","video","pdf","download","practice","task","quiz","discussion","live","heading","link"];
   return value.map((module, moduleIndex) => ({
     id: String(module.id || `module-${moduleIndex + 1}`),
     title: String(module.title || module.name || `Módulo ${moduleIndex + 1}`).trim(),
     unlockRule: ["immediate","previous","evaluation","date"].includes(module.unlockRule || module.unlock_rule) ? (module.unlockRule || module.unlock_rule) : "immediate",
     unlockDetail: String(module.unlockDetail || module.unlock_detail || "").trim(),
+    published: module.published !== false,
     activities: (Array.isArray(module.activities) ? module.activities : []).map((activity, activityIndex) => ({
       id: String(activity.id || `activity-${moduleIndex + 1}-${activityIndex + 1}`),
       title: String(activity.title || activity.name || `Actividad ${activityIndex + 1}`).trim(),
-      type: ["page","lesson","video","pdf","download","task","quiz","link"].includes(activity.type) ? activity.type : "lesson",
+      type: supportedTypes.includes(activity.type) ? activity.type : "lesson",
       url: String(activity.url || "").trim(),
-      description: String(activity.description || "").trim()
+      description: String(activity.description || "").trim(),
+      published: activity.published !== false,
+      examId: String(activity.examId || activity.exam_id || "").trim(),
+      dueAt: String(activity.dueAt || activity.due_at || "").trim(),
+      points: Math.max(0, Number(activity.points) || 0),
+      duration: Math.max(0, Number(activity.duration) || 0),
+      attempts: Math.max(0, Number(activity.attempts) || 0),
+      completionRule: ["none","view","manual","submit","pass"].includes(activity.completionRule || activity.completion_rule) ? (activity.completionRule || activity.completion_rule) : (activity.type === "heading" ? "none" : "manual"),
+      submissionTypes: Array.isArray(activity.submissionTypes || activity.submission_types) ? [...new Set(activity.submissionTypes || activity.submission_types)].filter(type => ["file","text","url","questions","none"].includes(type)) : []
     }))
   }));
 }
@@ -123,8 +133,13 @@ function modernIcon(name) {
     ,pdf: `<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 13h6M9 17h4"/>`
     ,download: `<path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 20h14"/>`
     ,task: `<path d="M7 4h10v17H7z"/><path d="M9 4V2h6v2M10 9h4M10 13h4M10 17h3"/>`
+    ,practice: `<path d="M5 19h14M7 16l4-10h2l4 10M9 12h6"/>`
     ,quiz: `<circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.3 2.3 0 1 1 3.2 2.1c-.8.4-1 1-1 1.9M12 17h.01"/>`
     ,link: `<path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"/>`
+    ,file: `<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 13h6M9 17h4"/>`
+    ,discussion: `<path d="M4 5h16v12H8l-4 4z"/><path d="M8 9h8M8 13h5"/>`
+    ,live: `<rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3z"/>`
+    ,heading: `<path d="M5 6v12M19 6v12M5 12h14"/>`
     ,progress: `<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>`
     ,certificate: `<circle cx="12" cy="9" r="6"/><path d="m8.5 14-1 8 4.5-2 4.5 2-1-8M9.5 9l1.5 1.5L14.5 7"/>`
     ,students: `<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 5M17 14a5 5 0 0 1 4 5"/>`
@@ -543,6 +558,7 @@ function bindStaticEvents() {
   $("#module-form").addEventListener("submit", saveModule);
   $("#activity-form").addEventListener("submit", saveActivity);
   $("#module-unlock-rule").addEventListener("change", toggleModuleUnlockDetail);
+  $("#activity-type").addEventListener("change", toggleActivityFields);
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
@@ -732,7 +748,7 @@ function getTeacherCourses() {
   return [...new Map([...publishedCourses, ...drafts.courses].map(course => [course.id, course])).values()];
 }
 function getTeacherExams() {
-  return [...publishedExams, ...drafts.exams];
+  return [...new Map([...publishedExams, ...drafts.exams].map(exam => [exam.id, exam])).values()];
 }
 function renderTeacherOverview() {
   const allCourses = getTeacherCourses();
@@ -847,12 +863,14 @@ function renderTeacherCourseWorkspace(course, exams) {
   const sections = [
     ["overview", "Resumen"],
     ["modules", `Módulos (${(course.modules || []).length})`],
+    ["tasks", "Tareas"],
     ["exams", `Exámenes (${exams.length})`],
     ["questions", `Banco de preguntas (${questionCount})`]
   ];
   let content = "";
   if (isStudentPreview) content = renderTeacherStudentPreview(course, exams);
-  else if (activeTeacherCourseSection === "modules") content = renderTeacherCourseModules(course);
+  else if (activeTeacherCourseSection === "modules") content = renderTeacherCourseModules(course, exams);
+  else if (activeTeacherCourseSection === "tasks") content = renderTeacherCourseTasks(course);
   else if (activeTeacherCourseSection === "exams") content = renderTeacherCourseExams(course, exams);
   else if (activeTeacherCourseSection === "questions") content = renderTeacherCourseQuestions(exams);
   else content = renderTeacherCourseOverview(course, exams, publishedCount, questionCount);
@@ -878,33 +896,51 @@ function renderTeacherCourseWorkspace(course, exams) {
     </div>
   </div>`;
 }
+function renderTeacherCourseTasks(course) {
+  const tasks = normalizeModules(course.modules).flatMap(module => module.activities.filter(activity => activity.type === "task").map(activity => ({ activity, module })));
+  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Tareas</h2><p>Filtro de las tareas ya ubicadas en los módulos; no se crean copias.</p></div></div><div class="course-exam-list">${tasks.length ? tasks.map(({ activity, module }) => `<article class="exam-module-item"><span class="exam-module-type-icon">${modernIcon("task")}</span><div class="exam-module-item-main"><div class="exam-module-title-line"><h4>${esc(activity.title)}</h4><span class="status ${activity.published ? "published" : "draft"}">${activity.published ? "Publicado" : "Borrador"}</span></div><div class="exam-module-meta"><span>Módulo: <strong>${esc(module.title)}</strong></span><span>${activity.points ? `${activity.points} puntos` : "Sin puntaje"}</span><span>${activity.dueAt ? `Vence ${formatDate(activity.dueAt)}` : "Sin fecha límite"}</span><span>${activity.submissionTypes.length ? activity.submissionTypes.join(" + ") : "Sin entrega configurada"}</span></div></div><div class="exam-module-actions"><button class="btn secondary edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button></div></article>`).join("") : `<div class="course-workspace-empty"><strong>No hay tareas en los módulos</strong><p>Agrega una tarea desde “Módulos” para verla también en este filtro.</p></div>`}</div>`;
+}
 function renderTeacherStudentPreview(course, exams) {
   const modules = normalizeModules(course.modules);
   const activities = modules.reduce((total, module) => total + module.activities.length, 0);
+  const assignedExamIds = new Set(modules.flatMap(module => module.activities.filter(activity => activity.type === "quiz" && activity.examId).map(activity => activity.examId)));
+  const unassignedExams = exams.filter(exam => !assignedExamIds.has(exam.id));
   return `<section class="teacher-student-preview">
     <div class="student-preview-banner"><span>${modernIcon("profile")}</span><div><strong>Vista del alumno</strong><p>Previsualización de solo lectura. Los cambios de progreso están desactivados.</p></div></div>
     <div class="student-preview-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p></div><div class="student-preview-counts"><span><b>${modules.length}</b> módulos</span><span><b>${activities}</b> actividades</span><span><b>${exams.length}</b> evaluaciones</span></div></div>
     <div class="student-preview-readonly" inert>
       ${modules.length ? renderStudentCourseModules(course, []) : `<div class="course-workspace-empty"><strong>Aún no hay módulos</strong><p>El alumno verá aquí el contenido cuando se agreguen módulos.</p></div>`}
-      ${exams.length ? `<section class="student-preview-exams"><h3>Evaluaciones</h3>${exams.map(exam => `<article><span>${modernIcon("quiz")}</span><div><strong>${esc(exam.title)}</strong><small>${exam.minutes} min · ${quantity(exam.questions.length, "pregunta")}</small></div></article>`).join("")}</section>` : ""}
+      ${unassignedExams.length ? `<section class="student-preview-exams"><h3>Evaluaciones pendientes de ubicar</h3>${unassignedExams.map(exam => `<article><span>${modernIcon("quiz")}</span><div><strong>${esc(exam.title)}</strong><small>Sin asignar a un módulo · ${exam.minutes} min · ${quantity(exam.questions.length, "pregunta")}</small></div></article>`).join("")}</section>` : ""}
     </div>
   </section>`;
 }
 function activityTypeLabel(type) {
-  return ({ page:"Página", lesson:"Lección", video:"Video", pdf:"Archivo PDF", download:"Descargable", task:"Tarea", quiz:"Evaluación", link:"Enlace" })[type] || "Lección";
+  return ({ page:"Página", lesson:"Lección", file:"Archivo", video:"Video", pdf:"Archivo PDF", download:"Descargable", practice:"Práctica", task:"Tarea", quiz:"Evaluación", discussion:"Foro", live:"Videoclase", heading:"Encabezado", link:"Enlace" })[type] || "Lección";
 }
 function unlockRuleLabel(module, index) {
   const detail = module.unlockDetail ? `: ${esc(module.unlockDetail)}` : "";
   return ({ immediate:"Disponible inmediatamente", previous:index ? "Tras completar el módulo anterior" : "Disponible inmediatamente", evaluation:`Después de aprobar una evaluación${detail}`, date:`Disponible desde${detail}` })[module.unlockRule] || "Disponible inmediatamente";
 }
-function renderTeacherCourseModules(course) {
+function activityMeta(activity, exams = []) {
+  const exam = exams.find(item => item.id === activity.examId);
+  return [
+    activityTypeLabel(activity.type),
+    exam?.title,
+    activity.dueAt ? `Vence ${formatDate(activity.dueAt)}` : "",
+    activity.points ? `${activity.points} puntos` : "",
+    activity.duration ? `${activity.duration} min` : "",
+    activity.attempts ? quantity(activity.attempts, "intento") : "",
+    activity.submissionTypes?.length ? `Entrega: ${activity.submissionTypes.map(type => ({ file:"archivos", text:"texto", url:"enlace", questions:"preguntas", none:"sin entrega digital" })[type]).join(", ")}` : ""
+  ].filter(Boolean).join(" · ");
+}
+function renderTeacherCourseModules(course, exams = []) {
   const modules = normalizeModules(course.modules);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>Organiza aquí, en orden, todo lo que verá el estudiante.</p></div><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear módulo</button></div><details class="course-builder-guide"><summary>Guía para organizar el contenido</summary><div class="module-content-types" aria-label="Contenido disponible"><span>Puedes añadir:</span><b>${modernIcon("page")} Página</b><b>${modernIcon("pdf")} Archivo PDF</b><b>${modernIcon("video")} Video</b><b>${modernIcon("link")} Enlace</b><b>${modernIcon("task")} Tarea</b><b>${modernIcon("quiz")} Evaluación</b></div><p class="drag-help">Arrastra los controles ⋮⋮ para cambiar el orden. También puedes usar las flechas.</p></details>
-    <div class="teacher-module-list">${modules.length ? modules.map((module, index) => `<article class="teacher-module-card" data-course-id="${esc(course.id)}" data-module-drop="${esc(module.id)}">
-      <header><span class="drag-handle module-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" role="button" tabindex="0" aria-label="Arrastrar módulo ${esc(module.title)}">⋮⋮</span><span class="module-order">${index + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, index)} · ${quantity(module.activities.length, "actividad", "actividades")}</small></div><div class="module-actions"><button class="icon-btn move-module" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === 0 ? "disabled" : ""} aria-label="Subir módulo">↑</button><button class="icon-btn move-module" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === modules.length - 1 ? "disabled" : ""} aria-label="Bajar módulo">↓</button><button class="icon-btn edit-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Editar</button><button class="icon-btn delete delete-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Eliminar</button></div></header>
-      <div class="teacher-activity-list">${module.activities.length ? module.activities.map((activity, activityIndex) => `<div class="teacher-activity-row" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar actividad ${esc(activity.title)}">⋮</span><span class="activity-type-icon">${modernIcon(activity.type)}</span><div><strong>${esc(activity.title)}</strong><small>${activityTypeLabel(activity.type)}${activity.description ? ` · ${esc(activity.description)}` : activity.url ? ` · ${esc(activity.url)}` : ""}</small></div><div class="activity-actions"><button class="icon-btn move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === 0 ? "disabled" : ""} aria-label="Subir actividad">↑</button><button class="icon-btn move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === module.activities.length - 1 ? "disabled" : ""} aria-label="Bajar actividad">↓</button><button class="icon-btn edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Editar</button><button class="icon-btn delete delete-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Eliminar</button></div></div>`).join("") : `<p class="module-empty">Este módulo aún no tiene actividades.</p>`}</div>
-      <button class="btn secondary add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button">+ Agregar actividad</button>
-    </article>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>Aún no hay módulos</strong><p>Crea el primero para comenzar a organizar páginas, archivos y actividades.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer módulo</button></div>`}</div>`;
+  return `<div class="course-subpage-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>Todo el recorrido académico se organiza aquí. Las vistas de tareas y evaluaciones son filtros de estos elementos.</p></div><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear módulo</button></div><details class="course-builder-guide"><summary>Tipos de contenido disponibles</summary><div class="module-content-types" aria-label="Contenido disponible"><b>${modernIcon("page")} Página</b><b>${modernIcon("file")} Archivo</b><b>${modernIcon("video")} Video</b><b>${modernIcon("practice")} Práctica</b><b>${modernIcon("task")} Tarea</b><b>${modernIcon("quiz")} Evaluación</b><b>${modernIcon("discussion")} Foro</b><b>${modernIcon("live")} Videoclase</b><b>${modernIcon("heading")} Encabezado</b></div><p class="drag-help">Arrastra los controles ⋮⋮ o usa las flechas. También puedes mover elementos entre módulos.</p></details>
+    <div class="teacher-module-list">${modules.length ? modules.map((module, index) => `<details class="teacher-module-card" data-course-id="${esc(course.id)}" data-module-drop="${esc(module.id)}" ${index === 0 ? "open" : ""}>
+      <summary><span class="drag-handle module-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" role="button" tabindex="0" aria-label="Arrastrar módulo ${esc(module.title)}">⋮⋮</span><span class="module-order">${index + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, index)} · ${quantity(module.activities.length, "elemento", "elementos")}</small></div><span class="status ${module.published ? "published" : "draft"}">${module.published ? "Publicado" : "Borrador"}</span><div class="module-actions"><button class="icon-btn move-module" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === 0 ? "disabled" : ""} aria-label="Subir módulo">↑</button><button class="icon-btn move-module" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === modules.length - 1 ? "disabled" : ""} aria-label="Bajar módulo">↓</button><button class="icon-btn edit-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Editar</button><button class="icon-btn delete delete-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Eliminar</button></div></summary>
+      <div class="teacher-activity-list">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="teacher-activity-row module-heading-row" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar encabezado ${esc(activity.title)}">⋮</span><div><strong>${esc(activity.title)}</strong><small>Encabezado · no genera progreso ni calificación</small></div><div class="activity-actions"><button class="icon-btn move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === 0 ? "disabled" : ""} aria-label="Subir encabezado">↑</button><button class="icon-btn move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === module.activities.length - 1 ? "disabled" : ""} aria-label="Bajar encabezado">↓</button><button class="icon-btn edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Editar</button><button class="icon-btn delete delete-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Eliminar</button></div></div>` : `<div class="teacher-activity-row ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar elemento ${esc(activity.title)}">⋮</span><span class="activity-type-icon">${modernIcon(activity.type)}</span><div><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` · ${esc(activity.description)}` : ""}</small></div><span class="status ${activity.published ? "published" : "draft"}">${activity.published ? "Publicado" : "Borrador"}</span><div class="activity-actions"><button class="icon-btn move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === 0 ? "disabled" : ""} aria-label="Subir elemento">↑</button><button class="icon-btn move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === module.activities.length - 1 ? "disabled" : ""} aria-label="Bajar elemento">↓</button><button class="icon-btn edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Editar</button><button class="icon-btn delete delete-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Eliminar</button></div></div>`).join("") : `<p class="module-empty">Este módulo aún no tiene contenido.</p>`}</div>
+      <button class="btn secondary add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button">+ Agregar contenido</button>
+    </details>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>Aún no hay módulos</strong><p>Crea el primero para comenzar a organizar el recorrido académico.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer módulo</button></div>`}</div>`;
 }
 function renderTeacherCourseOverview(course, exams, publishedCount, questionCount) {
   const recent = exams.slice(0, 3);
@@ -914,15 +950,19 @@ function renderTeacherCourseOverview(course, exams, publishedCount, questionCoun
   </div>`;
 }
 function renderTeacherCourseExams(course, exams) {
-  return `<div class="course-subpage-head"><div><span class="eyebrow">EVALUACIONES</span><h2>Exámenes</h2><p>Evaluaciones pertenecientes a ${esc(course.name)}.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear examen</button></div>
-    <div class="course-exam-list">${exams.length ? exams.map(renderTeacherExamRow).join("") : `<div class="course-workspace-empty"><strong>Este curso todavía no tiene exámenes</strong><p>Usa “Crear examen” para agregar el primero.</p></div>`}</div>`;
+  const modules = normalizeModules(course.modules);
+  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Evaluaciones</h2><p>Este listado filtra las evaluaciones del curso. La ubicación pedagógica se administra en Módulos.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear evaluación</button></div>
+    <div class="course-exam-list">${exams.length ? exams.map(exam => {
+      const module = modules.find(item => item.activities.some(activity => activity.examId === exam.id && activity.type === "quiz"));
+      return renderTeacherExamRow(exam, module?.title || "");
+    }).join("") : `<div class="course-workspace-empty"><strong>Este curso todavía no tiene evaluaciones</strong><p>Crea la primera y después ubícala dentro de un módulo.</p></div>`}</div>`;
 }
 function renderTeacherCourseQuestions(exams) {
   const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
   return `<div class="course-subpage-head"><div><span class="eyebrow">BANCO DE PREGUNTAS</span><h2>${quantity(questionCount, "pregunta")}</h2><p>Las preguntas están organizadas por la evaluación a la que pertenecen.</p></div></div>
     <div class="course-question-banks">${exams.length ? exams.map(exam => `<article class="course-question-bank"><span>${modernIcon("exams")}</span><div><strong>${esc(exam.title)}</strong><small>${quantity(exam.questions.length, "pregunta")} · ${exam.optionCount} opciones por pregunta</small></div><button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Abrir banco</button></article>`).join("") : `<div class="course-workspace-empty"><strong>No hay bancos de preguntas</strong><p>Los bancos aparecerán cuando crees una evaluación.</p></div>`}</div>`;
 }
-function renderTeacherExamRow(exam) {
+function renderTeacherExamRow(exam, moduleTitle = "") {
   const isDraft = !publishedExams.some(item => item.id === exam.id);
   const actions = isDraft
     ? `<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Editar</button><button class="btn secondary export-draft" data-id="${esc(exam.id)}" type="button">Exportar JSON</button><button class="icon-btn delete delete-exam" data-id="${esc(exam.id)}" type="button">Eliminar</button>`
@@ -931,7 +971,7 @@ function renderTeacherExamRow(exam) {
     <span class="exam-module-type-icon">${modernIcon("exams")}</span>
     <div class="exam-module-item-main">
       <div class="exam-module-title-line"><h4>${esc(exam.title)}</h4><span class="status ${isDraft ? "draft" : "published"}">${isDraft ? "Borrador local" : "Publicado"}</span></div>
-      <div class="exam-module-meta"><span><strong>${exam.questionsToShow}</strong> preguntas</span><span><strong>${exam.minutes}</strong> min</span><span><strong>${exam.attemptsAllowed}</strong> ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</span><span>Banco: <strong>${quantity(exam.questions.length, "pregunta")}</strong></span><span><strong>${exam.optionCount}</strong> opciones</span></div>
+      <div class="exam-module-meta"><span><strong>${exam.questionsToShow}</strong> preguntas</span><span><strong>${exam.minutes}</strong> min</span><span><strong>${exam.attemptsAllowed}</strong> ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</span><span>Banco: <strong>${quantity(exam.questions.length, "pregunta")}</strong></span><span><strong>${exam.optionCount}</strong> opciones</span><span class="${moduleTitle ? "exam-assigned" : "exam-unassigned"}">${moduleTitle ? `Módulo: ${esc(moduleTitle)}` : "Sin asignar a un módulo"}</span></div>
     </div>
     <div class="exam-module-actions">${actions}</div>
   </article>`;
@@ -983,6 +1023,7 @@ function openPublishCourseModal(id) {
   $("#publish-course-modal").classList.remove("hidden");
 }
 function bindTeacherExamWorkspaceActions() {
+  $$(".teacher-module-card > summary button").forEach(button => button.addEventListener("click", event => event.stopPropagation()));
   $$(".open-course-workspace").forEach(button => button.addEventListener("click", () => {
     openTeacherCourseWorkspace(button.dataset.courseId, "overview", "exams");
   }));
@@ -1187,32 +1228,41 @@ function renderStudentCourseDirectory(courses, summaries) {
   }).join("")}</div>`;
 }
 function renderStudentCourseWorkspace(course, myGrades) {
-  const modules = normalizeModules(course.modules);
-  const activities = modules.reduce((total, module) => total + module.activities.length, 0);
+  const modules = normalizeModules(course.modules).filter(module => module.published);
+  const activities = modules.flatMap(module => module.activities.filter(activity => activity.published && activity.type !== "heading")).length;
   const exams = publishedExams.filter(exam => exam.courseId === course.id);
   return `<div class="student-course-page"><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button><header class="student-course-hero"><div class="student-course-hero-mark">${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</div><div><span class="eyebrow">ESPACIO DEL CURSO</span><h3>${esc(course.name)}</h3><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p><small>Profesor: ${esc(course.teacherName || "Profesor")}</small></div><div class="student-course-hero-stats"><span><b>${modules.length}</b> módulos</span><span><b>${activities}</b> actividades</span><span><b>${exams.length}</b> evaluaciones</span></div></header><nav class="course-workspace-nav student-course-nav"><button class="course-subpage active" type="button">Curso</button><button class="course-subpage" type="button" disabled>Actividades (${activities})</button><button class="course-subpage" type="button" disabled>Evaluaciones (${exams.length})</button><button class="course-subpage student-course-grades" type="button">Calificaciones</button></nav><section class="student-course-content"><div class="student-course-content-head"><div><span class="eyebrow">CONTENIDO</span><h4>Módulos del curso</h4><p>Avanza por las páginas, archivos y actividades preparadas por tu profesor.</p></div></div>${renderStudentCourseModules(course, myGrades)}${exams.length ? `<div class="exam-rows student-course-exams"><h4>Evaluaciones del curso</h4>${exams.map(exam => renderStudentExamRow(exam, myGrades)).join("")}</div>` : ""}</section></div>`;
 }
 function courseStudentSummary(course) {
-  const activities = normalizeModules(course.modules).flatMap(module => module.activities);
+  const activities = normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(activity => activity.published && activity.type !== "heading" && activity.completionRule !== "none"));
   const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
-  const completed = activities.filter(activity => progress.completed?.[activity.id]).length;
+  const myGrades = results.filter(grade => grade.studentId === currentUser?.id);
+  const completed = activities.filter(activity => activityCompleted(activity, progress, myGrades)).length;
   return { course, total:activities.length, completed, percent:activities.length ? Math.round(completed * 100 / activities.length) : 0, lastActivityId:progress.lastActivityId || "" };
+}
+function activityCompleted(activity, progress, myGrades = []) {
+  if (activity.examId && ["practice","quiz"].includes(activity.type)) {
+    const attempts = myGrades.filter(grade => grade.examId === activity.examId);
+    if (activity.completionRule === "pass") return attempts.some(grade => Number(grade.score) >= 11);
+    return attempts.length > 0;
+  }
+  return Boolean(progress.completed?.[activity.id]);
 }
 function renderStudentOverview(courses, myGrades, summaries, pendingExams) {
   const nextCandidates = courses.flatMap(course => accessibleCourseActivities(course).filter(activity => !courseProgress[course.id]?.completed?.[activity.id]).map(activity => ({ course, activity })));
   const next = nextCandidates[0];
-  const allActivities = courses.flatMap(course => normalizeModules(course.modules).flatMap(module => module.activities.map(activity => ({ course, activity }))));
+  const allActivities = courses.flatMap(course => normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(activity => activity.published && activity.type !== "heading").map(activity => ({ course, activity }))));
   const last = allActivities.find(item => courseProgress[item.course.id]?.lastActivityId === item.activity.id);
   const pendingList = publishedExams.filter(exam => !myGrades.some(grade => grade.examId === exam.id)).slice(0, 5);
   const overall = summaries.length ? Math.round(summaries.reduce((total, summary) => total + summary.percent, 0) / summaries.length) : 0;
   $("#student-overview").innerHTML = `<div class="student-home-layout"><section class="overview-panel student-resume-panel"><div class="overview-panel-head"><div><span class="eyebrow">CONTINUAR</span><h3>Actividad actual</h3></div><span class="student-overall-progress">${overall}% general</span></div>${next ? `<div class="student-resume-body"><span class="activity-type-icon">${modernIcon(next.activity.type)}</span><div><small>${esc(next.course.name)}</small><h4>${esc(next.activity.title)}</h4><p>${activityTypeLabel(next.activity.type)} · ${esc(next.activity.moduleTitle)}</p><div class="course-progress-track"><span style="width:${overall}%"></span></div></div><button class="btn primary continue-course" data-course-id="${esc(next.course.id)}" data-activity-id="${esc(next.activity.id)}" type="button">Continuar →</button></div>` : `<div class="lms-empty-state"><strong>${courses.length ? "Todo está al día" : "No hay cursos disponibles"}</strong><p>Las próximas actividades aparecerán aquí.</p></div>`}${last ? `<div class="student-last-row"><span>Última actividad</span><strong>${esc(last.activity.title)}</strong><small>${esc(last.course.name)}</small></div>` : ""}</section><aside class="overview-panel student-todo-panel"><div class="overview-panel-head"><div><span class="eyebrow">POR HACER</span><h3>Evaluaciones pendientes</h3></div><span class="todo-count">${pendingExams}</span></div><div class="student-todo-list">${pendingList.length ? pendingList.map(exam => `<button class="start-exam" data-id="${esc(exam.id)}" type="button"><span>${modernIcon("quiz")}</span><span><strong>${esc(exam.title)}</strong><small>${esc(findCourse(exam.courseId)?.name || "Curso")} · ${exam.minutes} min</small></span><b>›</b></button>`).join("") : `<p class="lms-empty-note">No tienes evaluaciones pendientes.</p>`}</div></aside></div>`;
 }
 function renderStudentCourseModules(course, myGrades) {
-  const modules = normalizeModules(course.modules);
+  const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published) }));
   if (!modules.length) return "";
   const progress = courseProgress[course.id] || { completed: {}, lastActivityId:"" };
-  const activities = modules.flatMap(module => module.activities);
-  const completedCount = activities.filter(activity => progress.completed?.[activity.id]).length;
+  const activities = modules.flatMap(module => module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none"));
+  const completedCount = activities.filter(activity => activityCompleted(activity, progress, myGrades)).length;
   const percent = activities.length ? Math.round(completedCount * 100 / activities.length) : 0;
   const accessibleActivities = accessibleCourseActivities(course);
   const lastAccessible = accessibleActivities.find(activity => activity.id === progress.lastActivityId);
@@ -1224,8 +1274,20 @@ function renderStudentCourseModules(course, myGrades) {
       const passedEvaluation = myGrades.some(grade => grade.courseId === course.id && Number(grade.score) >= 11);
       const dateAvailable = module.unlockRule !== "date" || (module.unlockDetail && new Date(module.unlockDetail) <= new Date());
       const locked = (module.unlockRule === "previous" && !previousComplete) || (module.unlockRule === "evaluation" && !passedEvaluation) || !dateAvailable;
-      const moduleComplete = module.activities.length > 0 && module.activities.every(activity => progress.completed?.[activity.id]);
-      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-order">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `🔒 ${unlockRuleLabel(module, index)}` : `${quantity(module.activities.length, "actividad", "actividades")} · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span><b>${moduleComplete ? "✓" : locked ? "🔒" : "⌄"}</b></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => { const completed = Boolean(progress.completed?.[activity.id]); const inProgress = !completed && progress.lastActivityId === activity.id; return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="activity-type-icon">${modernIcon(activity.type)}</span><button class="open-lesson" data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}" type="button"><strong>${esc(activity.title)}</strong><small>${activityTypeLabel(activity.type)} · ${completed ? "Completado" : inProgress ? "En progreso" : "No iniciado"}</small></button><button class="student-activity-action ${completed ? "is-complete" : ""}" data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}" type="button" aria-label="${completed ? "Marcar como pendiente" : "Marcar como completado"}">${completed ? "✓" : "○"}</button></div>`; }).join("") : `<p class="module-empty">No hay actividades publicadas.</p>`}</div>`}</details>`;
+      const progressItems = module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none");
+      const moduleCompletedCount = progressItems.filter(activity => activityCompleted(activity, progress, myGrades)).length;
+      const moduleComplete = progressItems.length > 0 && moduleCompletedCount === progressItems.length;
+      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-order">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `🔒 ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span><b>${moduleComplete ? "✓" : locked ? "🔒" : "⌄"}</b></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
+        if (activity.type === "heading") return `<h5 class="student-module-heading">${esc(activity.title)}</h5>`;
+        const completed = activityCompleted(activity, progress, myGrades);
+        const inProgress = !completed && progress.lastActivityId === activity.id;
+        const exam = activity.examId ? publishedExams.find(item => item.id === activity.examId) : null;
+        const actionClass = exam && ["practice","quiz"].includes(activity.type) ? "start-exam" : "open-lesson";
+        const actionData = exam ? `data-id="${esc(exam.id)}"` : `data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}"`;
+        const status = completed ? (activity.type === "task" ? "Entregado" : "Completado") : inProgress ? "En progreso" : activity.dueAt && new Date(activity.dueAt) < new Date() ? "Atrasado" : "No iniciado";
+        const manual = activity.completionRule === "manual";
+        return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="activity-type-icon">${modernIcon(activity.type)}</span><button class="${actionClass}" ${actionData} type="button"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, publishedExams))} · ${status}</small></button>${manual ? `<button class="student-activity-action ${completed ? "is-complete" : ""}" data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}" type="button" aria-label="${completed ? "Marcar como pendiente" : "Marcar como completado"}">${completed ? "✓" : "○"}</button>` : `<span class="student-activity-state" aria-label="${status}">${completed ? "✓" : "○"}</span>`}</div>`;
+      }).join("") : `<p class="module-empty">No hay actividades publicadas.</p>`}</div>`}</details>`;
       previousComplete = moduleComplete;
       return markup;
     }).join("")}</div></section>`;
@@ -1239,7 +1301,7 @@ function toggleActivityProgress(courseId, activityId) {
   renderStudent();
 }
 function accessibleCourseActivities(course) {
-  const modules = normalizeModules(course.modules);
+  const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published && activity.type !== "heading") }));
   const progress = courseProgress[course.id] || { completed:{} };
   const myGrades = results.filter(grade => grade.studentId === currentUser.id);
   const accessible = [];
@@ -1249,7 +1311,8 @@ function accessibleCourseActivities(course) {
     const dateAvailable = module.unlockRule !== "date" || (module.unlockDetail && new Date(module.unlockDetail) <= new Date());
     const locked = (module.unlockRule === "previous" && moduleIndex > 0 && !previousComplete) || (module.unlockRule === "evaluation" && !passedEvaluation) || !dateAvailable;
     if (!locked) module.activities.forEach(activity => accessible.push({ ...activity, moduleId:module.id, moduleTitle:module.title, moduleIndex }));
-    previousComplete = module.activities.length > 0 && module.activities.every(activity => progress.completed?.[activity.id]);
+    const progressItems = module.activities.filter(activity => activity.completionRule !== "none");
+    previousComplete = progressItems.length > 0 && progressItems.every(activity => activityCompleted(activity, progress, myGrades));
   });
   return accessible;
 }
@@ -1261,6 +1324,8 @@ function openLesson(courseId, activityId) {
   activeLessonTab = "description";
   const progress = courseProgress[courseId] || { completed:{}, lastActivityId:"" };
   progress.lastActivityId = activityId;
+  const activity = accessibleCourseActivities(course).find(item => item.id === activityId);
+  if (activity?.completionRule === "view") progress.completed = { ...(progress.completed || {}), [activityId]:true };
   courseProgress[courseId] = progress;
   saveCourseProgress();
   renderLesson();
@@ -1291,8 +1356,9 @@ function renderLesson() {
   if (!course || activityIndex < 0) { renderStudent(); return; }
   const activity = activities[activityIndex];
   const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
-  const allActivities = normalizeModules(course.modules).flatMap(module => module.activities);
-  const completedCount = allActivities.filter(item => progress.completed?.[item.id]).length;
+  const allActivities = normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(item => item.published && item.type !== "heading" && item.completionRule !== "none"));
+  const myGrades = results.filter(grade => grade.studentId === currentUser.id);
+  const completedCount = allActivities.filter(item => activityCompleted(item, progress, myGrades)).length;
   const percent = allActivities.length ? Math.round(completedCount * 100 / allActivities.length) : 0;
   $("#lesson-sidebar-course").textContent = course.name;
   $("#lesson-title").textContent = activity.title;
@@ -1304,6 +1370,7 @@ function renderLesson() {
   const completed = Boolean(progress.completed?.[activity.id]);
   $("#lesson-complete").textContent = completed ? "✓ Actividad completada" : "Marcar como completado";
   $("#lesson-complete").classList.toggle("completed-button", completed);
+  $("#lesson-complete").classList.toggle("hidden", activity.completionRule !== "manual");
   $("#lesson-previous").disabled = activityIndex === 0;
   $("#lesson-next").disabled = activityIndex === activities.length - 1;
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
@@ -1703,6 +1770,7 @@ function openModuleModal(courseId, moduleId = "") {
   $("#module-course-id").value = courseId;
   $("#module-id").value = module?.id || "";
   $("#module-title").value = module?.title || "";
+  $("#module-published").value = String(module?.published !== false);
   $("#module-unlock-rule").value = module?.unlockRule || "immediate";
   $("#module-unlock-detail").value = module?.unlockDetail || "";
   $("#module-error").textContent = "";
@@ -1715,37 +1783,86 @@ async function saveModule(event) {
   const courseId = $("#module-course-id").value;
   const moduleId = $("#module-id").value;
   const title = $("#module-title").value.trim();
+  const published = $("#module-published").value === "true";
   const unlockRule = $("#module-unlock-rule").value;
   const unlockDetail = $("#module-unlock-detail").value.trim();
   if (!title) { $("#module-error").textContent = "Escribe un nombre para el módulo."; return; }
   const saved = await updateCourseModules(courseId, modules => moduleId
-    ? modules.map(module => module.id === moduleId ? { ...module, title, unlockRule, unlockDetail } : module)
-    : [...modules, { id: uid(), title, unlockRule, unlockDetail, activities: [] }]);
+    ? modules.map(module => module.id === moduleId ? { ...module, title, published, unlockRule, unlockDetail } : module)
+    : [...modules, { id: uid(), title, published, unlockRule, unlockDetail, activities: [] }]);
   if (saved) closeModal("module-modal");
 }
 function openActivityModal(courseId, moduleId, activityId = "") {
-  const module = normalizeModules(findCourse(courseId)?.modules).find(item => item.id === moduleId);
+  const modules = normalizeModules(findCourse(courseId)?.modules);
+  const module = modules.find(item => item.id === moduleId);
   const activity = module?.activities.find(item => item.id === activityId);
-  $("#activity-modal-title").textContent = activity ? "Editar actividad" : "Crear actividad";
+  const exams = getTeacherExams().filter(exam => exam.courseId === courseId);
+  $("#activity-modal-title").textContent = activity ? "Editar contenido" : "Agregar contenido";
   $("#activity-course-id").value = courseId;
   $("#activity-module-id").value = moduleId;
   $("#activity-id").value = activity?.id || "";
+  $("#activity-target-module").innerHTML = modules.map(item => `<option value="${esc(item.id)}">${esc(item.title)}</option>`).join("");
+  $("#activity-target-module").value = moduleId;
   $("#activity-title").value = activity?.title || "";
   $("#activity-type").value = activity?.type || "lesson";
   $("#activity-url").value = activity?.url || "";
   $("#activity-description").value = activity?.description || "";
+  $("#activity-published").value = String(activity?.published !== false);
+  $("#activity-completion-rule").value = activity?.completionRule || "manual";
+  $("#activity-due-at").value = activity?.dueAt ? activity.dueAt.slice(0, 16) : "";
+  $("#activity-points").value = activity?.points || 0;
+  $("#activity-duration").value = activity?.duration || 0;
+  $("#activity-attempts").value = activity?.attempts || 0;
+  $("#activity-exam-id").innerHTML = `<option value="">${exams.length ? "Selecciona una evaluación" : "Primero crea una evaluación en este curso"}</option>${exams.map(exam => `<option value="${esc(exam.id)}">${esc(exam.title)}</option>`).join("")}`;
+  $("#activity-exam-id").value = activity?.examId || "";
+  $$('input[name="activity-submission"]').forEach(input => { input.checked = activity?.submissionTypes?.includes(input.value) || false; });
+  toggleActivityFields();
   $("#activity-error").textContent = "";
   $("#activity-modal").classList.remove("hidden");
   $("#activity-title").focus();
+}
+function toggleActivityFields() {
+  const type = $("#activity-type").value;
+  const isHeading = type === "heading";
+  $("#activity-exam-field").classList.toggle("hidden", !["practice","task","quiz"].includes(type));
+  $("#activity-submission-field").classList.toggle("hidden", type !== "task");
+  $("#activity-completion-rule").disabled = isHeading;
+  if (isHeading) $("#activity-completion-rule").value = "none";
 }
 async function saveActivity(event) {
   event.preventDefault();
   const courseId = $("#activity-course-id").value;
   const moduleId = $("#activity-module-id").value;
+  const targetModuleId = $("#activity-target-module").value;
   const activityId = $("#activity-id").value;
-  const activity = { id: activityId || uid(), title: $("#activity-title").value.trim(), type: $("#activity-type").value, url: $("#activity-url").value.trim(), description: $("#activity-description").value.trim() };
+  const type = $("#activity-type").value;
+  const activity = {
+    id: activityId || uid(),
+    title: $("#activity-title").value.trim(),
+    type,
+    url: $("#activity-url").value.trim(),
+    description: $("#activity-description").value.trim(),
+    published: $("#activity-published").value === "true",
+    examId: $("#activity-exam-id").value,
+    dueAt: $("#activity-due-at").value,
+    points: Number($("#activity-points").value) || 0,
+    duration: Number($("#activity-duration").value) || 0,
+    attempts: Number($("#activity-attempts").value) || 0,
+    completionRule: type === "heading" ? "none" : $("#activity-completion-rule").value,
+    submissionTypes: $$('input[name="activity-submission"]:checked').map(input => input.value)
+  };
   if (!activity.title) { $("#activity-error").textContent = "Escribe un nombre para la actividad."; return; }
-  const saved = await updateCourseModules(courseId, modules => modules.map(module => module.id === moduleId ? { ...module, activities: activityId ? module.activities.map(item => item.id === activityId ? activity : item) : [...module.activities, activity] } : module));
+  if (activity.url && !safeActivityUrl(activity.url)) { $("#activity-error").textContent = "Usa una URL https:// o una ruta local que empiece con ./ o /."; return; }
+  if (["practice","quiz"].includes(type) && !activity.examId) { $("#activity-error").textContent = "Selecciona la evaluación o banco que utilizará este elemento."; return; }
+  if (type === "task" && !activity.submissionTypes.length) { $("#activity-error").textContent = "Selecciona al menos un tipo de entrega para la tarea."; return; }
+  const saved = await updateCourseModules(courseId, modules => {
+    if (!activityId || targetModuleId === moduleId) return modules.map(module => module.id === moduleId ? { ...module, activities:activityId ? module.activities.map(item => item.id === activityId ? activity : item) : [...module.activities, activity] } : module);
+    return modules.map(module => {
+      if (module.id === moduleId) return { ...module, activities:module.activities.filter(item => item.id !== activityId) };
+      if (module.id === targetModuleId) return { ...module, activities:[...module.activities, activity] };
+      return module;
+    });
+  });
   if (saved) closeModal("activity-modal");
 }
 async function deleteModule(courseId, moduleId) {

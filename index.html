@@ -219,6 +219,7 @@
       <span class="eyebrow">ESTRUCTURA DEL CURSO</span><h2 id="module-modal-title">Crear módulo</h2>
       <form id="module-form"><input type="hidden" id="module-course-id"><input type="hidden" id="module-id">
         <label>Nombre del módulo<input id="module-title" required maxlength="100" placeholder="Ej. Módulo 1: Análisis dimensional"></label>
+        <label>Estado<select id="module-published"><option value="true">Publicado</option><option value="false">Borrador</option></select></label>
         <label>Regla de disponibilidad<select id="module-unlock-rule"><option value="immediate">Disponible inmediatamente</option><option value="previous">Después de completar el módulo anterior</option><option value="evaluation">Después de aprobar una evaluación</option><option value="date">Desde una fecha específica</option></select></label>
         <label id="module-unlock-detail-field" class="hidden">Requisito o fecha<input id="module-unlock-detail" maxlength="120" placeholder="Ej. Aprobar Evaluación 1 o 2026-08-01"></label>
         <p id="module-error" class="error" aria-live="polite"></p>
@@ -229,14 +230,31 @@
 
   <div id="activity-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="activity-modal-title">
     <div class="modal-card panel"><button class="modal-close" data-close="activity-modal" type="button" aria-label="Cerrar">×</button>
-      <span class="eyebrow">CONTENIDO DEL MÓDULO</span><h2 id="activity-modal-title">Crear actividad</h2>
+      <span class="eyebrow">CONTENIDO DEL MÓDULO</span><h2 id="activity-modal-title">Agregar contenido</h2>
       <form id="activity-form"><input type="hidden" id="activity-course-id"><input type="hidden" id="activity-module-id"><input type="hidden" id="activity-id">
-        <label>Nombre de la actividad<input id="activity-title" required maxlength="120" placeholder="Ej. Video: Magnitudes físicas"></label>
-        <label>Tipo<select id="activity-type"><option value="page">Página de contenido</option><option value="lesson">Lección</option><option value="video">Video</option><option value="pdf">Archivo PDF</option><option value="download">Material descargable</option><option value="task">Tarea</option><option value="quiz">Cuestionario o evaluación</option><option value="link">Enlace externo</option></select></label>
+        <label>Nombre visible<input id="activity-title" required maxlength="120" placeholder="Ej. Representación de vectores"></label>
+        <label>Ubicación en el curso<select id="activity-target-module"></select></label>
+        <label>Tipo de contenido<select id="activity-type">
+          <optgroup label="Contenido"><option value="page">Página de contenido</option><option value="file">Archivo</option><option value="video">Video</option><option value="link">Enlace externo</option></optgroup>
+          <optgroup label="Actividades"><option value="practice">Práctica</option><option value="task">Tarea</option><option value="quiz">Evaluación</option><option value="discussion">Foro o discusión</option></optgroup>
+          <optgroup label="Comunicación"><option value="live">Videoclase</option></optgroup>
+          <optgroup label="Organización"><option value="heading">Encabezado o separador</option></optgroup>
+          <optgroup label="Compatibilidad"><option value="lesson">Lección</option><option value="pdf">Archivo PDF</option><option value="download">Material descargable</option></optgroup>
+        </select></label>
         <label>Enlace o ruta (opcional)<input id="activity-url" maxlength="500" placeholder="https://… o ./materiales/archivo.pdf"></label>
-        <label>Descripción de la clase<textarea id="activity-description" rows="4" maxlength="1000" placeholder="Explica el objetivo y contenido de esta actividad."></textarea></label>
+        <label>Descripción breve<textarea id="activity-description" rows="3" maxlength="1000" placeholder="Explica qué encontrará o deberá hacer el alumno."></textarea></label>
+        <div class="activity-config-grid">
+          <label>Estado<select id="activity-published"><option value="true">Publicado</option><option value="false">Borrador</option></select></label>
+          <label>Finalización<select id="activity-completion-rule"><option value="manual">El alumno marca completado</option><option value="view">Ver el elemento</option><option value="submit">Realizar una entrega</option><option value="pass">Obtener nota aprobatoria</option><option value="none">No genera progreso</option></select></label>
+          <label>Fecha límite<input id="activity-due-at" type="datetime-local"></label>
+          <label>Puntaje<input id="activity-points" type="number" min="0" max="10000" value="0"></label>
+          <label>Duración en minutos<input id="activity-duration" type="number" min="0" max="10000" value="0"></label>
+          <label>Intentos (0 = sin límite)<input id="activity-attempts" type="number" min="0" max="100" value="0"></label>
+        </div>
+        <label id="activity-exam-field" class="hidden">Evaluación vinculada<select id="activity-exam-id"><option value="">Selecciona una evaluación</option></select><small>La evaluación se mantiene como una sola entidad y esta fila solo crea su ubicación dentro del módulo.</small></label>
+        <fieldset id="activity-submission-field" class="hidden activity-submission-types"><legend>Tipos de entrega permitidos</legend><label><input type="checkbox" name="activity-submission" value="file"> Archivos</label><label><input type="checkbox" name="activity-submission" value="text"> Texto en línea</label><label><input type="checkbox" name="activity-submission" value="url"> Enlace externo</label><label><input type="checkbox" name="activity-submission" value="questions"> Banco de preguntas</label><label><input type="checkbox" name="activity-submission" value="none"> Sin entrega digital</label></fieldset>
         <p id="activity-error" class="error" aria-live="polite"></p>
-        <button class="btn primary full" type="submit">Guardar actividad</button>
+        <button class="btn primary full" type="submit">Guardar contenido</button>
       </form>
     </div>
   </div>
