@@ -17,6 +17,7 @@ El panel del profesor está organizado como un espacio de gestión académica:
 - **Cursos** es la pantalla inicial del profesor y muestra directamente todos los cursos creados.
 - La navegación principal del profesor se concentra en **Cursos**.
 - Cada curso integra su resumen, módulos, evaluaciones y banco de preguntas en una página propia.
+- **Vista del alumno** permite comprobar el contenido del curso en modo de solo lectura antes de publicarlo.
 - El botón **Volver a cursos** regresa directamente al tablero anterior.
 
 La reorganización visual no elimina la portabilidad de los JSON. `data/catalog.json` y `data/exams/` continúan funcionando como catálogo estático, mientras que la publicación directa y los resultados usan Supabase cuando está configurado.

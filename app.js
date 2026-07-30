@@ -841,6 +841,7 @@ function renderTeacherExamCourseLink(course, exams) {
 }
 function renderTeacherCourseWorkspace(course, exams) {
   const isDraftCourse = drafts.courses.some(item => item.id === course.id);
+  const isStudentPreview = activeTeacherCourseSection === "student-preview";
   const publishedCount = exams.filter(exam => publishedExams.some(item => item.id === exam.id)).length;
   const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
   const sections = [
@@ -850,21 +851,25 @@ function renderTeacherCourseWorkspace(course, exams) {
     ["questions", `Banco de preguntas (${questionCount})`]
   ];
   let content = "";
-  if (activeTeacherCourseSection === "modules") content = renderTeacherCourseModules(course);
+  if (isStudentPreview) content = renderTeacherStudentPreview(course, exams);
+  else if (activeTeacherCourseSection === "modules") content = renderTeacherCourseModules(course);
   else if (activeTeacherCourseSection === "exams") content = renderTeacherCourseExams(course, exams);
   else if (activeTeacherCourseSection === "questions") content = renderTeacherCourseQuestions(exams);
   else content = renderTeacherCourseOverview(course, exams, publishedCount, questionCount);
   return `<div class="course-workspace-page">
     <div class="course-workspace-toolbar">
       <button class="course-workspace-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Volver a cursos</button>
-      <div class="course-workspace-breadcrumb" aria-label="Ruta actual"><span>Tablero</span><b aria-hidden="true">/</b><strong>${esc(course.name)}</strong></div>
+      <div class="course-workspace-toolbar-actions">
+        <div class="course-workspace-breadcrumb" aria-label="Ruta actual"><span>Tablero</span><b aria-hidden="true">/</b><strong>${esc(course.name)}</strong></div>
+        <button class="btn secondary student-preview-toggle ${isStudentPreview ? "active" : ""}" id="toggle-student-preview" type="button">${modernIcon(isStudentPreview ? "edit" : "profile")} ${isStudentPreview ? "Volver a editar" : "Vista del alumno"}</button>
+      </div>
     </div>
     <header class="course-workspace-hero">
       <span class="course-workspace-icon">${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span>
       <div><span class="eyebrow">CURSO</span><h1>${esc(course.name)}</h1><p>${esc(course.description || "Sin descripción registrada")}</p></div>
       <span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Curso local" : "Publicado"}</span>
     </header>
-    <div class="course-workspace-layout">
+    <div class="course-workspace-layout ${isStudentPreview ? "student-preview-active" : ""}">
       <aside class="course-workspace-sidebar">
         <span>NAVEGACIÓN DEL CURSO</span>
         <nav class="course-workspace-nav" aria-label="Secciones de ${esc(course.name)}">${sections.map(([id, label]) => `<button class="course-subpage ${activeTeacherCourseSection === id ? "active" : ""}" data-course-section="${id}" type="button">${label}</button>`).join("")}</nav>
@@ -872,6 +877,18 @@ function renderTeacherCourseWorkspace(course, exams) {
       <main class="course-workspace-content">${content}</main>
     </div>
   </div>`;
+}
+function renderTeacherStudentPreview(course, exams) {
+  const modules = normalizeModules(course.modules);
+  const activities = modules.reduce((total, module) => total + module.activities.length, 0);
+  return `<section class="teacher-student-preview">
+    <div class="student-preview-banner"><span>${modernIcon("profile")}</span><div><strong>Vista del alumno</strong><p>Previsualización de solo lectura. Los cambios de progreso están desactivados.</p></div></div>
+    <div class="student-preview-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p></div><div class="student-preview-counts"><span><b>${modules.length}</b> módulos</span><span><b>${activities}</b> actividades</span><span><b>${exams.length}</b> evaluaciones</span></div></div>
+    <div class="student-preview-readonly" inert>
+      ${modules.length ? renderStudentCourseModules(course, []) : `<div class="course-workspace-empty"><strong>Aún no hay módulos</strong><p>El alumno verá aquí el contenido cuando se agreguen módulos.</p></div>`}
+      ${exams.length ? `<section class="student-preview-exams"><h3>Evaluaciones</h3>${exams.map(exam => `<article><span>${modernIcon("quiz")}</span><div><strong>${esc(exam.title)}</strong><small>${exam.minutes} min · ${quantity(exam.questions.length, "pregunta")}</small></div></article>`).join("")}</section>` : ""}
+    </div>
+  </section>`;
 }
 function activityTypeLabel(type) {
   return ({ page:"Página", lesson:"Lección", video:"Video", pdf:"Archivo PDF", download:"Descargable", task:"Tarea", quiz:"Evaluación", link:"Enlace" })[type] || "Lección";
@@ -977,6 +994,11 @@ function bindTeacherExamWorkspaceActions() {
     renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     renderTeacherOverview();
     bindTeacherActions();
+  });
+  $("#toggle-student-preview")?.addEventListener("click", () => {
+    activeTeacherCourseSection = activeTeacherCourseSection === "student-preview" ? "modules" : "student-preview";
+    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
+    bindTeacherExamWorkspaceActions();
   });
   $$(".course-subpage").forEach(button => button.addEventListener("click", () => {
     activeTeacherCourseSection = button.dataset.courseSection;
