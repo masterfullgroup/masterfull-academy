@@ -478,8 +478,7 @@ function renderApp() {
   const activeTeacherTab = $("#teacher-view .tab-content.active")?.id || "teacher-home";
   const teacherNavigation = isTeacher ? `<nav class="shell-teacher-nav" aria-label="Secciones del profesor">
     <div class="shell-nav-label"><strong>Espacio docente</strong><small>Gestión académica</small></div>
-    <button class="shell-nav-item ${activeTeacherTab === "teacher-home" ? "active" : ""}" data-teacher-tab="teacher-home" type="button"><span aria-hidden="true">⌂</span>Inicio</button>
-    <button class="shell-nav-item ${activeTeacherTab === "teacher-courses" ? "active" : ""}" data-teacher-tab="teacher-courses" type="button"><span aria-hidden="true">▣</span>Cursos <b id="courses-tab-count">0</b></button>
+    <button class="shell-nav-item ${activeTeacherTab === "teacher-home" || activeTeacherTab === "teacher-courses" ? "active" : ""}" data-teacher-tab="teacher-home" type="button"><span aria-hidden="true">▣</span>Cursos <b id="courses-tab-count">0</b></button>
     <button class="shell-nav-item ${activeTeacherTab === "teacher-exams" ? "active" : ""}" data-teacher-tab="teacher-exams" type="button"><span aria-hidden="true">✎</span>Evaluaciones <b id="exams-tab-count">0</b></button>
     <button class="shell-nav-item ${activeTeacherTab === "teacher-grades" ? "active" : ""}" data-teacher-tab="teacher-grades" type="button"><span aria-hidden="true">✓</span>Calificaciones <b id="grades-tab-count">0</b></button>
   </nav>` : "";
@@ -521,7 +520,7 @@ function bindStaticEvents() {
   $("#profile-form").addEventListener("submit", saveProfile);
   $("#new-course-btn").addEventListener("click", () => openCourseModal());
   $("#teacher-head-new-course").addEventListener("click", () => openCourseModal());
-  $("#teacher-head-new-exam").addEventListener("click", () => openExamModal());
+  $("#teacher-head-new-exam")?.addEventListener("click", () => openExamModal());
   $("#course-search").addEventListener("input", renderTeacherCourseList);
   $("#course-quick-toggle").addEventListener("click", () => {
     const directory = $("#teacher-course-directory");
@@ -717,16 +716,9 @@ function rowToGrade(row) {
 
 function renderTeacher() {
   show("teacher-view");
-  $("#teacher-welcome").textContent = `Hola, ${currentUser.name}`;
+  $("#teacher-welcome").textContent = "Tablero";
   const courses = getTeacherCourses();
   const exams = getTeacherExams();
-  const moduleCount = courses.reduce((total, course) => total + normalizeModules(course.modules).length, 0);
-  const studentCount = new Set(results.map(result => result.studentId)).size;
-  $("#teacher-stats").innerHTML =
-    stat("Cursos totales", courses.length, "courses", "published") +
-    stat("Módulos creados", moduleCount, "progress", "published") +
-    stat("Evaluaciones", exams.length, "exams", "published") +
-    stat("Estudiantes activos", studentCount, "students", "grades");
   $("#courses-tab-count").textContent = publishedCourses.length + drafts.courses.length;
   $("#exams-tab-count").textContent = exams.length;
   $("#grades-tab-count").textContent = results.length;
@@ -737,7 +729,6 @@ function renderTeacher() {
   renderTeacherGrades(filteredTeacherResults());
   bindTeacherActions();
   bindTeacherExamWorkspaceActions();
-  $$(".stat-card").forEach(card => card.addEventListener("click", () => activateStat(card.dataset.statAction)));
 }
 function getTeacherCourses() {
   return [...new Map([...publishedCourses, ...drafts.courses].map(course => [course.id, course])).values()];
@@ -746,27 +737,27 @@ function getTeacherExams() {
   return [...publishedExams, ...drafts.exams];
 }
 function renderTeacherOverview() {
-  const allCourses = [...publishedCourses, ...drafts.courses];
-  const allExams = [...publishedExams, ...drafts.exams];
-  const recentCourses = allCourses.slice(0, 6);
-  const courseCards = recentCourses.length ? recentCourses.map(course => {
+  const allCourses = getTeacherCourses();
+  const allExams = getTeacherExams();
+  const courseCards = allCourses.length ? allCourses.map(course => {
     const examCount = allExams.filter(exam => exam.courseId === course.id).length;
     const isDraft = drafts.courses.some(item => item.id === course.id);
     const modules = normalizeModules(course.modules);
     const activities = modules.reduce((total, module) => total + module.activities.length, 0);
-    return `<article class="teacher-home-course-card"><div class="dashboard-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${isDraft ? "BORRADOR" : "PUBLICADO"}</small></div><div class="dashboard-course-card-body"><span class="eyebrow">CURSO</span><h4>${esc(course.name)}</h4><p>${esc(course.description || "Curso listo para organizar contenido.")}</p><div class="dashboard-course-metrics"><span><b>${modules.length}</b> módulos</span><span><b>${activities}</b> recursos</span><span><b>${examCount}</b> evaluaciones</span></div><button class="btn primary manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso <span aria-hidden="true">→</span></button></div></article>`;
-  }).join("") : `<div class="overview-empty"><strong>Tu espacio está listo</strong><p>Crea el primer curso y después organiza sus módulos y contenidos.</p><button class="btn primary overview-new-course-dynamic" type="button">Crear primer curso</button></div>`;
-  const todoItems = [
-    ...drafts.courses.map(course => ({ label:"Publicar curso", title:course.name, action:"courses" })),
-    ...drafts.exams.map(exam => ({ label:"Publicar evaluación", title:exam.title, action:"exams" })),
-    ...publishedCourses.filter(course => !normalizeModules(course.modules).length).map(course => ({ label:"Agregar módulos", title:course.name, action:"courses" }))
-  ].slice(0, 5);
-  const recentResults = results.slice(0, 4);
-  $("#teacher-overview").innerHTML = `<section class="dashboard-course-library teacher-course-library"><div class="dashboard-library-head"><div><span class="eyebrow">MIS CURSOS</span><h3>Continúa construyendo tu aula</h3><p>Abre un curso para crear módulos y organizar páginas, archivos, videos y evaluaciones.</p></div><div><button class="btn secondary overview-link" data-overview-tab="teacher-courses" type="button">Ver todos</button><button class="btn primary overview-new-course-dynamic" type="button">+ Crear curso</button></div></div><div class="dashboard-course-gallery">${courseCards}</div></section>
-    <div class="teacher-dashboard-secondary"><aside class="lms-dashboard-side">
-      <section class="overview-panel lms-todo-panel"><div class="overview-panel-head"><div><span class="eyebrow">POR HACER</span><h3>Pendientes</h3></div></div><div class="lms-todo-list">${todoItems.length ? todoItems.map(item => `<button data-overview-tab="teacher-${item.action}" type="button"><span></span><span><small>${esc(item.label)}</small><strong>${esc(item.title)}</strong></span><b>›</b></button>`).join("") : `<p class="lms-empty-note">No tienes tareas pendientes.</p>`}</div></section>
-      <section class="overview-panel lms-activity-panel"><div class="overview-panel-head"><div><span class="eyebrow">ACTIVIDAD</span><h3>Intentos recientes</h3></div><button class="overview-link" data-overview-tab="teacher-grades" type="button">Ver libro</button></div><div>${recentResults.length ? recentResults.map(result => `<article><span>${esc((result.studentName || "A").charAt(0).toUpperCase())}</span><div><strong>${esc(result.studentName || "Alumno")}</strong><small>${esc(result.examTitle)} · ${result.score}/20</small></div></article>`).join("") : `<p class="lms-empty-note">Aún no hay intentos registrados.</p>`}</div></section>
-    </aside></div>`;
+    return `<article class="canvas-dashboard-card">
+      <div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${isDraft ? "NO PUBLICADO" : "PUBLICADO"}</small></div>
+      <div class="canvas-dashboard-card-body">
+        <button class="manage-course-content canvas-course-title" data-course-id="${esc(course.id)}" type="button">${esc(course.name)}</button>
+        <p>${esc(course.description || "Curso listo para organizar contenido.")}</p>
+        <div class="canvas-course-meta" aria-label="Contenido del curso">
+          <span title="Módulos">${modernIcon("page")}<b>${modules.length}</b></span>
+          <span title="Recursos">${modernIcon("folder")}<b>${activities}</b></span>
+          <span title="Evaluaciones">${modernIcon("quiz")}<b>${examCount}</b></span>
+        </div>
+      </div>
+    </article>`;
+  }).join("") : `<div class="canvas-dashboard-empty">${modernIcon("course")}<strong>Aún no hay cursos</strong><p>Crea tu primer curso para comenzar.</p><button class="btn primary overview-new-course-dynamic" type="button">Crear curso</button></div>`;
+  $("#teacher-overview").innerHTML = `<section class="canvas-dashboard-courses" aria-label="Cursos creados"><div class="canvas-dashboard-grid">${courseCards}</div></section>`;
 }
 function renderTeacherCourseList(bind = true) {
   $("#teacher-course-list").innerHTML = renderTeacherCourses();

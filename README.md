@@ -14,7 +14,7 @@ Plataforma educativa estática para GitHub Pages con cursos y exámenes cargados
 
 El panel del profesor está organizado como un espacio de gestión académica:
 
-- **Inicio** resume cursos, borradores, evaluaciones e intentos registrados.
+- **Cursos** es la pantalla inicial del profesor y muestra directamente todos los cursos creados.
 - **Cursos** permite crear, editar, publicar y eliminar espacios de aprendizaje.
 - **Evaluaciones** reúne el constructor, la importación y la exportación JSON.
 - **Calificaciones** centraliza intentos, filtros, revisión y exportación CSV.
