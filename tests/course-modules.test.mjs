@@ -18,6 +18,10 @@ assert.match(appSource, /document\.body\.classList\.toggle\("student-course-open
 assert.doesNotMatch(appSource, /scrollIntoView|window\.scrollTo/, "Los botones no deben desplazar automáticamente la página");
 assert.match(appSource, /course-home-metrics/, "El inicio del curso debe presentar métricas ordenadas");
 assert.match(appSource, /course-home-open-modules/, "El inicio debe ofrecer acceso directo a los módulos");
+assert.doesNotMatch(appSource, /\["modules", `Módulos \(\$\{/, "La navegación no debe mostrar el total de módulos");
+assert.doesNotMatch(appSource, /\["exams", `Evaluaciones \(\$\{/, "La navegación no debe mostrar el total de evaluaciones");
+assert.match(appSource, /question-bank-search/, "El banco de preguntas debe incluir búsqueda");
+assert.match(appSource, /question-bank-card-metrics/, "Cada banco debe presentar sus métricas");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

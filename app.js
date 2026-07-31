@@ -885,14 +885,14 @@ function renderTeacherCourseWorkspace(course, exams) {
   const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
   const sections = [
     ["overview", "Inicio", "course"],
-    ["modules", `Módulos (${(course.modules || []).length})`, "courses"],
+    ["modules", "Módulos", "courses"],
     ["tasks", "Tareas", "task"],
-    ["exams", `Evaluaciones (${exams.length})`, "quiz"],
+    ["exams", "Evaluaciones", "quiz"],
     ["grades", "Calificaciones", "results"],
     ["people", "Personas", "students"],
     ["pages", "Páginas", "page"],
     ["files", "Archivos", "file"],
-    ["questions", `Banco de preguntas (${questionCount})`, "practice"],
+    ["questions", "Banco de preguntas", "practice"],
     ["settings", "Configuración", "settings"]
   ];
   let content = "";
@@ -904,7 +904,7 @@ function renderTeacherCourseWorkspace(course, exams) {
   else if (activeTeacherCourseSection === "people") content = renderTeacherCoursePeople(course);
   else if (activeTeacherCourseSection === "pages") content = renderTeacherCourseResources(course, ["page","lesson"], "Páginas", "page");
   else if (activeTeacherCourseSection === "files") content = renderTeacherCourseResources(course, ["file","pdf","download","video","link"], "Archivos y recursos", "file");
-  else if (activeTeacherCourseSection === "questions") content = renderTeacherCourseQuestions(exams);
+  else if (activeTeacherCourseSection === "questions") content = renderTeacherCourseQuestions(course, exams);
   else if (activeTeacherCourseSection === "settings") content = renderTeacherCourseSettings(course);
   else content = renderTeacherCourseOverview(course, exams, publishedCount, questionCount);
   return `<div class="course-workspace-page">
@@ -1030,10 +1030,21 @@ function renderTeacherCourseExams(course, exams) {
       return renderTeacherExamRow(exam, module?.title || "");
     }).join("") : `<div class="course-workspace-empty"><strong>Este curso todavía no tiene evaluaciones</strong><p>Crea la primera y después ubícala dentro de un módulo.</p></div>`}</div>`;
 }
-function renderTeacherCourseQuestions(exams) {
+function renderTeacherCourseQuestions(course, exams) {
   const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">BANCO DE PREGUNTAS</span><h2>${quantity(questionCount, "pregunta")}</h2><p>Las preguntas están organizadas por la evaluación a la que pertenecen.</p></div></div>
-    <div class="course-question-banks">${exams.length ? exams.map(exam => `<article class="course-question-bank"><span>${modernIcon("exams")}</span><div><strong>${esc(exam.title)}</strong><small>${quantity(exam.questions.length, "pregunta")} · ${exam.optionCount} opciones por pregunta</small></div><button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Abrir banco</button></article>`).join("") : `<div class="course-workspace-empty"><strong>No hay bancos de preguntas</strong><p>Los bancos aparecerán cuando crees una evaluación.</p></div>`}</div>`;
+  const publishedCount = exams.filter(exam => publishedExams.some(item => item.id === exam.id)).length;
+  const average = exams.length ? Math.round(questionCount / exams.length) : 0;
+  return `<div class="question-bank-page">
+    <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">CONTENIDO EVALUATIVO</span><h2>Banco de preguntas</h2><p>Organiza y administra las preguntas de cada evaluación desde una biblioteca centralizada.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluación</button></div>
+    <section class="question-bank-summary" aria-label="Resumen del banco"><article><span>${modernIcon("practice")}</span><div><small>Preguntas totales</small><strong>${questionCount}</strong></div></article><article><span>${modernIcon("quiz")}</span><div><small>Bancos activos</small><strong>${exams.length}</strong></div></article><article><span>${modernIcon("results")}</span><div><small>Publicados</small><strong>${publishedCount}</strong></div></article><article><span>${modernIcon("progress")}</span><div><small>Promedio por banco</small><strong>${average}</strong></div></article></section>
+    <div class="question-bank-toolbar"><label><span>${modernIcon("courses")}</span><input id="question-bank-search" type="search" placeholder="Buscar una evaluación o banco…" autocomplete="off"></label><span>${quantity(exams.length, "banco disponible", "bancos disponibles")}</span></div>
+    <div class="course-question-banks question-bank-grid">${exams.length ? exams.map(exam => {
+      const isPublished = publishedExams.some(item => item.id === exam.id);
+      const searchText = `${exam.title} ${isPublished ? "publicado" : "borrador"}`.toLocaleLowerCase("es");
+      return `<article class="course-question-bank" data-bank-search="${esc(searchText)}"><header><span class="question-bank-icon">${modernIcon("quiz")}</span><span class="status ${isPublished ? "published" : "draft"}">${isPublished ? "Publicado" : "Borrador"}</span></header><div class="question-bank-card-copy"><h3>${esc(exam.title)}</h3><p>Banco vinculado a esta evaluación.</p></div><div class="question-bank-card-metrics"><span><b>${exam.questions.length}</b><small>Preguntas</small></span><span><b>${exam.optionCount}</b><small>Opciones</small></span><span><b>${exam.minutes}</b><small>Minutos</small></span></div><footer><small>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento permitido" : "intentos permitidos"}</small><button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Administrar banco <span aria-hidden="true">→</span></button></footer></article>`;
+    }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea una evaluación para comenzar a construir su banco.</p><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear primera evaluación</button></div>`}</div>
+    <div id="question-bank-filter-empty" class="course-workspace-empty question-bank-filter-empty hidden"><strong>No hay coincidencias</strong><p>Prueba con otro nombre de evaluación.</p></div>
+  </div>`;
 }
 function renderTeacherExamRow(exam, moduleTitle = "") {
   const isDraft = !publishedExams.some(item => item.id === exam.id);
@@ -1135,6 +1146,17 @@ function bindTeacherExamWorkspaceActions() {
     renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     bindTeacherExamWorkspaceActions();
   }));
+  $("#question-bank-search")?.addEventListener("input", event => {
+    const query = event.currentTarget.value.trim().toLocaleLowerCase("es");
+    const cards = $$(".course-question-bank[data-bank-search]");
+    let visible = 0;
+    cards.forEach(card => {
+      const match = !query || card.dataset.bankSearch.includes(query);
+      card.classList.toggle("hidden", !match);
+      if (match) visible++;
+    });
+    $("#question-bank-filter-empty")?.classList.toggle("hidden", visible > 0 || !cards.length);
+  });
   $$("#teacher-course-workspace .create-exam-course").forEach(button => button.addEventListener("click", () => openExamModal(null, button.dataset.id)));
   $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id)));
   $$("#teacher-course-workspace .delete-exam").forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
