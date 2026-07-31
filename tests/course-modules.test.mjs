@@ -78,6 +78,12 @@ assert.doesNotMatch(appSource, /student-card-footer/, "Las tarjetas no deben rep
 assert.doesNotMatch(appSource, /contentMeta/, "El directorio del alumno no debe calcular metadatos redundantes");
 assert.match(appSource, /student-dashboard-course-card/, "Las tarjetas del alumno deben compartir la estructura visual del tablero docente");
 assert.match(appSource, /student-dashboard-progress/, "El progreso útil debe mantenerse de forma compacta");
+assert.doesNotMatch(appSource, /student-course-exams/, "Las evaluaciones no deben repetirse fuera de sus módulos");
+assert.doesNotMatch(appSource, /ESPACIO DEL CURSO/, "La cabecera del alumno no debe repetir el contexto del curso");
+assert.doesNotMatch(appSource, /Avanza por las páginas/, "La vista interna no debe añadir instrucciones redundantes");
+assert.match(appSource, /student-course-progress/, "El progreso interno debe presentarse de forma compacta");
+assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
+assert.match(appSource, /module\.activities\.map\(activity =>/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
