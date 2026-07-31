@@ -159,12 +159,12 @@ function show(id) {
   $$(".view").forEach(view => view.classList.toggle("active", view.id === id));
   document.body.classList.toggle("app-shell-mode", ["teacher-view","student-view"].includes(id));
   if (id !== "teacher-view") document.body.classList.remove("teacher-course-open");
+  if (id !== "student-view") document.body.classList.remove("student-course-open");
   document.body.classList.toggle("lesson-mode", id === "lesson-view");
   document.body.classList.toggle("exam-in-progress", id === "exam-view");
   document.body.classList.remove("student-game-mode");
   document.body.classList.toggle("result-game-mode", id === "result-view");
   document.body.classList.toggle("auth-game-mode", id === "auth-view");
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function setSessionMessage(message, type = "muted") {
   $("#session-area").innerHTML = `<span class="${esc(type)} small">${esc(message)}</span>`;
@@ -519,8 +519,9 @@ function renderApp() {
     switchTab("teacher", button.dataset.teacherTab, button);
   }));
   $$("#session-area [data-student-tab]").forEach(button => button.addEventListener("click", () => {
-    if (button.dataset.studentTab === "student-courses") {
+    if (activeStudentCourseId) {
       activeStudentCourseId = null;
+      document.body.classList.remove("student-course-open");
       $("#student-course-list")?.classList.remove("hidden");
       $("#student-course-workspace")?.classList.add("hidden");
       $("#student-overview")?.classList.remove("hidden");
@@ -606,10 +607,7 @@ function bindStaticEvents() {
   $$("[data-teacher-tab]").forEach(button => button.addEventListener("click", () => switchTab("teacher", button.dataset.teacherTab, button)));
   $$("[data-student-tab]").forEach(button => button.addEventListener("click", () => switchTab("student", button.dataset.studentTab, button)));
   $$(".question-mode").forEach(button => button.addEventListener("click", () => setQuestionMode(button.dataset.questionMode)));
-  $$(".exam-editor-tab").forEach(button => button.addEventListener("click", () => {
-    $$(".exam-editor-tab").forEach(tab => tab.classList.toggle("active", tab === button));
-    document.querySelector(`.${button.dataset.editorSection}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }));
+  $$(".exam-editor-tab").forEach(button => button.addEventListener("click", () => selectExamEditorSection(button.dataset.editorSection)));
   $$('[data-close]').forEach(button => button.addEventListener("click", () => closeModal(button.dataset.close)));
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && activeExam && timerInterval) finishExam(false, "El examen se entregó al cambiar de pestaña o minimizar la ventana.", true);
@@ -1282,6 +1280,7 @@ function renderStudent() {
   renderStudentOverview(courses, summaries);
   const activeStudentCourse = courses.find(course => course.id === activeStudentCourseId);
   if (activeStudentCourseId && !activeStudentCourse) activeStudentCourseId = null;
+  document.body.classList.toggle("student-course-open", Boolean(activeStudentCourse));
   $("#student-course-list").classList.toggle("hidden", Boolean(activeStudentCourse));
   $("#student-course-workspace").classList.toggle("hidden", !activeStudentCourse);
   $("#student-overview").classList.toggle("hidden", Boolean(activeStudentCourse));
@@ -1301,7 +1300,11 @@ function renderStudent() {
   $$(".continue-course").forEach(button => button.addEventListener("click", () => openLesson(button.dataset.courseId, button.dataset.activityId)));
   $$(".open-student-course").forEach(button => button.addEventListener("click", () => { activeStudentCourseId = button.dataset.courseId; renderStudent(); }));
   $("#back-to-student-courses")?.addEventListener("click", () => { activeStudentCourseId = null; renderStudent(); });
-  $$(".student-course-grades").forEach(button => button.addEventListener("click", () => switchTab("student", "student-grades", $('[data-student-tab="student-grades"]'))));
+  $$(".student-course-grades").forEach(button => button.addEventListener("click", () => {
+    activeStudentCourseId = null;
+    renderStudent();
+    switchTab("student", "student-grades", $('[data-student-tab="student-grades"]'));
+  }));
 }
 function renderStudentCourseDirectory(courses, summaries) {
   if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Todavía no tienes cursos disponibles</strong><p>Los cursos publicados por el profesor aparecerán aquí.</p></div>`;
@@ -2189,7 +2192,7 @@ function openExamModal(id = null, courseId = null) {
   renderBuilder();
   setQuestionMode("manual-panel");
   $("#exam-editor-error").textContent = "";
-  $$(".exam-editor-tab").forEach((tab, index) => tab.classList.toggle("active", index === 0));
+  selectExamEditorSection("editor-settings-section");
   $("#exam-modal").classList.remove("hidden");
 }
 function changeOptionCount() {
@@ -2206,6 +2209,12 @@ function changeOptionCount() {
 function setQuestionMode(panelId) {
   $$(".question-mode").forEach(button => button.classList.toggle("active", button.dataset.questionMode === panelId));
   $$(".question-tool-panel").forEach(panel => panel.classList.toggle("active", panel.id === panelId));
+}
+function selectExamEditorSection(sectionClass) {
+  $$(".exam-editor-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.editorSection === sectionClass));
+  [".editor-settings-section",".editor-questions-section"].forEach(selector => {
+    document.querySelector(selector)?.classList.toggle("editor-section-tab-hidden", selector !== `.${sectionClass}`);
+  });
 }
 function addBuilderQuestion() {
   collectBuilder();
