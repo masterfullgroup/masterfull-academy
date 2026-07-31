@@ -87,6 +87,9 @@ assert.match(appSource, /renderStudentCourseGrades/, "El alumno debe consultar l
 assert.match(appSource, /myGrades\.filter\(grade => grade\.courseId === course\.id\)/, "Las calificaciones internas deben filtrarse por curso");
 assert.match(cssSource, /\.student-course-sidebar\s*\{[\s\S]*?flex-direction:column;/, "La navegación del curso debe ocupar el lateral izquierdo");
 assert.doesNotMatch(appSource, /student-course-grades/, "El acceso contextual no debe enviar al alumno a la tabla global");
+assert.match(cssSource, /body\.student-course-open\.app-shell-mode > main\s*\{[\s\S]*?padding:0;/, "El curso interno debe ocupar la pantalla sin marco exterior");
+assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s\S]*?max-width:none;[\s\S]*?min-height:100vh;/, "La estructura del curso debe usar todo el ancho y alto");
+assert.match(cssSource, /body\.student-course-open \.student-course-content\s*\{[\s\S]*?width:100%;[\s\S]*?max-width:none;[\s\S]*?margin:0;/, "El contenido no debe heredar el centrado del main general");
 assert.doesNotMatch(htmlSource, /class="lesson-tabs"/, "La página de contenido no debe mostrar pestañas vacías o redundantes");
 assert.doesNotMatch(appSource, /renderLessonTabs/, "El contenido no debe duplicarse en paneles secundarios");
 assert.match(appSource, /ACTIVE_LESSON_KEY/, "La lección activa debe conservarse durante recargas y sincronizaciones");
