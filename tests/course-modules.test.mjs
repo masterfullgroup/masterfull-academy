@@ -18,8 +18,13 @@ assert.match(htmlSource, /activity-rich-menubar/, "El editor debe incluir una ba
 assert.match(htmlSource, /data-activity-format="image"/, "El editor debe permitir insertar imágenes");
 assert.match(htmlSource, /data-activity-format="table"/, "El editor debe permitir insertar tablas");
 assert.match(htmlSource, /data-activity-format="fullscreen"/, "El editor debe ofrecer escritura en pantalla completa");
+assert.match(htmlSource, /contenteditable="true"/, "El área de contenido debe aplicar formato visual mientras se escribe");
 assert.match(appSource, /updateActivityEditorStats/, "El editor debe actualizar el contador de palabras");
 assert.match(appSource, /formatActivityDescription/, "Las herramientas de formato deben ser funcionales");
+assert.match(appSource, /sanitizeActivityHtml/, "El contenido visual debe limpiarse antes de guardarse o mostrarse");
+assert.match(appSource, /renderActivityContent/, "El alumno debe recibir el contenido con su formato visual");
+assert.match(appSource, /rememberActivityEditorSelection/, "La barra debe conservar la selección al aplicar formato");
+assert.doesNotMatch(appSource, /setRangeText/, "Las herramientas no deben escribir etiquetas de formato en un textarea");
 assert.match(appSource, /teacher-course-open/, "Al abrir un curso debe activarse el modo de enfoque");
 assert.match(appSource, /document\.body\.classList\.toggle\("teacher-course-open"/, "El modo de enfoque debe sincronizarse con el curso activo");
 assert.match(appSource, /document\.body\.classList\.toggle\("student-course-open"/, "El alumno debe recibir el mismo modo de curso");
@@ -62,36 +67,6 @@ vm.runInContext([
   extractFunction("activityCompleted"),
   extractFunction("accessibleCourseActivities")
 ].join("\n"), context);
-
-const editorField = {
-  value: "Concepto",
-  selectionStart: 0,
-  selectionEnd: 8,
-  focus() {},
-  setRangeText(replacement, start, end) {
-    this.value = `${this.value.slice(0, start)}${replacement}${this.value.slice(end)}`;
-    this.selectionStart = start;
-    this.selectionEnd = start + replacement.length;
-  }
-};
-const editorCount = { textContent: "" };
-const editorContext = {
-  $: selector => selector === "#activity-description" ? editorField : editorCount,
-  document: { execCommand() {} }
-};
-vm.createContext(editorContext);
-vm.runInContext([
-  extractFunction("updateActivityEditorStats"),
-  extractFunction("formatActivityDescription")
-].join("\n"), editorContext);
-editorContext.formatActivityDescription("bold");
-assert.equal(editorField.value, "**Concepto**", "La herramienta de negrita debe aplicar formato al texto seleccionado");
-editorField.value = "";
-editorField.selectionStart = 0;
-editorField.selectionEnd = 0;
-editorContext.formatActivityDescription("table");
-assert.match(editorField.value, /\| Encabezado 1 \|/, "La herramienta de tabla debe insertar una estructura editable");
-assert.equal(editorCount.textContent, "17 palabras", "El editor debe actualizar el contador después de insertar contenido");
 
 const normalized = context.normalizeModules([{
   id: "module-1",

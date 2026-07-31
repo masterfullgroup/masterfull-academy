@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260730-8">
+  <link rel="stylesheet" href="styles.css?v=20260730-9">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -143,7 +143,7 @@
           <header class="lesson-topbar"><button id="lesson-menu-toggle" class="btn secondary" type="button" aria-expanded="false">☰ Contenido</button><button id="lesson-return" class="lesson-return" type="button">← Volver al curso</button><div class="lesson-progress-compact"><span id="lesson-progress-label">0% completado</span><div class="course-progress-track"><span id="lesson-progress-bar"></span></div></div></header>
           <article class="lesson-content">
             <div id="lesson-media" class="lesson-media"></div>
-            <div class="lesson-title-row"><div><span id="lesson-type" class="eyebrow"></span><h1 id="lesson-title"></h1><p id="lesson-description" class="muted"></p></div><button id="lesson-complete" class="btn primary" type="button">Marcar como completado</button></div>
+            <div class="lesson-title-row"><div><span id="lesson-type" class="eyebrow"></span><h1 id="lesson-title"></h1><div id="lesson-description" class="muted lesson-rich-content"></div></div><button id="lesson-complete" class="btn primary" type="button">Marcar como completado</button></div>
             <div id="lesson-materials-card" class="lesson-materials-card"></div>
             <nav class="lesson-tabs" aria-label="Información de la clase">
               <button class="lesson-tab active" data-lesson-tab="description" type="button">Descripción</button><button class="lesson-tab" data-lesson-tab="materials" type="button">Materiales</button><button class="lesson-tab" data-lesson-tab="evaluation" type="button">Evaluación</button><button class="lesson-tab" data-lesson-tab="comments" type="button">Comentarios</button><button class="lesson-tab" data-lesson-tab="resources" type="button">Recursos descargables</button>
@@ -245,14 +245,14 @@
           <label>Título del elemento<input id="activity-title" required maxlength="120" placeholder="Ej. ¿Qué aprenderemos en esta unidad?"></label>
           <label id="activity-url-field" class="hidden">Enlace o ruta del recurso<input id="activity-url" maxlength="500" placeholder="https://… o ./materiales/archivo.pdf"></label>
           <div id="activity-description-field" class="activity-rich-field">
-            <label for="activity-description">Contenido e indicaciones</label>
+            <label for="activity-description-editor">Contenido e indicaciones</label>
             <div class="activity-editor-shell">
               <div class="activity-rich-menubar" role="menubar" aria-label="Menú del editor">
                 <span role="menuitem">Editar</span><span role="menuitem">Ver</span><span role="menuitem">Insertar</span><span role="menuitem">Formato</span><span role="menuitem">Herramientas</span><span role="menuitem">Tabla</span>
               </div>
               <div class="activity-rich-toolbar" role="toolbar" aria-label="Formato del contenido">
                 <select id="activity-text-size" aria-label="Tamaño de texto" title="Tamaño de texto"><option value="">12 pt</option><option value="small">10 pt</option><option value="large">16 pt</option><option value="xlarge">20 pt</option></select>
-                <select id="activity-block-style" aria-label="Estilo de párrafo" title="Estilo de párrafo"><option value="">Párrafo</option><option value="heading">Título</option><option value="subheading">Subtítulo</option><option value="quote">Cita</option></select>
+                <select id="activity-block-style" aria-label="Estilo de párrafo" title="Estilo de párrafo"><option value="">Formato</option><option value="paragraph">Párrafo</option><option value="heading">Título</option><option value="subheading">Subtítulo</option><option value="quote">Cita</option></select>
                 <span aria-hidden="true"></span>
                 <button data-activity-format="bold" type="button" aria-label="Negrita" title="Negrita"><strong>B</strong></button>
                 <button data-activity-format="italic" type="button" aria-label="Cursiva" title="Cursiva"><em>I</em></button>
@@ -273,7 +273,8 @@
                 <button data-activity-format="numbered" type="button" aria-label="Lista numerada" title="Lista numerada">1☰</button>
                 <button data-activity-format="table" type="button" aria-label="Insertar tabla" title="Insertar tabla">▦</button>
               </div>
-              <textarea id="activity-description" rows="10" maxlength="5000" placeholder="Escribe aquí el contenido, las instrucciones o el contexto para el alumno…"></textarea>
+              <div id="activity-description-editor" class="activity-rich-canvas" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Escribe aquí el contenido, las instrucciones o el contexto para el alumno…"></div>
+              <textarea id="activity-description" class="activity-description-source" maxlength="5000" aria-hidden="true" tabindex="-1"></textarea>
               <footer class="activity-rich-status">
                 <span>Párrafo</span>
                 <div><span id="activity-word-count">0 palabras</span><button data-activity-format="code" type="button" aria-label="Insertar bloque de código" title="Código">&lt;/&gt;</button><button data-activity-format="fullscreen" type="button" aria-label="Pantalla completa" aria-pressed="false" title="Pantalla completa">⛶</button></div>
@@ -396,6 +397,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260730-8"></script>
+  <script src="app.js?v=20260730-9"></script>
 </body>
 </html>

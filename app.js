@@ -45,6 +45,7 @@ let activeStudentCourseId = null;
 let activeLessonCourseId = null;
 let activeLessonActivityId = null;
 let activeLessonTab = "description";
+let activityEditorRange = null;
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -579,7 +580,13 @@ function bindStaticEvents() {
   $("#activity-form").addEventListener("submit", saveActivity);
   $("#module-unlock-rule").addEventListener("change", toggleModuleUnlockDetail);
   $("#activity-type").addEventListener("change", toggleActivityFields);
-  $$("[data-activity-format]").forEach(button => button.addEventListener("click", () => formatActivityDescription(button.dataset.activityFormat)));
+  $$("[data-activity-format]").forEach(button => {
+    button.addEventListener("mousedown", event => {
+      rememberActivityEditorSelection();
+      event.preventDefault();
+    });
+    button.addEventListener("click", () => formatActivityDescription(button.dataset.activityFormat));
+  });
   $("#activity-text-size").addEventListener("change", event => {
     if (event.target.value) formatActivityDescription(`size-${event.target.value}`);
     event.target.value = "";
@@ -588,7 +595,9 @@ function bindStaticEvents() {
     if (event.target.value) formatActivityDescription(event.target.value);
     event.target.value = "";
   });
-  $("#activity-description").addEventListener("input", updateActivityEditorStats);
+  $("#activity-description-editor").addEventListener("input", syncActivityEditor);
+  $("#activity-description-editor").addEventListener("paste", pastePlainActivityText);
+  document.addEventListener("selectionchange", rememberActivityEditorSelection);
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
@@ -982,8 +991,17 @@ function activityMeta(activity, exams = []) {
     activity.submissionTypes?.length ? `Entrega: ${activity.submissionTypes.map(type => ({ file:"archivos", text:"texto", url:"enlace", questions:"preguntas", none:"sin entrega digital" })[type]).join(", ")}` : ""
   ].filter(Boolean).join(" · ");
 }
+function modulesWithDescriptionPreviews(value) {
+  return normalizeModules(value).map(module => ({
+    ...module,
+    activities: module.activities.map(activity => ({
+      ...activity,
+      description: activityDescriptionPreview(activity.description)
+    }))
+  }));
+}
 function renderTeacherCourseModules(course, exams = []) {
-  const modules = normalizeModules(course.modules);
+  const modules = modulesWithDescriptionPreviews(course.modules);
   return `<div class="course-subpage-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>Todo el recorrido académico se organiza aquí. Las vistas de tareas y evaluaciones son filtros de estos elementos.</p></div><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear módulo</button></div><details class="course-builder-guide"><summary>Tipos de contenido disponibles</summary><div class="module-content-types" aria-label="Contenido disponible"><b>${modernIcon("page")} Página</b><b>${modernIcon("file")} Archivo</b><b>${modernIcon("video")} Video</b><b>${modernIcon("practice")} Práctica</b><b>${modernIcon("task")} Tarea</b><b>${modernIcon("quiz")} Evaluación</b><b>${modernIcon("discussion")} Foro</b><b>${modernIcon("live")} Videoclase</b><b>${modernIcon("heading")} Encabezado</b></div><p class="drag-help">Arrastra los controles ⋮⋮ o usa las flechas. También puedes mover elementos entre módulos.</p></details>
     <div class="teacher-module-list">${modules.length ? modules.map((module, index) => `<details class="teacher-module-card" data-course-id="${esc(course.id)}" data-module-drop="${esc(module.id)}" ${index === 0 ? "open" : ""}>
       <summary><span class="drag-handle module-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" role="button" tabindex="0" aria-label="Arrastrar módulo ${esc(module.title)}">⋮⋮</span><span class="module-order">${index + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, index)} · ${quantity(module.activities.length, "elemento", "elementos")}</small></div><span class="status ${module.published ? "published" : "draft"}">${module.published ? "Publicado" : "Borrador"}</span><div class="module-actions"><button class="icon-btn move-module" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === 0 ? "disabled" : ""} aria-label="Subir módulo">↑</button><button class="icon-btn move-module" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === modules.length - 1 ? "disabled" : ""} aria-label="Bajar módulo">↓</button><button class="icon-btn edit-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Editar</button><button class="icon-btn delete delete-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Eliminar</button></div></summary>
@@ -998,7 +1016,7 @@ function renderActivityOptions(course, module, activity, index) {
   return `<div class="row-action-menu"><button class="row-action-toggle" aria-label="Opciones de ${esc(activity.title)}" aria-expanded="false" title="Opciones" type="button">⋮</button><div class="row-action-popover hidden"><button class="move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${index === 0 ? "disabled" : ""} type="button">Mover arriba</button><button class="move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${index === module.activities.length - 1 ? "disabled" : ""} type="button">Mover abajo</button><button class="edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button><button class="delete-activity danger" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Eliminar</button></div></div>`;
 }
 function renderTeacherCourseModulesCanvas(course, exams = []) {
-  const modules = normalizeModules(course.modules);
+  const modules = modulesWithDescriptionPreviews(course.modules);
   const totalItems = modules.reduce((total, module) => total + module.activities.length, 0);
   return `<div class="canvas-modules-page">
     <div class="course-subpage-head canvas-modules-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>${quantity(modules.length, "módulo")} · ${quantity(totalItems, "elemento")} organizados en el recorrido académico.</p></div></div>
@@ -1496,7 +1514,7 @@ function renderLesson() {
   $("#lesson-sidebar-course").textContent = course.name;
   $("#lesson-title").textContent = activity.title;
   $("#lesson-type").textContent = `${activity.moduleTitle} · ${activityTypeLabel(activity.type)}`;
-  $("#lesson-description").textContent = activity.description || "Avanza a tu ritmo y marca esta actividad como completada cuando termines.";
+  $("#lesson-description").innerHTML = renderActivityContent(activity.description || "Avanza a tu ritmo y marca esta actividad como completada cuando termines.");
   $("#lesson-media").innerHTML = lessonMediaMarkup(activity);
   $("#lesson-progress-label").textContent = `${percent}% completado`;
   $("#lesson-progress-bar").style.width = `${percent}%`;
@@ -1530,7 +1548,7 @@ function renderLessonTabs() {
   $$(".lesson-tab").forEach(button => button.classList.toggle("active", button.dataset.lessonTab === activeLessonTab));
   const url = safeActivityUrl(activity.url);
   const contents = {
-    description: `<h3>Descripción de la clase</h3><p>${esc(activity.description || "Esta actividad forma parte de tu ruta de aprendizaje. Revisa el contenido principal y completa los materiales indicados antes de continuar.")}</p><div class="lesson-objective"><strong>Objetivo</strong><span>Comprender y aplicar los conceptos presentados en ${esc(activity.title)}.</span></div>`,
+    description: `<h3>Descripción de la clase</h3><div class="lesson-rich-content">${renderActivityContent(activity.description || "Esta actividad forma parte de tu ruta de aprendizaje. Revisa el contenido principal y completa los materiales indicados antes de continuar.")}</div><div class="lesson-objective"><strong>Objetivo</strong><span>Comprender y aplicar los conceptos presentados en ${esc(activity.title)}.</span></div>`,
     materials: `<h3>Materiales</h3>${url ? `<a class="lesson-resource-row" href="${esc(url)}" target="_blank" rel="noopener"><span>${modernIcon(activity.type)}</span><span><strong>${esc(activity.title)}</strong><small>Abrir material asociado</small></span><b>↗</b></a>` : `<p class="muted">Esta clase no tiene materiales adicionales.</p>`}`,
     evaluation: `<h3>Evaluación</h3><p>${activity.type === "quiz" ? "Completa la evaluación indicada por tu profesor desde la sección de evaluaciones del curso." : "No hay una evaluación vinculada directamente a esta clase."}</p>`,
     comments: `<h3>Comentarios</h3><p class="muted">El espacio de comentarios estará disponible en una próxima etapa.</p>`,
@@ -1940,10 +1958,10 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   $("#activity-title").value = activity?.title || "";
   $("#activity-type").value = activity?.type || "lesson";
   $("#activity-url").value = activity?.url || "";
-  $("#activity-description").value = activity?.description || "";
+  $("#activity-description-editor").innerHTML = renderActivityContent(activity?.description || "");
+  syncActivityEditor();
   $(".activity-editor-shell").classList.remove("is-fullscreen");
   $('[data-activity-format="fullscreen"]').setAttribute("aria-pressed", "false");
-  updateActivityEditorStats();
   $("#activity-published").value = String(activity?.published !== false);
   $("#activity-completion-rule").value = activity?.completionRule || "manual";
   $("#activity-due-at").value = activity?.dueAt ? activity.dueAt.slice(0, 16) : "";
@@ -1989,53 +2007,176 @@ function toggleActivityFields() {
   $("#activity-completion-rule").disabled = isHeading;
   if (isHeading) $("#activity-completion-rule").value = "none";
 }
+function safeRichContentUrl(value) {
+  const url = String(value || "").trim();
+  return /^(https?:\/\/|\.\/|\/)/i.test(url) ? url : "";
+}
+function sanitizeActivityHtml(value) {
+  const template = document.createElement("template");
+  template.innerHTML = String(value || "");
+  const allowed = new Set(["P","DIV","BR","STRONG","B","EM","I","U","S","SUP","SUB","SMALL","SPAN","FONT","H2","H3","BLOCKQUOTE","UL","OL","LI","A","IMG","TABLE","THEAD","TBODY","TR","TH","TD","PRE","CODE"]);
+  template.content.querySelectorAll("*").forEach(element => {
+    if (["SCRIPT","STYLE","IFRAME","OBJECT","EMBED"].includes(element.tagName)) {
+      element.remove();
+      return;
+    }
+    if (!allowed.has(element.tagName)) {
+      element.replaceWith(...element.childNodes);
+      return;
+    }
+    const originalHref = element.getAttribute("href");
+    const originalSrc = element.getAttribute("src");
+    const originalColor = element.getAttribute("color");
+    const originalSize = element.getAttribute("size");
+    const originalStyle = element.getAttribute("style") || "";
+    [...element.attributes].forEach(attribute => element.removeAttribute(attribute.name));
+    if (element.tagName === "A") {
+      const href = safeRichContentUrl(originalHref);
+      if (href) {
+        element.setAttribute("href", href);
+        element.setAttribute("target", "_blank");
+        element.setAttribute("rel", "noopener");
+      }
+    }
+    if (element.tagName === "IMG") {
+      const src = safeRichContentUrl(originalSrc);
+      if (!src) element.remove();
+      else {
+        element.setAttribute("src", src);
+        element.setAttribute("alt", "Imagen del contenido");
+      }
+    }
+    if (element.tagName === "FONT") {
+      const styles = [];
+      if (/^#[0-9a-f]{6}$/i.test(originalColor || "")) styles.push(`color:${originalColor}`);
+      const sizes = { "2": ".85em", "4": "1.25em", "5": "1.5em" };
+      if (sizes[originalSize]) styles.push(`font-size:${sizes[originalSize]}`);
+      if (styles.length) element.setAttribute("style", styles.join(";"));
+    }
+    const alignment = originalStyle.match(/text-align\s*:\s*(left|center|right|justify)/i);
+    if (["P","DIV"].includes(element.tagName) && alignment) element.setAttribute("style", `text-align:${alignment[1].toLowerCase()}`);
+    if (element.tagName === "SPAN") {
+      const color = originalStyle.match(/color\s*:\s*(#[0-9a-f]{6})/i);
+      const size = originalStyle.match(/font-size\s*:\s*(\.85|1\.25|1\.5)em/i);
+      const styles = [];
+      if (color) styles.push(`color:${color[1]}`);
+      if (size) styles.push(`font-size:${size[1]}em`);
+      if (styles.length) element.setAttribute("style", styles.join(";"));
+    }
+  });
+  return template.innerHTML;
+}
+function legacyDescriptionToHtml(value) {
+  const original = String(value || "").trim();
+  if (!original) return "";
+  if (/<(?:p|div|h2|h3|blockquote|ul|ol|table|pre)\b/i.test(original)) return sanitizeActivityHtml(original);
+  let markup = esc(original)
+    .replace(/&lt;(\/?)(u|small|sup|strong|em|s|code)&gt;/gi, "<$1$2>")
+    .replace(/&lt;span style=&quot;((?:color:#[0-9a-f]{6}|font-size:(?:\.85|1\.25|1\.5)em))&quot;&gt;/gi, '<span style="$1">')
+    .replace(/&lt;\/span&gt;/gi, "</span>")
+    .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/_([^_\n]+)_/g, "<em>$1</em>")
+    .replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, '<img src="$2" alt="$1">')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
+  const lines = markup.split(/\r?\n/);
+  const output = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index].trim();
+    if (/^\|.+\|$/.test(line) && /^\|\s*[-:]+/.test((lines[index + 1] || "").trim())) {
+      const headers = line.slice(1, -1).split("|").map(cell => cell.trim());
+      index += 2;
+      const rows = [];
+      while (index < lines.length && /^\|.+\|$/.test(lines[index].trim())) {
+        rows.push(lines[index].trim().slice(1, -1).split("|").map(cell => cell.trim()));
+        index += 1;
+      }
+      index -= 1;
+      output.push(`<table><thead><tr>${headers.map(cell => `<th>${cell}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
+    } else if (/^###\s+/.test(line)) output.push(`<h3>${line.replace(/^###\s+/, "")}</h3>`);
+    else if (/^##\s+/.test(line)) output.push(`<h2>${line.replace(/^##\s+/, "")}</h2>`);
+    else if (/^>\s+/.test(line)) output.push(`<blockquote>${line.replace(/^>\s+/, "")}</blockquote>`);
+    else if (/^-\s+/.test(line)) output.push(`<ul><li>${line.replace(/^-\s+/, "")}</li></ul>`);
+    else if (/^\d+\.\s+/.test(line)) output.push(`<ol><li>${line.replace(/^\d+\.\s+/, "")}</li></ol>`);
+    else if (line) output.push(`<p>${line}</p>`);
+  }
+  return sanitizeActivityHtml(output.join(""));
+}
+function renderActivityContent(value) {
+  return legacyDescriptionToHtml(value);
+}
+function activityDescriptionPreview(value) {
+  const container = document.createElement("div");
+  container.innerHTML = renderActivityContent(value);
+  return (container.textContent || "").replace(/\s+/g, " ").trim().slice(0, 110);
+}
+function syncActivityEditor() {
+  const editor = $("#activity-description-editor");
+  $("#activity-description").value = sanitizeActivityHtml(editor.innerHTML);
+  updateActivityEditorStats();
+}
+function pastePlainActivityText(event) {
+  event.preventDefault();
+  document.execCommand("insertText", false, event.clipboardData?.getData("text/plain") || "");
+  syncActivityEditor();
+}
+function insertActivityEditorHtml(markup) {
+  document.execCommand("insertHTML", false, sanitizeActivityHtml(markup));
+}
+function requestActivityUrl(label) {
+  const value = prompt(label, "https://");
+  return safeRichContentUrl(value);
+}
+function rememberActivityEditorSelection() {
+  const editor = $("#activity-description-editor");
+  const selection = window.getSelection();
+  if (editor && selection?.rangeCount && editor.contains(selection.anchorNode)) activityEditorRange = selection.getRangeAt(0).cloneRange();
+}
+function restoreActivityEditorSelection() {
+  if (!activityEditorRange) return;
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(activityEditorRange);
+}
 function formatActivityDescription(command) {
-  const field = $("#activity-description");
+  const editor = $("#activity-description-editor");
   if (command === "fullscreen") {
     const shell = $(".activity-editor-shell");
     const active = shell.classList.toggle("is-fullscreen");
     $('[data-activity-format="fullscreen"]').setAttribute("aria-pressed", String(active));
-    field.focus();
+    editor.focus();
     return;
   }
-  if (["undo", "redo"].includes(command)) {
-    field.focus();
-    document.execCommand(command);
-    updateActivityEditorStats();
-    return;
-  }
-  const start = field.selectionStart;
-  const end = field.selectionEnd;
-  const selected = field.value.slice(start, end);
-  const replacements = {
-    bold: `**${selected || "texto destacado"}**`,
-    italic: `_${selected || "texto en cursiva"}_`,
-    underline: `<u>${selected || "texto subrayado"}</u>`,
-    textcolor: `<span style="color:#334ea2">${selected || "texto con color"}</span>`,
-    superscript: `<sup>${selected || "texto"}</sup>`,
-    heading: `## ${selected || "Título de sección"}`,
-    subheading: `### ${selected || "Subtítulo de sección"}`,
-    quote: (selected || "Texto de la cita").split("\n").map(line => `> ${line.replace(/^>\s*/, "")}`).join("\n"),
-    link: `[${selected || "texto del enlace"}](https://)`,
-    image: `![${selected || "Descripción de la imagen"}](https://)`,
-    video: `[▶ ${selected || "Ver video"}](https://)`,
-    file: `[▤ ${selected || "Descargar archivo"}](https://)`,
-    align: `<div style="text-align:center">${selected || "Texto centrado"}</div>`,
-    list: (selected || "Elemento de la lista").split("\n").map(line => `- ${line.replace(/^[-*]\s*/, "")}`).join("\n"),
-    numbered: (selected || "Elemento de la lista").split("\n").map((line, index) => `${index + 1}. ${line.replace(/^\d+\.\s*/, "")}`).join("\n"),
-    table: `| Encabezado 1 | Encabezado 2 |\n| --- | --- |\n| Contenido | Contenido |`,
-    code: `\`\`\`\n${selected || "Escribe el código aquí"}\n\`\`\``,
-    "size-small": `<small>${selected || "texto pequeño"}</small>`,
-    "size-large": `<span style="font-size:1.25em">${selected || "texto grande"}</span>`,
-    "size-xlarge": `<span style="font-size:1.5em">${selected || "texto destacado"}</span>`,
-    clear: selected.replace(/(\*\*|__|~~|`|<\/?u>|<\/?sup>|<\/?small>|<\/?span[^>]*>)/g, "")
+  editor.focus();
+  restoreActivityEditorSelection();
+  const nativeCommands = {
+    bold: ["bold"], italic: ["italic"], underline: ["underline"], superscript: ["superscript"],
+    clear: ["removeFormat"], undo: ["undo"], redo: ["redo"], align: ["justifyCenter"],
+    list: ["insertUnorderedList"], numbered: ["insertOrderedList"], textcolor: ["foreColor", "#334ea2"],
+    paragraph: ["formatBlock", "p"], heading: ["formatBlock", "h2"], subheading: ["formatBlock", "h3"], quote: ["formatBlock", "blockquote"],
+    code: ["formatBlock", "pre"], "size-small": ["fontSize", "2"], "size-large": ["fontSize", "4"], "size-xlarge": ["fontSize", "5"]
   };
-  field.setRangeText(replacements[command] || selected, start, end, "select");
-  field.focus();
-  updateActivityEditorStats();
+  if (nativeCommands[command]) document.execCommand(nativeCommands[command][0], false, nativeCommands[command][1] || null);
+  else if (command === "link") {
+    const url = requestActivityUrl("Pega la dirección del enlace");
+    if (url) {
+      const selection = window.getSelection();
+      if (selection?.isCollapsed) insertActivityEditorHtml(`<a href="${esc(url)}">Abrir enlace</a>`);
+      else document.execCommand("createLink", false, url);
+    }
+  } else if (command === "image") {
+    const url = requestActivityUrl("Pega la dirección de la imagen");
+    if (url) document.execCommand("insertImage", false, url);
+  } else if (["video", "file"].includes(command)) {
+    const url = requestActivityUrl(command === "video" ? "Pega la dirección del video" : "Pega la dirección del archivo");
+    if (url) insertActivityEditorHtml(`<p><a href="${esc(url)}">${command === "video" ? "▶ Ver video" : "▤ Abrir archivo"}</a></p>`);
+  } else if (command === "table") {
+    insertActivityEditorHtml("<table><thead><tr><th>Encabezado 1</th><th>Encabezado 2</th></tr></thead><tbody><tr><td>Contenido</td><td>Contenido</td></tr></tbody></table><p><br></p>");
+  }
+  syncActivityEditor();
+  rememberActivityEditorSelection();
 }
 function updateActivityEditorStats() {
-  const value = $("#activity-description").value.trim();
+  const value = ($("#activity-description-editor").innerText || "").trim();
   const words = value ? value.split(/\s+/).length : 0;
   $("#activity-word-count").textContent = `${words} ${words === 1 ? "palabra" : "palabras"}`;
 }
@@ -2613,12 +2754,14 @@ function download(content, filename, type) {
   URL.revokeObjectURL(link.href);
 }
 
-initApp().catch(error => {
-  console.error("No se pudo iniciar la plataforma:", error);
-  document.body.classList.remove("session-loading");
-  if (currentUser) renderApp();
-  else {
-    show("auth-view");
-    setSessionMessage("No se pudo iniciar la plataforma.", "error");
-  }
-});
+if (!window.__MASTERFULL_TEST_MODE__) {
+  initApp().catch(error => {
+    console.error("No se pudo iniciar la plataforma:", error);
+    document.body.classList.remove("session-loading");
+    if (currentUser) renderApp();
+    else {
+      show("auth-view");
+      setSessionMessage("No se pudo iniciar la plataforma.", "error");
+    }
+  });
+}
