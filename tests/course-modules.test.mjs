@@ -43,6 +43,11 @@ assert.match(appSource, /question-bank-search/, "El banco de preguntas debe incl
 assert.match(appSource, /question-bank-card-metrics/, "Cada banco debe presentar sus métricas");
 assert.match(cssSource, /\.canvas-item-copy small\s*\{\s*display:none/, "Los módulos docentes deben mostrar solo el nombre del contenido");
 assert.match(cssSource, /\.student-activity small\s*\{\s*display:none/, "Los módulos del alumno deben mostrar solo el nombre del contenido");
+assert.doesNotMatch(htmlSource, /class="brand-mark"/, "La cabecera no debe mostrar el antiguo icono de libro");
+assert.doesNotMatch(cssSource, /\.dashboard-course-cover::after\s*,\s*\.student-course-cover::after/, "Las tarjetas no deben incluir círculos decorativos");
+assert.match(cssSource, /\.canvas-add-content\s*\{\s*display:none/, "La acción inferior redundante para agregar contenido debe permanecer oculta");
+assert.match(appSource, /\["overview", "Inicio", "home"\]/, "La navegación debe usar iconos específicos y profesionales");
+assert.match(appSource, /stroke-width="1\.75"/, "Los iconos deben compartir un trazo visual consistente");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

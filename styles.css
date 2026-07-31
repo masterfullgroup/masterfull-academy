@@ -409,7 +409,16 @@ footer { text-align: center; padding: 20px; color: var(--muted); font-size: 13px
 html { scroll-behavior: smooth; }
 body { background: radial-gradient(circle at 8% 0,#eef2ff 0,transparent 25rem),var(--bg); }
 body::selection { color: #fff; background: var(--primary); }
-.modern-icon { width: 22px; height: 22px; display: block; }
+.modern-icon {
+  display:block;
+  width:20px;
+  height:20px;
+  flex:0 0 auto;
+  overflow:visible;
+}
+.modern-icon path,
+.modern-icon rect,
+.modern-icon circle { vector-effect:non-scaling-stroke; }
 .topbar { height: 76px; padding: 0 max(4vw,28px); border-bottom-color: #dfe5ef; background: #ffffffed; box-shadow: 0 4px 22px #1720330a; backdrop-filter: blur(16px); }
 .brand { gap: 12px; font-size: 18px; letter-spacing: -.015em; }
 .brand-mark { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(145deg,#6366f1,#4338ca); box-shadow: 0 9px 20px #4f46e538; }
@@ -534,7 +543,7 @@ body { background: #edf2f7; }
 }
 .app-shell-mode .brand { position: relative; align-items: center; padding: 8px 5px 42px; color: #fff; border-bottom: 1px solid #ffffff18; }
 .app-shell-mode .brand > span:last-child { display: block; min-width: 0; white-space: nowrap; font-size: 20px; font-weight: 720; line-height: 1.25; letter-spacing: -.025em; }
-.app-shell-mode .brand::after { content: "Panel educativo"; position: absolute; left: 58px; top: 41px; color: #8da0bd; font-size: 10.5px; font-weight: 450; line-height: 1.5; letter-spacing: .06em; }
+.app-shell-mode .brand::after { content: "Panel educativo"; position: absolute; left: 5px; top: 41px; color: #8da0bd; font-size: 10.5px; font-weight: 450; line-height: 1.5; letter-spacing: .06em; }
 .app-shell-mode .brand-mark { background: linear-gradient(145deg,#22d3ee,#0891b2); box-shadow: 0 10px 25px #06b6d43b; }
 .app-shell-mode #session-area { display: flex; flex: 1; align-items: flex-end; }
 .app-shell-mode .user-menu { width: 100%; display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 11px; padding-top: 18px; border-top: 1px solid #ffffff18; }
@@ -3022,7 +3031,6 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
 .teacher-home-course-card:nth-child(3n+2) .dashboard-course-cover,.student-library-card.tone-1 .student-course-cover { background:linear-gradient(135deg,#1762aa,#2845a9); }
 .teacher-home-course-card:nth-child(3n) .dashboard-course-cover,.student-library-card.tone-2 .student-course-cover { background:linear-gradient(135deg,#0f766e,#138a77); }
 .student-library-card.tone-3 .student-course-cover { background:linear-gradient(135deg,#5166b7,#7454a8); }
-.dashboard-course-cover::after,.student-course-cover::after { content:""; position:absolute; width:145px; height:145px; right:-55px; top:-87px; border:28px solid #ffffff12; border-radius:50%; }
 .dashboard-course-cover > span,.student-course-cover > span { position:relative; z-index:1; display:grid; width:43px; height:43px; place-items:center; border:1px solid #ffffff48; border-radius:12px; background:#ffffff19; font-size:21px; font-weight:600; backdrop-filter:blur(4px); }
 .dashboard-course-cover small,.student-course-cover small { position:relative; z-index:1; padding:5px 7px; border-radius:99px; background:#071d3552; font-size:8px; font-weight:650; letter-spacing:.04em; }
 .dashboard-course-card-body,.student-course-card-body { display:flex; min-height:218px; flex-direction:column; padding:16px; }
@@ -5888,6 +5896,7 @@ body.teacher-course-open .course-workspace-page {
   display:none;
 }
 .canvas-add-content {
+  display:none;
   min-height:64px;
   width:calc(100% - 32px);
   margin:16px;
