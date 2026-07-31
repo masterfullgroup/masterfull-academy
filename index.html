@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260730-9">
+  <link rel="stylesheet" href="styles.css?v=20260730-10">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -248,7 +248,12 @@
             <label for="activity-description-editor">Contenido e indicaciones</label>
             <div class="activity-editor-shell">
               <div class="activity-rich-menubar" role="menubar" aria-label="Menú del editor">
-                <span role="menuitem">Editar</span><span role="menuitem">Ver</span><span role="menuitem">Insertar</span><span role="menuitem">Formato</span><span role="menuitem">Herramientas</span><span role="menuitem">Tabla</span>
+                <div class="activity-rich-menu"><button class="activity-menu-trigger" data-activity-menu="edit" type="button" aria-expanded="false" aria-haspopup="menu">Editar</button><div class="activity-menu-popover hidden" data-activity-menu-panel="edit" role="menu"><button data-activity-format="undo" type="button" role="menuitem"><span>Deshacer</span><kbd>Ctrl+Z</kbd></button><button data-activity-format="redo" type="button" role="menuitem"><span>Rehacer</span><kbd>Ctrl+Y</kbd></button><hr><button data-activity-format="clear" type="button" role="menuitem"><span>Quitar formato</span></button></div></div>
+                <div class="activity-rich-menu"><button class="activity-menu-trigger" data-activity-menu="view" type="button" aria-expanded="false" aria-haspopup="menu">Ver</button><div class="activity-menu-popover hidden" data-activity-menu-panel="view" role="menu"><button data-activity-format="fullscreen" type="button" role="menuitem"><span>Pantalla completa</span><kbd>F11</kbd></button><button data-activity-action="focus-editor" type="button" role="menuitem"><span>Ir al área de escritura</span></button></div></div>
+                <div class="activity-rich-menu"><button class="activity-menu-trigger" data-activity-menu="insert" type="button" aria-expanded="false" aria-haspopup="menu">Insertar</button><div class="activity-menu-popover hidden" data-activity-menu-panel="insert" role="menu"><button data-activity-format="link" type="button" role="menuitem"><span>Enlace</span></button><button data-activity-format="image" type="button" role="menuitem"><span>Imagen</span></button><button data-activity-format="video" type="button" role="menuitem"><span>Video</span></button><button data-activity-format="file" type="button" role="menuitem"><span>Archivo</span></button><hr><button data-activity-format="table" type="button" role="menuitem"><span>Tabla 2 × 2</span></button></div></div>
+                <div class="activity-rich-menu"><button class="activity-menu-trigger" data-activity-menu="format" type="button" aria-expanded="false" aria-haspopup="menu">Formato</button><div class="activity-menu-popover hidden" data-activity-menu-panel="format" role="menu"><button data-activity-format="bold" type="button" role="menuitem"><span>Negrita</span><kbd>Ctrl+B</kbd></button><button data-activity-format="italic" type="button" role="menuitem"><span>Cursiva</span><kbd>Ctrl+I</kbd></button><button data-activity-format="underline" type="button" role="menuitem"><span>Subrayado</span><kbd>Ctrl+U</kbd></button><button data-activity-format="superscript" type="button" role="menuitem"><span>Superíndice</span></button><hr><button data-activity-format="heading" type="button" role="menuitem"><span>Título</span></button><button data-activity-format="subheading" type="button" role="menuitem"><span>Subtítulo</span></button><button data-activity-format="quote" type="button" role="menuitem"><span>Cita</span></button></div></div>
+                <div class="activity-rich-menu"><button class="activity-menu-trigger" data-activity-menu="tools" type="button" aria-expanded="false" aria-haspopup="menu">Herramientas</button><div class="activity-menu-popover hidden" data-activity-menu-panel="tools" role="menu"><button data-activity-format="code" type="button" role="menuitem"><span>Bloque de código</span></button><button data-activity-format="align" type="button" role="menuitem"><span>Centrar texto</span></button><button data-activity-format="list" type="button" role="menuitem"><span>Lista con viñetas</span></button><button data-activity-format="numbered" type="button" role="menuitem"><span>Lista numerada</span></button><hr><button data-activity-format="clear" type="button" role="menuitem"><span>Limpiar formato</span></button></div></div>
+                <div class="activity-rich-menu"><button class="activity-menu-trigger" data-activity-menu="table" type="button" aria-expanded="false" aria-haspopup="menu">Tabla</button><div class="activity-menu-popover hidden" data-activity-menu-panel="table" role="menu"><button data-activity-format="table" type="button" role="menuitem"><span>Insertar tabla 2 × 2</span></button><button data-activity-format="table-row" type="button" role="menuitem"><span>Añadir fila debajo</span></button><button data-activity-format="table-column" type="button" role="menuitem"><span>Añadir columna a la derecha</span></button><hr><button class="danger" data-activity-format="table-delete" type="button" role="menuitem"><span>Eliminar tabla</span></button></div></div>
               </div>
               <div class="activity-rich-toolbar" role="toolbar" aria-label="Formato del contenido">
                 <select id="activity-text-size" aria-label="Tamaño de texto" title="Tamaño de texto"><option value="">12 pt</option><option value="small">10 pt</option><option value="large">16 pt</option><option value="xlarge">20 pt</option></select>
@@ -397,6 +402,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260730-9"></script>
+  <script src="app.js?v=20260730-10"></script>
 </body>
 </html>

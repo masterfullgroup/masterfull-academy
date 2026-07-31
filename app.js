@@ -46,6 +46,7 @@ let activeLessonCourseId = null;
 let activeLessonActivityId = null;
 let activeLessonTab = "description";
 let activityEditorRange = null;
+let activityEditorTableCell = null;
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -585,7 +586,26 @@ function bindStaticEvents() {
       rememberActivityEditorSelection();
       event.preventDefault();
     });
-    button.addEventListener("click", () => formatActivityDescription(button.dataset.activityFormat));
+    button.addEventListener("click", () => {
+      formatActivityDescription(button.dataset.activityFormat);
+      closeActivityMenus();
+    });
+  });
+  $$(".activity-menu-trigger").forEach(button => {
+    button.addEventListener("mousedown", rememberActivityEditorSelection);
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      toggleActivityMenu(button);
+    });
+  });
+  $$(".activity-menu-popover").forEach(menu => menu.addEventListener("click", event => event.stopPropagation()));
+  $('[data-activity-action="focus-editor"]').addEventListener("click", () => {
+    closeActivityMenus();
+    $("#activity-description-editor").focus();
+  });
+  document.addEventListener("click", closeActivityMenus);
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeActivityMenus();
   });
   $("#activity-text-size").addEventListener("change", event => {
     if (event.target.value) formatActivityDescription(`size-${event.target.value}`);
@@ -597,6 +617,9 @@ function bindStaticEvents() {
   });
   $("#activity-description-editor").addEventListener("input", syncActivityEditor);
   $("#activity-description-editor").addEventListener("paste", pastePlainActivityText);
+  $("#activity-description-editor").addEventListener("pointerdown", event => {
+    activityEditorTableCell = event.target.closest("td, th");
+  });
   document.addEventListener("selectionchange", rememberActivityEditorSelection);
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
@@ -1961,7 +1984,7 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   $("#activity-description-editor").innerHTML = renderActivityContent(activity?.description || "");
   syncActivityEditor();
   $(".activity-editor-shell").classList.remove("is-fullscreen");
-  $('[data-activity-format="fullscreen"]').setAttribute("aria-pressed", "false");
+  $$('[data-activity-format="fullscreen"]').forEach(button => button.setAttribute("aria-pressed", "false"));
   $("#activity-published").value = String(activity?.published !== false);
   $("#activity-completion-rule").value = activity?.completionRule || "manual";
   $("#activity-due-at").value = activity?.dueAt ? activity.dueAt.slice(0, 16) : "";
@@ -2137,12 +2160,58 @@ function restoreActivityEditorSelection() {
   selection.removeAllRanges();
   selection.addRange(activityEditorRange);
 }
+function activeActivityTableCell() {
+  const node = activityEditorRange?.commonAncestorContainer;
+  const element = node?.nodeType === 1 ? node : node?.parentElement;
+  return element?.closest?.("#activity-description-editor td, #activity-description-editor th")
+    || (activityEditorTableCell?.isConnected ? activityEditorTableCell : null);
+}
+function closeActivityMenus() {
+  $$(".activity-menu-trigger").forEach(trigger => trigger.setAttribute("aria-expanded", "false"));
+  $$(".activity-menu-popover").forEach(menu => menu.classList.add("hidden"));
+}
+function toggleActivityMenu(trigger) {
+  const menu = $(`[data-activity-menu-panel="${trigger.dataset.activityMenu}"]`);
+  const opening = menu.classList.contains("hidden");
+  closeActivityMenus();
+  if (!opening) return;
+  const rect = trigger.getBoundingClientRect();
+  menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - 244))}px`;
+  menu.style.top = `${Math.min(rect.bottom + 5, window.innerHeight - 300)}px`;
+  if (trigger.dataset.activityMenu === "table") {
+    const insideTable = Boolean(activeActivityTableCell());
+    $$('[data-activity-menu-panel="table"] [data-activity-format="table-row"], [data-activity-menu-panel="table"] [data-activity-format="table-column"], [data-activity-menu-panel="table"] [data-activity-format="table-delete"]').forEach(button => { button.disabled = !insideTable; });
+  }
+  menu.classList.remove("hidden");
+  trigger.setAttribute("aria-expanded", "true");
+}
+function editActiveActivityTable(command) {
+  const cell = activeActivityTableCell();
+  if (!cell) return;
+  const row = cell.closest("tr");
+  const table = cell.closest("table");
+  if (command === "table-row") {
+    const newRow = row.cloneNode(true);
+    [...newRow.cells].forEach(item => { item.innerHTML = "<br>"; });
+    row.after(newRow);
+  } else if (command === "table-column") {
+    const index = cell.cellIndex + 1;
+    [...table.rows].forEach(item => {
+      const newCell = document.createElement(item.parentElement?.tagName === "THEAD" ? "th" : "td");
+      newCell.innerHTML = "<br>";
+      item.insertBefore(newCell, item.cells[index] || null);
+    });
+  } else if (command === "table-delete") {
+    table.remove();
+    activityEditorTableCell = null;
+  }
+}
 function formatActivityDescription(command) {
   const editor = $("#activity-description-editor");
   if (command === "fullscreen") {
     const shell = $(".activity-editor-shell");
     const active = shell.classList.toggle("is-fullscreen");
-    $('[data-activity-format="fullscreen"]').setAttribute("aria-pressed", String(active));
+    $$('[data-activity-format="fullscreen"]').forEach(button => button.setAttribute("aria-pressed", String(active)));
     editor.focus();
     return;
   }
@@ -2156,6 +2225,7 @@ function formatActivityDescription(command) {
     code: ["formatBlock", "pre"], "size-small": ["fontSize", "2"], "size-large": ["fontSize", "4"], "size-xlarge": ["fontSize", "5"]
   };
   if (nativeCommands[command]) document.execCommand(nativeCommands[command][0], false, nativeCommands[command][1] || null);
+  else if (["table-row", "table-column", "table-delete"].includes(command)) editActiveActivityTable(command);
   else if (command === "link") {
     const url = requestActivityUrl("Pega la dirección del enlace");
     if (url) {

@@ -15,6 +15,11 @@ assert.match(htmlSource, /class="exam-editor-nav"/, "El editor debe separar deta
 assert.match(htmlSource, /module-content-editor-card/, "El contenido del módulo debe usar un editor estructurado");
 assert.match(htmlSource, /data-activity-format="bold"/, "El editor debe incluir herramientas de formato");
 assert.match(htmlSource, /activity-rich-menubar/, "El editor debe incluir una barra de menús completa");
+assert.match(htmlSource, /activity-menu-trigger/, "Los menús del editor deben ser controles desplegables");
+assert.match(htmlSource, /data-activity-menu-panel="insert"/, "El menú Insertar debe ofrecer acciones reales");
+assert.match(htmlSource, /data-activity-format="table-row"/, "El menú Tabla debe permitir añadir filas");
+assert.match(appSource, /toggleActivityMenu/, "Los menús superiores deben abrirse y cerrarse de forma funcional");
+assert.match(appSource, /editActiveActivityTable/, "Las acciones avanzadas de tabla deben modificar la tabla activa");
 assert.match(htmlSource, /data-activity-format="image"/, "El editor debe permitir insertar imágenes");
 assert.match(htmlSource, /data-activity-format="table"/, "El editor debe permitir insertar tablas");
 assert.match(htmlSource, /data-activity-format="fullscreen"/, "El editor debe ofrecer escritura en pantalla completa");
