@@ -5226,10 +5226,32 @@ body.student-course-open .student-course-content-head {
   background:#f6f7fa;
   box-shadow:0 26px 70px #17233c32;
 }
-.module-content-editor-card > .modal-close {
+#activity-modal {
+  z-index:120;
+}
+.module-content-editor-head > .modal-close {
+  position:absolute;
   top:18px;
   right:20px;
-  z-index:8;
+  z-index:9;
+  display:grid;
+  width:36px;
+  height:36px;
+  place-items:center;
+  color:#e7eaf5;
+  border:1px solid #ffffff1f;
+  border-radius:9px;
+  background:#ffffff0b;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+}
+.module-content-editor-head > .modal-close:hover,
+.module-content-editor-head > .modal-close:focus-visible {
+  color:#fff;
+  border-color:#ffffff4a;
+  outline:0;
+  background:#ffffff18;
 }
 .module-content-editor-head {
   position:sticky;
@@ -5667,31 +5689,48 @@ body.student-course-open .student-course-content-head {
 .module-content-editor-footer {
   position:sticky;
   bottom:0;
-  z-index:6;
+  z-index:8;
   display:flex;
-  min-height:72px;
+  min-height:64px;
   align-items:center;
-  justify-content:flex-end;
-  gap:9px;
+  justify-content:space-between;
+  gap:18px;
   margin:0 -28px;
-  padding:13px 28px;
+  padding:11px 28px;
   border-top:1px solid #d8dce7;
-  background:#fffffff4;
-  backdrop-filter:blur(10px);
+  background:#fff;
+  box-shadow:0 -8px 22px #1b29410d;
 }
 .module-content-editor-footer .error {
   flex:1;
   margin:0;
   text-align:left;
 }
+.module-content-editor-actions {
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  gap:9px;
+}
 .module-content-editor-footer .btn {
-  min-width:120px;
-  min-height:41px;
-  border-radius:7px;
+  min-width:116px;
+  min-height:39px;
+  border-radius:8px;
+  box-shadow:none;
+}
+.module-content-editor-footer .btn.secondary {
+  color:#344766;
+  border-color:#cfd7e3;
+  background:#fff;
+}
+.module-content-editor-footer .btn.secondary:hover {
+  border-color:#aeb9c9;
+  background:#f5f7fa;
 }
 .module-content-editor-footer .btn.primary {
   border-color:#5148bb;
   background:#5148bb;
+  box-shadow:0 6px 14px #5148bb22;
 }
 
 /* Serious module hierarchy: no decorative green side stripe */
@@ -5737,6 +5776,7 @@ body.student-course-open .student-course-content-head {
     padding:12px 14px;
   }
   .module-content-editor-footer .error { display:none; }
+  .module-content-editor-actions { width:100%; }
   .module-content-editor-footer .btn { min-width:0; flex:1; }
 }
 

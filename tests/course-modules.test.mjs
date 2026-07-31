@@ -64,6 +64,12 @@ assert.match(appSource, /class="\$\{deleteClass\}"/, "Cada tarjeta debe permitir
 assert.doesNotMatch(cssSource, /\.canvas-dashboard-cover::after/, "Las tarjetas del tablero no deben incluir adornos circulares");
 assert.doesNotMatch(cssSource, /\.canvas-course-cover > button::after/, "Las demás tarjetas de curso tampoco deben incluir adornos circulares");
 assert.match(cssSource, /\.app-shell-mode \.user-menu\s*\{[\s\S]*?border-radius:0;[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/, "La información de cuenta debe integrarse sin otra tarjeta");
+assert.match(appSource, /modernIcon\(isStudentPreview \? "edit" : "eye"\)/, "La vista del alumno debe usar un icono de previsualización profesional");
+assert.match(appSource, /function openActivityModal[\s\S]*?closeRowActionMenus\(\);[\s\S]*?closeActivityMenus\(\);/, "El editor debe cerrar los menús anteriores antes de abrirse");
+assert.match(cssSource, /#activity-modal\s*\{\s*z-index:120;/, "El editor debe quedar por encima de las tarjetas del módulo");
+assert.match(htmlSource, /module-content-editor-head[\s\S]*?class="modal-close"[\s\S]*?<\/header>/, "El cierre debe permanecer dentro de la cabecera fija");
+assert.match(htmlSource, /module-content-editor-actions/, "Las acciones del editor deben estar agrupadas");
+assert.match(cssSource, /\.module-content-editor-footer\s*\{[\s\S]*?position:sticky;[\s\S]*?background:#fff;/, "La barra de acciones debe permanecer visible y usar una superficie limpia");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260731-01">
+  <link rel="stylesheet" href="styles.css?v=20260731-02">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -224,8 +224,8 @@
   </div>
 
   <div id="activity-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="activity-modal-title">
-    <div class="modal-card panel large module-content-editor-card"><button class="modal-close" data-close="activity-modal" type="button" aria-label="Cerrar">×</button>
-      <header class="module-content-editor-head"><div><span class="eyebrow">CONTENIDO DEL MÓDULO</span><h2 id="activity-modal-title">Agregar contenido</h2><p id="activity-editor-context">Selecciona qué deseas incorporar y completa su información.</p></div><span class="module-content-step">Nuevo elemento</span></header>
+    <div class="modal-card panel large module-content-editor-card">
+      <header class="module-content-editor-head"><div><span class="eyebrow">CONTENIDO DEL MÓDULO</span><h2 id="activity-modal-title">Agregar contenido</h2><p id="activity-editor-context">Selecciona qué deseas incorporar y completa su información.</p></div><span class="module-content-step">Nuevo elemento</span><button class="modal-close" data-close="activity-modal" type="button" aria-label="Cerrar editor">×</button></header>
       <form id="activity-form"><input type="hidden" id="activity-course-id"><input type="hidden" id="activity-module-id"><input type="hidden" id="activity-id">
         <section class="module-content-block">
           <div class="module-content-block-title"><span>1</span><div><strong>Tipo y ubicación</strong><small>Define qué elemento se agregará y en qué módulo aparecerá.</small></div></div>
@@ -300,7 +300,7 @@
             <label>Intentos (0 = sin límite)<input id="activity-attempts" type="number" min="0" max="100" value="0"></label>
           </div>
         </details>
-        <footer class="module-content-editor-footer"><p id="activity-error" class="error" aria-live="polite"></p><button class="btn secondary" data-close="activity-modal" type="button">Cancelar</button><button class="btn primary" type="submit">Agregar al módulo</button></footer>
+        <footer class="module-content-editor-footer"><p id="activity-error" class="error" aria-live="polite"></p><div class="module-content-editor-actions"><button class="btn secondary" data-close="activity-modal" type="button">Cancelar</button><button class="btn primary" type="submit">Agregar al módulo</button></div></footer>
       </form>
     </div>
   </div>
@@ -402,6 +402,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260731-01"></script>
+  <script src="app.js?v=20260731-02"></script>
 </body>
 </html>

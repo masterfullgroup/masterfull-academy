@@ -153,6 +153,8 @@ function modernIcon(name) {
     ,folder: `<path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>`
     ,library: `<path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7M8 11h7"/>`
     ,trash: `<path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/>`
+    ,eye: `<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.75"/>`
+    ,edit: `<path d="M4 20h4l11-11a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>`
     ,settings: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/>`
   };
   const aliases = { "▦": "courses", "▤": "exams", "✓": "results", "◇": "course" };
@@ -949,7 +951,7 @@ function renderTeacherCourseWorkspace(course, exams) {
   return `<div class="course-workspace-page">
     <header class="course-context-bar">
       <div class="course-context-title"><button class="course-workspace-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Cursos</button><span class="course-context-divider" aria-hidden="true"></span><h1>${esc(course.name)}</h1></div>
-      <div class="course-context-actions"><span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Borrador" : "Publicado"}</span><button class="btn secondary student-preview-toggle ${isStudentPreview ? "active" : ""}" id="toggle-student-preview" type="button">${modernIcon(isStudentPreview ? "edit" : "profile")} ${isStudentPreview ? "Volver a editar" : "Vista del alumno"}</button></div>
+      <div class="course-context-actions"><span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Borrador" : "Publicado"}</span><button class="btn secondary student-preview-toggle ${isStudentPreview ? "active" : ""}" id="toggle-student-preview" type="button">${modernIcon(isStudentPreview ? "edit" : "eye")} ${isStudentPreview ? "Volver a editar" : "Vista del alumno"}</button></div>
     </header>
     <div class="course-workspace-layout ${isStudentPreview ? "student-preview-active" : ""}">
       <aside class="course-workspace-sidebar">
@@ -1950,6 +1952,8 @@ function toggleModuleUnlockDetail() {
   $("#module-unlock-detail").required = needsDetail;
 }
 function openModuleModal(courseId, moduleId = "") {
+  closeRowActionMenus();
+  closeActivityMenus();
   const module = normalizeModules(findCourse(courseId)?.modules).find(item => item.id === moduleId);
   $("#module-modal-title").textContent = module ? "Editar módulo" : "Crear módulo";
   $("#module-course-id").value = courseId;
@@ -1978,6 +1982,8 @@ async function saveModule(event) {
   if (saved) closeModal("module-modal");
 }
 function openActivityModal(courseId, moduleId, activityId = "") {
+  closeRowActionMenus();
+  closeActivityMenus();
   const modules = normalizeModules(findCourse(courseId)?.modules);
   const module = modules.find(item => item.id === moduleId);
   const activity = module?.activities.find(item => item.id === activityId);
