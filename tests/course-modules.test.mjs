@@ -57,6 +57,13 @@ assert.doesNotMatch(appSource, /shell-nav-label/, "La barra lateral no debe repe
 assert.doesNotMatch(appSource, /courses-tab-count/, "La navegación no debe repetir el total de cursos");
 assert.match(cssSource, /\.app-shell-mode \.brand\s*\{[\s\S]*?align-items:center;[\s\S]*?text-align:center;/, "La marca y su subtítulo deben quedar centrados");
 assert.match(cssSource, /\.app-shell-mode #session-area\s*\{[\s\S]*?flex:0 0 auto;/, "La cuenta debe quedar junto a la navegación sin un vacío artificial");
+assert.doesNotMatch(appSource, /<nav class="shell-teacher-nav"/, "La barra docente no debe repetir la única sección Cursos");
+assert.doesNotMatch(appSource, /canvas-course-meta/, "Las tarjetas del tablero no deben repetir métricas visibles dentro del curso");
+assert.match(appSource, /canvas-dashboard-actions/, "Cada curso debe mostrar acciones directas");
+assert.match(appSource, /class="\$\{deleteClass\}"/, "Cada tarjeta debe permitir eliminar el curso");
+assert.doesNotMatch(cssSource, /\.canvas-dashboard-cover::after/, "Las tarjetas del tablero no deben incluir adornos circulares");
+assert.doesNotMatch(cssSource, /\.canvas-course-cover > button::after/, "Las demás tarjetas de curso tampoco deben incluir adornos circulares");
+assert.match(cssSource, /\.app-shell-mode \.user-menu\s*\{[\s\S]*?border-radius:0;[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/, "La información de cuenta debe integrarse sin otra tarjeta");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

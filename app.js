@@ -152,6 +152,7 @@ function modernIcon(name) {
     ,users: `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>`
     ,folder: `<path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>`
     ,library: `<path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7M8 11h7"/>`
+    ,trash: `<path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/>`
     ,settings: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/>`
   };
   const aliases = { "▦": "courses", "▤": "exams", "✓": "results", "◇": "course" };
@@ -503,11 +504,8 @@ function renderApp() {
     show("auth-view");
     return;
   }
-  const activeTeacherTab = $("#teacher-view .tab-content.active")?.id || "teacher-home";
   const activeStudentTab = $("#student-view .tab-content.active")?.id || "student-courses";
-  const teacherNavigation = isTeacher ? `<nav class="shell-teacher-nav" aria-label="Secciones del profesor">
-    <button class="shell-nav-item ${activeTeacherTab === "teacher-home" || activeTeacherTab === "teacher-courses" ? "active" : ""}" data-teacher-tab="teacher-home" type="button">${menuIcon("courses")}<span>Cursos</span></button>
-  </nav>` : "";
+  const teacherNavigation = "";
   const studentNavigation = !isTeacher ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
     <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
     <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
@@ -819,21 +817,17 @@ function getTeacherExams() {
 }
 function renderTeacherOverview() {
   const allCourses = getTeacherCourses();
-  const allExams = getTeacherExams();
   const courseCards = allCourses.length ? allCourses.map(course => {
-    const examCount = allExams.filter(exam => exam.courseId === course.id).length;
     const isDraft = drafts.courses.some(item => item.id === course.id);
-    const modules = normalizeModules(course.modules);
-    const activities = modules.reduce((total, module) => total + module.activities.length, 0);
+    const deleteClass = isDraft ? "delete-course" : "delete-published-course";
     return `<article class="canvas-dashboard-card">
       <div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${isDraft ? "NO PUBLICADO" : "PUBLICADO"}</small></div>
       <div class="canvas-dashboard-card-body">
         <button class="manage-course-content canvas-course-title" data-course-id="${esc(course.id)}" type="button">${esc(course.name)}</button>
         <p>${esc(course.description || "Curso listo para organizar contenido.")}</p>
-        <div class="canvas-course-meta" aria-label="Contenido del curso">
-          <span title="Módulos">${modernIcon("page")}<b>${modules.length}</b></span>
-          <span title="Recursos">${modernIcon("folder")}<b>${activities}</b></span>
-          <span title="Evaluaciones">${modernIcon("quiz")}<b>${examCount}</b></span>
+        <div class="canvas-dashboard-actions">
+          <button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button>
+          <button class="${deleteClass}" data-id="${esc(course.id)}" type="button" aria-label="Eliminar ${esc(course.name)}">${modernIcon("trash")}<span>Eliminar</span></button>
         </div>
       </div>
     </article>`;

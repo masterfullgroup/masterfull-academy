@@ -3055,17 +3055,21 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
 .canvas-dashboard-card:nth-child(4n+2) .canvas-dashboard-cover { background:#2b5daf; }
 .canvas-dashboard-card:nth-child(4n+3) .canvas-dashboard-cover { background:#148575; }
 .canvas-dashboard-card:nth-child(4n) .canvas-dashboard-cover { background:#7b4f9d; }
-.canvas-dashboard-cover::after { content:""; position:absolute; right:-44px; top:-72px; width:150px; height:150px; border:26px solid #ffffff12; border-radius:50%; }
 .canvas-dashboard-cover > span { position:relative; z-index:1; display:grid; width:44px; height:44px; place-items:center; border:1px solid #ffffff55; border-radius:4px; background:#ffffff14; font-size:22px; font-weight:600; }
 .canvas-dashboard-cover small { position:relative; z-index:1; padding:4px 7px; border-radius:3px; background:#0000002e; font-size:8px; font-weight:700; letter-spacing:.04em; }
 .canvas-dashboard-card-body { padding:15px 17px 13px; }
 .canvas-course-title { display:block; width:100%; overflow:hidden; padding:0; color:#0e7490; border:0; background:transparent; font-size:15px; font-weight:600; text-align:left; text-overflow:ellipsis; white-space:nowrap; }
 .canvas-course-title:hover,.canvas-course-title:focus-visible { color:#075985; text-decoration:underline; }
 .canvas-dashboard-card-body > p { min-height:34px; margin:6px 0 13px; overflow:hidden; color:#687786; font-size:11px; line-height:1.45; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
-.canvas-course-meta { display:flex; align-items:center; gap:18px; padding-top:11px; color:#607d8b; border-top:1px solid #e5e7eb; }
-.canvas-course-meta span { display:inline-flex; align-items:center; gap:5px; }
-.canvas-course-meta .modern-icon { width:16px; height:16px; }
-.canvas-course-meta b { font-size:10px; font-weight:600; }
+.canvas-dashboard-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:13px; padding-top:12px; border-top:1px solid #e5e7eb; }
+.canvas-dashboard-actions button { display:inline-flex; min-height:34px; align-items:center; justify-content:center; gap:6px; padding:7px 10px; border:0; border-radius:7px; background:transparent; font-size:11px; font-weight:650; cursor:pointer; }
+.canvas-dashboard-actions .manage-course-content { color:#0b7185; background:#e7f7fa; }
+.canvas-dashboard-actions .manage-course-content:hover { color:#075568; background:#d8f0f4; }
+.canvas-dashboard-actions .delete-course,
+.canvas-dashboard-actions .delete-published-course { color:#b42335; }
+.canvas-dashboard-actions .delete-course:hover,
+.canvas-dashboard-actions .delete-published-course:hover { background:#fff1f2; }
+.canvas-dashboard-actions .modern-icon { width:15px; height:15px; }
 .canvas-dashboard-empty { grid-column:1 / -1; display:grid; min-height:310px; place-content:center; justify-items:center; gap:9px; color:#64748b; border:1px dashed #b9c3cc; border-radius:4px; background:#fff; text-align:center; }
 .canvas-dashboard-empty .modern-icon { width:38px; height:38px; color:#0e7490; }
 .canvas-dashboard-empty strong { color:#27384a; font-size:17px; }
@@ -3185,7 +3189,6 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
 .canvas-course-card.tone-4 .canvas-course-cover { background:linear-gradient(135deg,#a65f27,#d18b31); }
 .canvas-course-card.draft .canvas-course-cover { filter:saturate(.78); }
 .canvas-course-cover > button { position:relative; display:grid; width:100%; height:100%; place-items:center; overflow:hidden; color:#fff; border:0; border-radius:inherit; background:transparent; cursor:pointer; }
-.canvas-course-cover > button::after { content:""; position:absolute; width:155px; height:155px; right:-62px; top:-92px; border:27px solid #ffffff13; border-radius:50%; }
 .canvas-course-cover > button > span { display:grid; width:49px; height:49px; place-items:center; border:1px solid #ffffff4b; border-radius:13px; background:#ffffff18; font-size:22px; font-weight:600; backdrop-filter:blur(4px); }
 .canvas-course-menu { position:absolute; z-index:8; top:9px; right:9px; }
 .canvas-course-menu summary { display:grid; width:31px; height:31px; place-items:center; color:#fff; border:1px solid #ffffff40; border-radius:8px; background:#09263c4d; font-size:20px; line-height:1; list-style:none; cursor:pointer; backdrop-filter:blur(4px); }
@@ -6381,11 +6384,12 @@ body.teacher-course-open .course-workspace-page {
   }
   .app-shell-mode .user-menu {
     margin-top:18px;
-    padding:14px;
-    border:1px solid #ffffff12;
-    border-radius:12px;
-    background:#293c50;
-    box-shadow:0 12px 28px #0b172527;
+    padding:18px 2px 0;
+    border:0;
+    border-top:1px solid #ffffff18;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
   }
   .app-shell-mode .user-actions {
     padding-top:9px;
