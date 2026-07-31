@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260730-7">
+  <link rel="stylesheet" href="styles.css?v=20260730-8">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -246,16 +246,39 @@
           <label id="activity-url-field" class="hidden">Enlace o ruta del recurso<input id="activity-url" maxlength="500" placeholder="https://… o ./materiales/archivo.pdf"></label>
           <div id="activity-description-field" class="activity-rich-field">
             <label for="activity-description">Contenido e indicaciones</label>
-            <div class="activity-rich-toolbar" role="toolbar" aria-label="Formato del contenido">
-              <button data-activity-format="bold" type="button" aria-label="Negrita" title="Negrita"><strong>B</strong></button>
-              <button data-activity-format="italic" type="button" aria-label="Cursiva" title="Cursiva"><em>I</em></button>
-              <button data-activity-format="heading" type="button" aria-label="Título" title="Título">T²</button>
-              <span aria-hidden="true"></span>
-              <button data-activity-format="list" type="button" aria-label="Lista con viñetas" title="Lista con viñetas">• Lista</button>
-              <button data-activity-format="numbered" type="button" aria-label="Lista numerada" title="Lista numerada">1. Lista</button>
-              <button data-activity-format="link" type="button" aria-label="Insertar enlace" title="Insertar enlace">↗ Enlace</button>
+            <div class="activity-editor-shell">
+              <div class="activity-rich-menubar" role="menubar" aria-label="Menú del editor">
+                <span role="menuitem">Editar</span><span role="menuitem">Ver</span><span role="menuitem">Insertar</span><span role="menuitem">Formato</span><span role="menuitem">Herramientas</span><span role="menuitem">Tabla</span>
+              </div>
+              <div class="activity-rich-toolbar" role="toolbar" aria-label="Formato del contenido">
+                <select id="activity-text-size" aria-label="Tamaño de texto" title="Tamaño de texto"><option value="">12 pt</option><option value="small">10 pt</option><option value="large">16 pt</option><option value="xlarge">20 pt</option></select>
+                <select id="activity-block-style" aria-label="Estilo de párrafo" title="Estilo de párrafo"><option value="">Párrafo</option><option value="heading">Título</option><option value="subheading">Subtítulo</option><option value="quote">Cita</option></select>
+                <span aria-hidden="true"></span>
+                <button data-activity-format="bold" type="button" aria-label="Negrita" title="Negrita"><strong>B</strong></button>
+                <button data-activity-format="italic" type="button" aria-label="Cursiva" title="Cursiva"><em>I</em></button>
+                <button data-activity-format="underline" type="button" aria-label="Subrayado" title="Subrayado"><u>U</u></button>
+                <button data-activity-format="textcolor" type="button" aria-label="Color de texto" title="Color de texto"><span class="activity-text-color">A</span></button>
+                <button data-activity-format="clear" type="button" aria-label="Quitar formato" title="Quitar formato">⌫</button>
+                <button data-activity-format="superscript" type="button" aria-label="Superíndice" title="Superíndice">T²</button>
+                <span aria-hidden="true"></span>
+                <button data-activity-format="link" type="button" aria-label="Insertar enlace" title="Insertar enlace">🔗</button>
+                <button data-activity-format="image" type="button" aria-label="Insertar imagen" title="Insertar imagen">▧</button>
+                <button data-activity-format="video" type="button" aria-label="Insertar video" title="Insertar video">▶</button>
+                <button data-activity-format="file" type="button" aria-label="Insertar archivo" title="Insertar archivo">▤</button>
+                <span aria-hidden="true"></span>
+                <button data-activity-format="undo" type="button" aria-label="Deshacer" title="Deshacer">↶</button>
+                <button data-activity-format="redo" type="button" aria-label="Rehacer" title="Rehacer">↷</button>
+                <button data-activity-format="align" type="button" aria-label="Centrar texto" title="Centrar texto">≡</button>
+                <button data-activity-format="list" type="button" aria-label="Lista con viñetas" title="Lista con viñetas">•☰</button>
+                <button data-activity-format="numbered" type="button" aria-label="Lista numerada" title="Lista numerada">1☰</button>
+                <button data-activity-format="table" type="button" aria-label="Insertar tabla" title="Insertar tabla">▦</button>
+              </div>
+              <textarea id="activity-description" rows="10" maxlength="5000" placeholder="Escribe aquí el contenido, las instrucciones o el contexto para el alumno…"></textarea>
+              <footer class="activity-rich-status">
+                <span>Párrafo</span>
+                <div><span id="activity-word-count">0 palabras</span><button data-activity-format="code" type="button" aria-label="Insertar bloque de código" title="Código">&lt;/&gt;</button><button data-activity-format="fullscreen" type="button" aria-label="Pantalla completa" aria-pressed="false" title="Pantalla completa">⛶</button></div>
+              </footer>
             </div>
-            <textarea id="activity-description" rows="8" maxlength="5000" placeholder="Escribe aquí el contenido, las instrucciones o el contexto para el alumno…"></textarea>
           </div>
         </section>
         <label id="activity-exam-field" class="hidden">Evaluación vinculada<select id="activity-exam-id"><option value="">Selecciona una evaluación</option></select><small>La evaluación se mantiene como una sola entidad y esta fila solo crea su ubicación dentro del módulo.</small></label>
@@ -373,6 +396,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260730-7"></script>
+  <script src="app.js?v=20260730-8"></script>
 </body>
 </html>

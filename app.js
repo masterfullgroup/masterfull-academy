@@ -580,6 +580,15 @@ function bindStaticEvents() {
   $("#module-unlock-rule").addEventListener("change", toggleModuleUnlockDetail);
   $("#activity-type").addEventListener("change", toggleActivityFields);
   $$("[data-activity-format]").forEach(button => button.addEventListener("click", () => formatActivityDescription(button.dataset.activityFormat)));
+  $("#activity-text-size").addEventListener("change", event => {
+    if (event.target.value) formatActivityDescription(`size-${event.target.value}`);
+    event.target.value = "";
+  });
+  $("#activity-block-style").addEventListener("change", event => {
+    if (event.target.value) formatActivityDescription(event.target.value);
+    event.target.value = "";
+  });
+  $("#activity-description").addEventListener("input", updateActivityEditorStats);
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
@@ -1932,6 +1941,9 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   $("#activity-type").value = activity?.type || "lesson";
   $("#activity-url").value = activity?.url || "";
   $("#activity-description").value = activity?.description || "";
+  $(".activity-editor-shell").classList.remove("is-fullscreen");
+  $('[data-activity-format="fullscreen"]').setAttribute("aria-pressed", "false");
+  updateActivityEditorStats();
   $("#activity-published").value = String(activity?.published !== false);
   $("#activity-completion-rule").value = activity?.completionRule || "manual";
   $("#activity-due-at").value = activity?.dueAt ? activity.dueAt.slice(0, 16) : "";
@@ -1979,19 +1991,53 @@ function toggleActivityFields() {
 }
 function formatActivityDescription(command) {
   const field = $("#activity-description");
+  if (command === "fullscreen") {
+    const shell = $(".activity-editor-shell");
+    const active = shell.classList.toggle("is-fullscreen");
+    $('[data-activity-format="fullscreen"]').setAttribute("aria-pressed", String(active));
+    field.focus();
+    return;
+  }
+  if (["undo", "redo"].includes(command)) {
+    field.focus();
+    document.execCommand(command);
+    updateActivityEditorStats();
+    return;
+  }
   const start = field.selectionStart;
   const end = field.selectionEnd;
   const selected = field.value.slice(start, end);
   const replacements = {
     bold: `**${selected || "texto destacado"}**`,
     italic: `_${selected || "texto en cursiva"}_`,
+    underline: `<u>${selected || "texto subrayado"}</u>`,
+    textcolor: `<span style="color:#334ea2">${selected || "texto con color"}</span>`,
+    superscript: `<sup>${selected || "texto"}</sup>`,
     heading: `## ${selected || "Título de sección"}`,
+    subheading: `### ${selected || "Subtítulo de sección"}`,
+    quote: (selected || "Texto de la cita").split("\n").map(line => `> ${line.replace(/^>\s*/, "")}`).join("\n"),
     link: `[${selected || "texto del enlace"}](https://)`,
+    image: `![${selected || "Descripción de la imagen"}](https://)`,
+    video: `[▶ ${selected || "Ver video"}](https://)`,
+    file: `[▤ ${selected || "Descargar archivo"}](https://)`,
+    align: `<div style="text-align:center">${selected || "Texto centrado"}</div>`,
     list: (selected || "Elemento de la lista").split("\n").map(line => `- ${line.replace(/^[-*]\s*/, "")}`).join("\n"),
-    numbered: (selected || "Elemento de la lista").split("\n").map((line, index) => `${index + 1}. ${line.replace(/^\d+\.\s*/, "")}`).join("\n")
+    numbered: (selected || "Elemento de la lista").split("\n").map((line, index) => `${index + 1}. ${line.replace(/^\d+\.\s*/, "")}`).join("\n"),
+    table: `| Encabezado 1 | Encabezado 2 |\n| --- | --- |\n| Contenido | Contenido |`,
+    code: `\`\`\`\n${selected || "Escribe el código aquí"}\n\`\`\``,
+    "size-small": `<small>${selected || "texto pequeño"}</small>`,
+    "size-large": `<span style="font-size:1.25em">${selected || "texto grande"}</span>`,
+    "size-xlarge": `<span style="font-size:1.5em">${selected || "texto destacado"}</span>`,
+    clear: selected.replace(/(\*\*|__|~~|`|<\/?u>|<\/?sup>|<\/?small>|<\/?span[^>]*>)/g, "")
   };
   field.setRangeText(replacements[command] || selected, start, end, "select");
   field.focus();
+  updateActivityEditorStats();
+}
+function updateActivityEditorStats() {
+  const value = $("#activity-description").value.trim();
+  const words = value ? value.split(/\s+/).length : 0;
+  $("#activity-word-count").textContent = `${words} ${words === 1 ? "palabra" : "palabras"}`;
 }
 async function saveActivity(event) {
   event.preventDefault();
