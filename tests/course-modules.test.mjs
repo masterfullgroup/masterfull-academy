@@ -70,6 +70,8 @@ assert.match(cssSource, /#activity-modal\s*\{\s*z-index:120;/, "El editor debe q
 assert.match(htmlSource, /module-content-editor-head[\s\S]*?class="modal-close"[\s\S]*?<\/header>/, "El cierre debe permanecer dentro de la cabecera fija");
 assert.match(htmlSource, /module-content-editor-actions/, "Las acciones del editor deben estar agrupadas");
 assert.match(cssSource, /\.module-content-editor-footer\s*\{[\s\S]*?position:sticky;[\s\S]*?background:#fff;/, "La barra de acciones debe permanecer visible y usar una superficie limpia");
+assert.doesNotMatch(cssSource, /\.app-shell-mode footer\s*\{/, "El pie principal no debe desplazar las barras internas del editor");
+assert.match(cssSource, /\.app-shell-mode > footer\s*\{\s*margin-left:/, "El desplazamiento lateral debe limitarse al pie principal");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
