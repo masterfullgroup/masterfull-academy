@@ -6322,3 +6322,72 @@ body.teacher-course-open .course-workspace-page {
     justify-content:center;
   }
 }
+
+/* Barra lateral compacta: jerarquía clara, sin contexto repetido ni vacíos artificiales. */
+.app-shell-mode .shell-nav-item {
+  grid-template-columns:22px minmax(0,1fr);
+  column-gap:10px;
+}
+.app-shell-mode .shell-nav-item .menu-icon {
+  width:18px;
+  height:18px;
+  color:#aebed0;
+}
+.app-shell-mode .shell-nav-item > span {
+  color:inherit;
+  font-size:12.5px;
+  text-align:left;
+}
+.app-shell-mode .shell-nav-item.active .menu-icon {
+  color:#fff;
+}
+
+@media (min-width:901px) {
+  .app-shell-mode .brand {
+    display:flex;
+    width:100%;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    padding:4px 4px 17px;
+    border-bottom:1px solid #ffffff18;
+    text-align:center;
+  }
+  .app-shell-mode .brand > span:last-child {
+    width:100%;
+    font-size:16px;
+    line-height:1.25;
+    text-align:center;
+  }
+  .app-shell-mode .brand::after {
+    position:static;
+    display:block;
+    color:#a9b8c8;
+    font-size:10px;
+    line-height:1.2;
+    letter-spacing:.025em;
+  }
+  .app-shell-mode #session-area {
+    flex:0 0 auto;
+    overflow:visible;
+  }
+  .app-shell-mode .shell-teacher-nav,
+  .app-shell-mode .shell-student-nav {
+    min-height:0;
+    flex:0 0 auto;
+    margin:16px 0 0;
+    overflow:visible;
+  }
+  .app-shell-mode .user-menu {
+    margin-top:18px;
+    padding:14px;
+    border:1px solid #ffffff12;
+    border-radius:12px;
+    background:#293c50;
+    box-shadow:0 12px 28px #0b172527;
+  }
+  .app-shell-mode .user-actions {
+    padding-top:9px;
+  }
+}

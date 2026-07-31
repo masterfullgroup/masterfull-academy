@@ -506,11 +506,9 @@ function renderApp() {
   const activeTeacherTab = $("#teacher-view .tab-content.active")?.id || "teacher-home";
   const activeStudentTab = $("#student-view .tab-content.active")?.id || "student-courses";
   const teacherNavigation = isTeacher ? `<nav class="shell-teacher-nav" aria-label="Secciones del profesor">
-    <div class="shell-nav-label"><strong>Espacio docente</strong><small>Gestión académica</small></div>
-    <button class="shell-nav-item ${activeTeacherTab === "teacher-home" || activeTeacherTab === "teacher-courses" ? "active" : ""}" data-teacher-tab="teacher-home" type="button"><span aria-hidden="true">▣</span>Cursos <b id="courses-tab-count">0</b></button>
+    <button class="shell-nav-item ${activeTeacherTab === "teacher-home" || activeTeacherTab === "teacher-courses" ? "active" : ""}" data-teacher-tab="teacher-home" type="button">${menuIcon("courses")}<span>Cursos</span></button>
   </nav>` : "";
   const studentNavigation = !isTeacher ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
-    <div class="shell-nav-label"><strong>Mi aprendizaje</strong><small>Espacio del alumno</small></div>
     <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
     <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
   </nav>` : "";
@@ -803,7 +801,6 @@ function renderTeacher() {
   $("#teacher-welcome").textContent = "Tablero";
   const courses = getTeacherCourses();
   const exams = getTeacherExams();
-  $("#courses-tab-count").textContent = publishedCourses.length + drafts.courses.length;
   if ($("#exams-tab-count")) $("#exams-tab-count").textContent = exams.length;
   if ($("#grades-tab-count")) $("#grades-tab-count").textContent = results.length;
   renderTeacherOverview();

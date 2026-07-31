@@ -53,6 +53,10 @@ assert.match(appSource, /menu\.classList\.add\("is-open"\)/, "El menú abierto d
 assert.match(cssSource, /\.row-action-menu\.is-open\s*\{\s*z-index:60/, "El menú abierto debe tener prioridad visual");
 assert.match(cssSource, /\.row-action-popover[\s\S]*?background:#fff;[\s\S]*?isolation:isolate;[\s\S]*?opacity:1;/, "El menú debe usar una superficie completamente opaca");
 assert.match(cssSource, /\.canvas-module-card\.has-open-actions \.canvas-module-items\s*\{\s*overflow:visible;/, "La lista no debe recortar el menú de acciones abierto");
+assert.doesNotMatch(appSource, /shell-nav-label/, "La barra lateral no debe repetir el contexto educativo");
+assert.doesNotMatch(appSource, /courses-tab-count/, "La navegación no debe repetir el total de cursos");
+assert.match(cssSource, /\.app-shell-mode \.brand\s*\{[\s\S]*?align-items:center;[\s\S]*?text-align:center;/, "La marca y su subtítulo deben quedar centrados");
+assert.match(cssSource, /\.app-shell-mode #session-area\s*\{[\s\S]*?flex:0 0 auto;/, "La cuenta debe quedar junto a la navegación sin un vacío artificial");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
