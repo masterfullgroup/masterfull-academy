@@ -1537,10 +1537,6 @@ function renderLesson() {
   }
   const activity = activities[activityIndex];
   const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
-  const allActivities = normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(item => item.published && item.type !== "heading" && item.completionRule !== "none"));
-  const myGrades = results.filter(grade => grade.studentId === currentUser.id);
-  const completedCount = allActivities.filter(item => activityCompleted(item, progress, myGrades)).length;
-  const percent = allActivities.length ? Math.round(completedCount * 100 / allActivities.length) : 0;
   $("#lesson-sidebar-course").textContent = course.name;
   $("#lesson-title").textContent = activity.title;
   $("#lesson-type").textContent = `${activity.moduleTitle} · ${activityTypeLabel(activity.type)}`;
@@ -1548,8 +1544,6 @@ function renderLesson() {
   const mediaMarkup = lessonMediaMarkup(activity);
   $("#lesson-media").innerHTML = mediaMarkup;
   $("#lesson-media").classList.toggle("hidden", !mediaMarkup);
-  $("#lesson-progress-label").textContent = `${percent}% completado`;
-  $("#lesson-progress-bar").style.width = `${percent}%`;
   const completed = Boolean(progress.completed?.[activity.id]);
   $("#lesson-complete").textContent = completed ? "✓ Actividad completada" : "Marcar como completado";
   $("#lesson-complete").classList.toggle("completed-button", completed);

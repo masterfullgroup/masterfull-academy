@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260731-09">
+  <link rel="stylesheet" href="styles.css?v=20260731-10">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -140,7 +140,7 @@
           <div id="lesson-module-tree" class="lesson-module-tree"></div>
         </aside>
         <div class="lesson-main">
-          <header class="lesson-topbar"><button id="lesson-menu-toggle" class="btn secondary" type="button" aria-expanded="false">☰ Contenido</button><button id="lesson-return" class="lesson-return" type="button">← Volver al curso</button><div class="lesson-progress-compact"><span id="lesson-progress-label">0% completado</span><div class="course-progress-track"><span id="lesson-progress-bar"></span></div></div></header>
+          <header class="lesson-topbar"><button id="lesson-menu-toggle" class="lesson-menu-toggle" type="button" aria-expanded="false" aria-controls="lesson-sidebar"><svg class="lesson-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Ver módulos</span></button><button id="lesson-return" class="lesson-return" type="button">← Volver al curso</button></header>
           <article class="lesson-content">
             <div id="lesson-media" class="lesson-media"></div>
             <header class="lesson-title-row"><div><span id="lesson-type" class="eyebrow"></span><h1 id="lesson-title"></h1></div><button id="lesson-complete" class="btn primary" type="button">Marcar como completado</button></header>
@@ -398,6 +398,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260731-09"></script>
+  <script src="app.js?v=20260731-10"></script>
 </body>
 </html>

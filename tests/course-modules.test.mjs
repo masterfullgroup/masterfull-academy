@@ -101,6 +101,12 @@ assert.match(appSource, /else if \(activeLessonCourseId && activeLessonActivityI
 assert.match(appSource, /saveActiveLesson\(\);[\s\S]*?renderLesson\(\);/, "Abrir una actividad debe guardar su estado antes de renderizarla");
 assert.match(cssSource, /\.lesson-mode > \.topbar,[\s\S]*?display:none !important;/, "La lectura debe ocultar la cabecera global que distrae");
 assert.match(cssSource, /\.lesson-reading-panel\s*\{[\s\S]*?background:#fff;/, "El contenido debe presentarse en una superficie limpia");
+assert.doesNotMatch(htmlSource, /lesson-progress-compact|lesson-progress-label|lesson-progress-bar/, "La cabecera de la lección no debe repetir el progreso");
+assert.doesNotMatch(appSource, /#lesson-progress-label|#lesson-progress-bar/, "La lección no debe mantener lógica para un progreso eliminado");
+assert.match(cssSource, /\.lesson-reading-panel\s*\{[\s\S]*?min-height:0;/, "La lectura debe ajustarse a la altura real del contenido");
+assert.match(cssSource, /\.lesson-reading-panel > \.lesson-rich-content\s*\{[\s\S]*?text-align:justify;/, "El texto de la lección debe mostrarse justificado");
+assert.match(htmlSource, /id="lesson-menu-toggle"[\s\S]*?lesson-menu-icon[\s\S]*?Ver módulos/, "El control móvil debe identificarse claramente como acceso a los módulos");
+assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, "El botón de módulos debe tener una apariencia moderna y reconocible");
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(activity =>/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
