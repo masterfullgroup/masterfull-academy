@@ -42,6 +42,7 @@ let activeTeacherCourseId = null;
 let activeTeacherCourseSection = "overview";
 let activeTeacherWorkspaceOrigin = "exams";
 let activeStudentCourseId = null;
+let activeStudentCourseSection = "modules";
 let activeLessonCourseId = null;
 let activeLessonActivityId = null;
 let activeLessonTab = "description";
@@ -1398,13 +1399,9 @@ function renderStudent() {
   $$(".student-activity-action").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); toggleActivityProgress(button.dataset.courseId, button.dataset.activityId); }));
   $$(".open-lesson").forEach(button => button.addEventListener("click", () => openLesson(button.dataset.courseId, button.dataset.activityId)));
   $$(".continue-course").forEach(button => button.addEventListener("click", () => openLesson(button.dataset.courseId, button.dataset.activityId)));
-  $$(".open-student-course").forEach(button => button.addEventListener("click", () => { activeStudentCourseId = button.dataset.courseId; renderStudent(); }));
-  $("#back-to-student-courses")?.addEventListener("click", () => { activeStudentCourseId = null; renderStudent(); });
-  $$(".student-course-grades").forEach(button => button.addEventListener("click", () => {
-    activeStudentCourseId = null;
-    renderStudent();
-    switchTab("student", "student-grades", $('[data-student-tab="student-grades"]'));
-  }));
+  $$(".open-student-course").forEach(button => button.addEventListener("click", () => { activeStudentCourseId = button.dataset.courseId; activeStudentCourseSection = "modules"; renderStudent(); }));
+  $("#back-to-student-courses")?.addEventListener("click", () => { activeStudentCourseId = null; activeStudentCourseSection = "modules"; renderStudent(); });
+  $$(".student-course-nav-button").forEach(button => button.addEventListener("click", () => { activeStudentCourseSection = button.dataset.section; renderStudent(); }));
 }
 function renderStudentCourseDirectory(courses, summaries) {
   if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Todavía no tienes cursos disponibles</strong><p>Los cursos publicados por el profesor aparecerán aquí.</p></div>`;
@@ -1415,7 +1412,25 @@ function renderStudentCourseDirectory(courses, summaries) {
   }).join("")}</div>`;
 }
 function renderStudentCourseWorkspace(course, myGrades) {
-  return `<div class="student-course-page"><header class="student-course-header"><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button><div class="student-course-title"><h2>${esc(course.name)}</h2></div><button class="btn secondary student-course-grades" type="button">${modernIcon("results")} Calificaciones</button></header><main class="student-course-content">${renderStudentCourseModules(course, myGrades)}</main></div>`;
+  const summary = courseStudentSummary(course);
+  const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
+  const accessibleActivities = accessibleCourseActivities(course);
+  const lastAccessible = accessibleActivities.find(activity => activity.id === progress.lastActivityId);
+  const next = accessibleActivities.find(activity => !activityCompleted(activity, progress, myGrades));
+  const target = lastAccessible?.id || next?.id || accessibleActivities[0]?.id || "";
+  const gradesActive = activeStudentCourseSection === "grades";
+  const mainContent = gradesActive ? renderStudentCourseGrades(course, myGrades) : renderStudentCourseModules(course, myGrades);
+  return `<div class="student-course-page"><aside class="student-course-sidebar"><div class="student-course-sidebar-title"><span>Curso</span><h2>${esc(course.name)}</h2></div><nav aria-label="Navegación del curso"><button class="student-course-nav-button ${gradesActive ? "" : "active"}" data-section="modules" type="button">${modernIcon("modules")}<span>Módulos</span></button><button class="student-course-nav-button ${gradesActive ? "active" : ""}" data-section="grades" type="button">${modernIcon("grade")}<span>Calificaciones</span></button></nav><div class="student-course-sidebar-progress"><span><b>Progreso</b><strong>${summary.percent}%</strong></span><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${summary.percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><span style="width:${summary.percent}%"></span></div></div><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button></aside><main class="student-course-content"><header class="student-course-main-header"><h2>${gradesActive ? "Calificaciones" : "Módulos"}</h2>${!gradesActive && target ? `<button class="btn primary continue-course" data-course-id="${esc(course.id)}" data-activity-id="${esc(target)}" type="button">Continuar</button>` : ""}</header>${mainContent}</main></div>`;
+}
+function renderStudentCourseGrades(course, myGrades) {
+  const grades = myGrades.filter(grade => grade.courseId === course.id).sort((left, right) => new Date(right.date) - new Date(left.date));
+  if (!grades.length) return `<div class="student-course-empty"><span>${modernIcon("grade")}</span><strong>Aún no tienes calificaciones</strong><p>Los resultados aparecerán aquí después de completar una evaluación del curso.</p></div>`;
+  return `<div class="student-course-grade-list">${grades.map(grade => {
+    const exam = publishedExams.find(item => item.id === grade.examId);
+    const attemptsUsed = myGrades.filter(item => item.examId === grade.examId).length;
+    const canReview = grade.review?.length && attemptsUsed >= (exam?.attemptsAllowed || 1);
+    return `<article class="student-course-grade-row"><div><strong>${esc(grade.examTitle)}</strong><small>Intento ${grade.attempt || 1} · ${formatDateOnly(grade.date)}</small></div><span class="student-course-grade-score">${grade.score} / 20</span>${canReview ? `<button class="btn secondary review-attempt" data-id="${esc(grade.id)}" type="button">Ver respuestas</button>` : ""}</article>`;
+  }).join("")}</div>`;
 }
 function courseStudentSummary(course) {
   const activities = normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(activity => activity.published && activity.type !== "heading" && activity.completionRule !== "none"));
@@ -1439,16 +1454,8 @@ function renderStudentCourseModules(course, myGrades) {
   const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published) }));
   if (!modules.length) return "";
   const progress = courseProgress[course.id] || { completed: {}, lastActivityId:"" };
-  const activities = modules.flatMap(module => module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none"));
-  const completedCount = activities.filter(activity => activityCompleted(activity, progress, myGrades)).length;
-  const percent = activities.length ? Math.round(completedCount * 100 / activities.length) : 0;
-  const accessibleActivities = accessibleCourseActivities(course);
-  const lastAccessible = accessibleActivities.find(activity => activity.id === progress.lastActivityId);
-  const next = accessibleActivities.find(activity => !progress.completed?.[activity.id]);
-  const target = lastAccessible?.id || next?.id || accessibleActivities[0]?.id || "";
   let previousComplete = true;
-  return `<section class="student-module-space"><div class="student-course-progress"><div class="student-course-progress-label"><span>Progreso</span><strong>${percent}%</strong></div><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><span style="width:${percent}%"></span></div>${target ? `<button class="btn primary continue-course" data-course-id="${esc(course.id)}" data-activity-id="${esc(target)}" type="button">Continuar</button>` : ""}</div>
-    <div class="student-module-list">${modules.map((module, index) => {
+  return `<section class="student-module-space"><div class="student-module-list">${modules.map((module, index) => {
       const passedEvaluation = myGrades.some(grade => grade.courseId === course.id && Number(grade.score) >= 11);
       const dateAvailable = module.unlockRule !== "date" || (module.unlockDetail && new Date(module.unlockDetail) <= new Date());
       const locked = (module.unlockRule === "previous" && !previousComplete) || (module.unlockRule === "evaluation" && !passedEvaluation) || !dateAvailable;

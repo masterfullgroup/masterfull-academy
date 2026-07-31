@@ -81,7 +81,12 @@ assert.match(appSource, /student-dashboard-progress/, "El progreso útil debe ma
 assert.doesNotMatch(appSource, /student-course-exams/, "Las evaluaciones no deben repetirse fuera de sus módulos");
 assert.doesNotMatch(appSource, /ESPACIO DEL CURSO/, "La cabecera del alumno no debe repetir el contexto del curso");
 assert.doesNotMatch(appSource, /Avanza por las páginas/, "La vista interna no debe añadir instrucciones redundantes");
-assert.match(appSource, /student-course-progress/, "El progreso interno debe presentarse de forma compacta");
+assert.match(appSource, /student-course-sidebar-progress/, "El progreso debe aprovechar el lateral del curso");
+assert.match(appSource, /activeStudentCourseSection/, "El curso debe conservar su sección contextual activa");
+assert.match(appSource, /renderStudentCourseGrades/, "El alumno debe consultar las calificaciones del curso específico");
+assert.match(appSource, /myGrades\.filter\(grade => grade\.courseId === course\.id\)/, "Las calificaciones internas deben filtrarse por curso");
+assert.match(cssSource, /\.student-course-sidebar\s*\{[\s\S]*?flex-direction:column;/, "La navegación del curso debe ocupar el lateral izquierdo");
+assert.doesNotMatch(appSource, /student-course-grades/, "El acceso contextual no debe enviar al alumno a la tabla global");
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(activity =>/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
