@@ -52,6 +52,7 @@ assert.match(appSource, /document\.addEventListener\("click", closeRowActionMenu
 assert.match(appSource, /menu\.classList\.add\("is-open"\)/, "El menú abierto debe elevarse sobre las demás filas");
 assert.match(cssSource, /\.row-action-menu\.is-open\s*\{\s*z-index:60/, "El menú abierto debe tener prioridad visual");
 assert.match(cssSource, /\.row-action-popover[\s\S]*?background:#fff;[\s\S]*?isolation:isolate;[\s\S]*?opacity:1;/, "El menú debe usar una superficie completamente opaca");
+assert.match(cssSource, /\.canvas-module-card\.has-open-actions \.canvas-module-items\s*\{\s*overflow:visible;/, "La lista no debe recortar el menú de acciones abierto");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

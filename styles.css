@@ -5863,6 +5863,9 @@ body.teacher-course-open .course-workspace-page {
   border-top:1px solid #e0e3eb;
   border-radius:0 0 13px 13px;
 }
+.canvas-module-card.has-open-actions .canvas-module-items {
+  overflow:visible;
+}
 .canvas-module-item {
   grid-template-columns:20px 36px minmax(0,1fr) 28px 38px;
   min-height:58px;
