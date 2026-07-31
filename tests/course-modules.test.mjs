@@ -9,6 +9,9 @@ assert.match(appSource, /collapse-all-modules/, "Los módulos deben poder contra
 assert.match(appSource, /row-action-menu/, "Las acciones de filas deben agruparse en menús verticales");
 assert.match(appSource, /\["settings", "Configuraci/, "La navegación del curso debe incluir configuración");
 assert.match(htmlSource, /class="exam-editor-nav"/, "El editor debe separar detalles y preguntas");
+assert.match(htmlSource, /module-content-editor-card/, "El contenido del módulo debe usar un editor estructurado");
+assert.match(htmlSource, /data-activity-format="bold"/, "El editor debe incluir herramientas de formato");
+assert.match(appSource, /formatActivityDescription/, "Las herramientas de formato deben ser funcionales");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260722-3">
+  <link rel="stylesheet" href="styles.css?v=20260730-2">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -224,32 +224,54 @@
   </div>
 
   <div id="activity-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="activity-modal-title">
-    <div class="modal-card panel"><button class="modal-close" data-close="activity-modal" type="button" aria-label="Cerrar">×</button>
-      <span class="eyebrow">CONTENIDO DEL MÓDULO</span><h2 id="activity-modal-title">Agregar contenido</h2>
+    <div class="modal-card panel large module-content-editor-card"><button class="modal-close" data-close="activity-modal" type="button" aria-label="Cerrar">×</button>
+      <header class="module-content-editor-head"><div><span class="eyebrow">CONTENIDO DEL MÓDULO</span><h2 id="activity-modal-title">Agregar contenido</h2><p id="activity-editor-context">Selecciona qué deseas incorporar y completa su información.</p></div><span class="module-content-step">Nuevo elemento</span></header>
       <form id="activity-form"><input type="hidden" id="activity-course-id"><input type="hidden" id="activity-module-id"><input type="hidden" id="activity-id">
-        <label>Nombre visible<input id="activity-title" required maxlength="120" placeholder="Ej. Representación de vectores"></label>
-        <label>Ubicación en el curso<select id="activity-target-module"></select></label>
-        <label>Tipo de contenido<select id="activity-type">
-          <optgroup label="Contenido"><option value="page">Página de contenido</option><option value="file">Archivo</option><option value="video">Video</option><option value="link">Enlace externo</option></optgroup>
-          <optgroup label="Actividades"><option value="practice">Práctica</option><option value="task">Tarea</option><option value="quiz">Evaluación</option><option value="discussion">Foro o discusión</option></optgroup>
-          <optgroup label="Comunicación"><option value="live">Videoclase</option></optgroup>
-          <optgroup label="Organización"><option value="heading">Encabezado o separador</option></optgroup>
-          <optgroup label="Compatibilidad"><option value="lesson">Lección</option><option value="pdf">Archivo PDF</option><option value="download">Material descargable</option></optgroup>
-        </select></label>
-        <label>Enlace o ruta (opcional)<input id="activity-url" maxlength="500" placeholder="https://… o ./materiales/archivo.pdf"></label>
-        <label>Descripción breve<textarea id="activity-description" rows="3" maxlength="1000" placeholder="Explica qué encontrará o deberá hacer el alumno."></textarea></label>
-        <div class="activity-config-grid">
-          <label>Estado<select id="activity-published"><option value="true">Publicado</option><option value="false">Borrador</option></select></label>
-          <label>Finalización<select id="activity-completion-rule"><option value="manual">El alumno marca completado</option><option value="view">Ver el elemento</option><option value="submit">Realizar una entrega</option><option value="pass">Obtener nota aprobatoria</option><option value="none">No genera progreso</option></select></label>
-          <label>Fecha límite<input id="activity-due-at" type="datetime-local"></label>
-          <label>Puntaje<input id="activity-points" type="number" min="0" max="10000" value="0"></label>
-          <label>Duración en minutos<input id="activity-duration" type="number" min="0" max="10000" value="0"></label>
-          <label>Intentos (0 = sin límite)<input id="activity-attempts" type="number" min="0" max="100" value="0"></label>
-        </div>
+        <section class="module-content-block">
+          <div class="module-content-block-title"><span>1</span><div><strong>Tipo y ubicación</strong><small>Define qué elemento se agregará y en qué módulo aparecerá.</small></div></div>
+          <div class="activity-editor-top-grid">
+            <label>Agregar<select id="activity-type">
+              <optgroup label="Contenido"><option value="page">Página de contenido</option><option value="file">Archivo</option><option value="video">Video</option><option value="link">Enlace externo</option></optgroup>
+              <optgroup label="Actividades"><option value="practice">Práctica</option><option value="task">Tarea</option><option value="quiz">Evaluación</option><option value="discussion">Foro o discusión</option></optgroup>
+              <optgroup label="Comunicación"><option value="live">Videoclase</option></optgroup>
+              <optgroup label="Organización"><option value="heading">Encabezado o separador</option></optgroup>
+              <optgroup label="Compatibilidad"><option value="lesson">Lección</option><option value="pdf">Archivo PDF</option><option value="download">Material descargable</option></optgroup>
+            </select></label>
+            <label>Al módulo<select id="activity-target-module"></select></label>
+          </div>
+        </section>
+        <section class="module-content-block">
+          <div class="module-content-block-title"><span>2</span><div><strong>Contenido</strong><small id="activity-content-help">Escribe el título y las indicaciones que verá el alumno.</small></div></div>
+          <label>Título del elemento<input id="activity-title" required maxlength="120" placeholder="Ej. ¿Qué aprenderemos en esta unidad?"></label>
+          <label id="activity-url-field" class="hidden">Enlace o ruta del recurso<input id="activity-url" maxlength="500" placeholder="https://… o ./materiales/archivo.pdf"></label>
+          <div id="activity-description-field" class="activity-rich-field">
+            <label for="activity-description">Contenido e indicaciones</label>
+            <div class="activity-rich-toolbar" role="toolbar" aria-label="Formato del contenido">
+              <button data-activity-format="bold" type="button" aria-label="Negrita" title="Negrita"><strong>B</strong></button>
+              <button data-activity-format="italic" type="button" aria-label="Cursiva" title="Cursiva"><em>I</em></button>
+              <button data-activity-format="heading" type="button" aria-label="Título" title="Título">T²</button>
+              <span aria-hidden="true"></span>
+              <button data-activity-format="list" type="button" aria-label="Lista con viñetas" title="Lista con viñetas">• Lista</button>
+              <button data-activity-format="numbered" type="button" aria-label="Lista numerada" title="Lista numerada">1. Lista</button>
+              <button data-activity-format="link" type="button" aria-label="Insertar enlace" title="Insertar enlace">↗ Enlace</button>
+            </div>
+            <textarea id="activity-description" rows="8" maxlength="5000" placeholder="Escribe aquí el contenido, las instrucciones o el contexto para el alumno…"></textarea>
+          </div>
+        </section>
         <label id="activity-exam-field" class="hidden">Evaluación vinculada<select id="activity-exam-id"><option value="">Selecciona una evaluación</option></select><small>La evaluación se mantiene como una sola entidad y esta fila solo crea su ubicación dentro del módulo.</small></label>
         <fieldset id="activity-submission-field" class="hidden activity-submission-types"><legend>Tipos de entrega permitidos</legend><label><input type="checkbox" name="activity-submission" value="file"> Archivos</label><label><input type="checkbox" name="activity-submission" value="text"> Texto en línea</label><label><input type="checkbox" name="activity-submission" value="url"> Enlace externo</label><label><input type="checkbox" name="activity-submission" value="questions"> Banco de preguntas</label><label><input type="checkbox" name="activity-submission" value="none"> Sin entrega digital</label></fieldset>
-        <p id="activity-error" class="error" aria-live="polite"></p>
-        <button class="btn primary full" type="submit">Guardar contenido</button>
+        <details class="activity-advanced-settings">
+          <summary><span>3</span><div><strong>Configuración avanzada</strong><small>Publicación, finalización, fechas y puntaje.</small></div><b aria-hidden="true">⌄</b></summary>
+          <div class="activity-config-grid">
+            <label>Estado<select id="activity-published"><option value="true">Publicado</option><option value="false">Borrador</option></select></label>
+            <label>Finalización<select id="activity-completion-rule"><option value="manual">El alumno marca completado</option><option value="view">Ver el elemento</option><option value="submit">Realizar una entrega</option><option value="pass">Obtener nota aprobatoria</option><option value="none">No genera progreso</option></select></label>
+            <label>Fecha límite<input id="activity-due-at" type="datetime-local"></label>
+            <label>Puntaje<input id="activity-points" type="number" min="0" max="10000" value="0"></label>
+            <label>Duración en minutos<input id="activity-duration" type="number" min="0" max="10000" value="0"></label>
+            <label>Intentos (0 = sin límite)<input id="activity-attempts" type="number" min="0" max="100" value="0"></label>
+          </div>
+        </details>
+        <footer class="module-content-editor-footer"><p id="activity-error" class="error" aria-live="polite"></p><button class="btn secondary" data-close="activity-modal" type="button">Cancelar</button><button class="btn primary" type="submit">Agregar al módulo</button></footer>
       </form>
     </div>
   </div>
@@ -351,6 +373,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260730-1"></script>
+  <script src="app.js?v=20260730-2"></script>
 </body>
 </html>

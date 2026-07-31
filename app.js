@@ -577,6 +577,7 @@ function bindStaticEvents() {
   $("#activity-form").addEventListener("submit", saveActivity);
   $("#module-unlock-rule").addEventListener("change", toggleModuleUnlockDetail);
   $("#activity-type").addEventListener("change", toggleActivityFields);
+  $$("[data-activity-format]").forEach(button => button.addEventListener("click", () => formatActivityDescription(button.dataset.activityFormat)));
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
@@ -1879,6 +1880,7 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   const activity = module?.activities.find(item => item.id === activityId);
   const exams = getTeacherExams().filter(exam => exam.courseId === courseId);
   $("#activity-modal-title").textContent = activity ? "Editar contenido" : "Agregar contenido";
+  $("#activity-editor-context").textContent = activity ? `Actualiza “${activity.title}” sin alterar su ubicación en el recorrido.` : `Agrega un nuevo elemento a ${module?.title || "este módulo"}.`;
   $("#activity-course-id").value = courseId;
   $("#activity-module-id").value = moduleId;
   $("#activity-id").value = activity?.id || "";
@@ -1899,16 +1901,55 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   $$('input[name="activity-submission"]').forEach(input => { input.checked = activity?.submissionTypes?.includes(input.value) || false; });
   toggleActivityFields();
   $("#activity-error").textContent = "";
+  $(".module-content-editor-footer .btn.primary").textContent = activity ? "Guardar cambios" : "Agregar al módulo";
+  $(".activity-advanced-settings").open = Boolean(activity);
   $("#activity-modal").classList.remove("hidden");
   $("#activity-title").focus();
 }
 function toggleActivityFields() {
   const type = $("#activity-type").value;
   const isHeading = type === "heading";
-  $("#activity-exam-field").classList.toggle("hidden", !["practice","task","quiz"].includes(type));
+  const resourceTypes = ["file","video","link","live","pdf","download"];
+  const typeCopy = {
+    page: ["Página de contenido", "Redacta una página con información, recursos e indicaciones."],
+    lesson: ["Lección", "Explica el tema y orienta el recorrido de aprendizaje."],
+    file: ["Archivo", "Añade el título, la ruta del archivo y una descripción opcional."],
+    video: ["Video", "Agrega el enlace del video y las indicaciones para visualizarlo."],
+    link: ["Enlace externo", "Comparte un recurso externo con contexto para el alumno."],
+    practice: ["Práctica", "Vincula un banco de preguntas y explica el objetivo de la práctica."],
+    task: ["Tarea", "Describe la entrega esperada y configura sus condiciones."],
+    quiz: ["Evaluación", "Vincula una evaluación existente y agrega instrucciones breves."],
+    discussion: ["Foro o discusión", "Formula la pregunta y las pautas de participación."],
+    live: ["Videoclase", "Incluye el enlace de acceso y la agenda de la sesión."],
+    heading: ["Encabezado", "Crea un separador visual dentro del módulo."],
+    pdf: ["Archivo PDF", "Añade la ruta del PDF y una descripción para el alumno."],
+    download: ["Material descargable", "Añade el recurso y explica cómo debe utilizarse."]
+  };
+  const [label, help] = typeCopy[type] || ["Contenido", "Completa la información que verá el alumno."];
+  $("#activity-content-help").textContent = help;
+  $("#activity-title").placeholder = `Título de ${label.toLocaleLowerCase("es")}`;
+  $("#activity-url-field").classList.toggle("hidden", !resourceTypes.includes(type));
+  $("#activity-description-field").classList.toggle("hidden", isHeading);
+  $("#activity-exam-field").classList.toggle("hidden", !["practice","quiz"].includes(type));
   $("#activity-submission-field").classList.toggle("hidden", type !== "task");
   $("#activity-completion-rule").disabled = isHeading;
   if (isHeading) $("#activity-completion-rule").value = "none";
+}
+function formatActivityDescription(command) {
+  const field = $("#activity-description");
+  const start = field.selectionStart;
+  const end = field.selectionEnd;
+  const selected = field.value.slice(start, end);
+  const replacements = {
+    bold: `**${selected || "texto destacado"}**`,
+    italic: `_${selected || "texto en cursiva"}_`,
+    heading: `## ${selected || "Título de sección"}`,
+    link: `[${selected || "texto del enlace"}](https://)`,
+    list: (selected || "Elemento de la lista").split("\n").map(line => `- ${line.replace(/^[-*]\s*/, "")}`).join("\n"),
+    numbered: (selected || "Elemento de la lista").split("\n").map((line, index) => `${index + 1}. ${line.replace(/^\d+\.\s*/, "")}`).join("\n")
+  };
+  field.setRangeText(replacements[command] || selected, start, end, "select");
+  field.focus();
 }
 async function saveActivity(event) {
   event.preventDefault();
