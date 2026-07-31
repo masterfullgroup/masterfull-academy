@@ -12,6 +12,8 @@ assert.match(htmlSource, /class="exam-editor-nav"/, "El editor debe separar deta
 assert.match(htmlSource, /module-content-editor-card/, "El contenido del módulo debe usar un editor estructurado");
 assert.match(htmlSource, /data-activity-format="bold"/, "El editor debe incluir herramientas de formato");
 assert.match(appSource, /formatActivityDescription/, "Las herramientas de formato deben ser funcionales");
+assert.match(appSource, /teacher-course-open/, "Al abrir un curso debe activarse el modo de enfoque");
+assert.match(appSource, /document\.body\.classList\.toggle\("teacher-course-open"/, "El modo de enfoque debe sincronizarse con el curso activo");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
