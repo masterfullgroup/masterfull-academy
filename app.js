@@ -1161,6 +1161,16 @@ function openPublishCourseModal(id) {
   $("#publish-course-error").textContent = "";
   $("#publish-course-modal").classList.remove("hidden");
 }
+function closeRowActionMenus() {
+  $$(".row-action-popover").forEach(popover => popover.classList.add("hidden"));
+  $$(".row-action-toggle").forEach(toggle => toggle.setAttribute("aria-expanded", "false"));
+  $$(".row-action-menu.is-open").forEach(menu => menu.classList.remove("is-open"));
+  $$(".canvas-module-card.has-open-actions").forEach(card => card.classList.remove("has-open-actions"));
+}
+document.addEventListener("click", closeRowActionMenus);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeRowActionMenus();
+});
 function bindTeacherExamWorkspaceActions() {
   $$(".teacher-module-card > summary button").forEach(button => button.addEventListener("click", event => event.stopPropagation()));
   $$(".row-action-menu").forEach(menu => menu.addEventListener("click", event => event.stopPropagation()));
@@ -1169,10 +1179,13 @@ function bindTeacherExamWorkspaceActions() {
     const menu = toggle.closest(".row-action-menu");
     const popover = menu.querySelector(".row-action-popover");
     const willOpen = popover.classList.contains("hidden");
-    $$(".row-action-popover").forEach(item => item.classList.add("hidden"));
-    $$(".row-action-toggle").forEach(item => item.setAttribute("aria-expanded", "false"));
-    popover.classList.toggle("hidden", !willOpen);
-    toggle.setAttribute("aria-expanded", String(willOpen));
+    closeRowActionMenus();
+    if (willOpen) {
+      popover.classList.remove("hidden");
+      toggle.setAttribute("aria-expanded", "true");
+      menu.classList.add("is-open");
+      menu.closest(".canvas-module-card")?.classList.add("has-open-actions");
+    }
   }));
   $$(".open-course-workspace").forEach(button => button.addEventListener("click", () => {
     openTeacherCourseWorkspace(button.dataset.courseId, "overview", "exams");

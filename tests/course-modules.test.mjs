@@ -48,6 +48,10 @@ assert.doesNotMatch(cssSource, /\.dashboard-course-cover::after\s*,\s*\.student-
 assert.match(cssSource, /\.canvas-add-content\s*\{\s*display:none/, "La acción inferior redundante para agregar contenido debe permanecer oculta");
 assert.match(appSource, /\["overview", "Inicio", "home"\]/, "La navegación debe usar iconos específicos y profesionales");
 assert.match(appSource, /stroke-width="1\.75"/, "Los iconos deben compartir un trazo visual consistente");
+assert.match(appSource, /document\.addEventListener\("click", closeRowActionMenus\)/, "Los menús de tres puntos deben cerrarse al pulsar fuera");
+assert.match(appSource, /menu\.classList\.add\("is-open"\)/, "El menú abierto debe elevarse sobre las demás filas");
+assert.match(cssSource, /\.row-action-menu\.is-open\s*\{\s*z-index:60/, "El menú abierto debe tener prioridad visual");
+assert.match(cssSource, /\.row-action-popover[\s\S]*?background:#fff;[\s\S]*?isolation:isolate;[\s\S]*?opacity:1;/, "El menú debe usar una superficie completamente opaca");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

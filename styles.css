@@ -4974,6 +4974,9 @@ body.student-course-open .student-course-content-head {
   position:relative;
   z-index:4;
 }
+.row-action-menu.is-open {
+  z-index:60;
+}
 .row-action-toggle {
   display:grid;
   width:32px;
@@ -4993,7 +4996,7 @@ body.student-course-open .student-course-content-head {
   position:absolute;
   top:36px;
   right:0;
-  z-index:30;
+  z-index:70;
   display:grid;
   min-width:178px;
   overflow:hidden;
@@ -5001,7 +5004,9 @@ body.student-course-open .student-course-content-head {
   border:1px solid #d2d7e1;
   border-radius:8px;
   background:#fff;
-  box-shadow:0 13px 30px #17233c24;
+  box-shadow:0 16px 38px #17233c2e;
+  isolation:isolate;
+  opacity:1;
 }
 .row-action-menu button {
   min-height:34px;
@@ -5773,6 +5778,10 @@ body.teacher-course-open .course-workspace-page {
   background:#fff;
   box-shadow:0 10px 28px #1b29410d;
   transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.canvas-module-card.has-open-actions {
+  position:relative;
+  z-index:40;
 }
 .canvas-module-card:hover {
   border-color:#cbd0df;
