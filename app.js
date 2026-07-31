@@ -1405,9 +1405,7 @@ function renderStudent() {
   $$(".start-exam").forEach(button => button.addEventListener("click", () => startExam(button.dataset.id)));
   $$(".review-exam").forEach(button => button.addEventListener("click", () => showExamReviews(button.dataset.id)));
   $$(".review-attempt").forEach(button => button.addEventListener("click", () => showAttemptReview(button.dataset.id)));
-  $$(".student-activity-action").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); toggleActivityProgress(button.dataset.courseId, button.dataset.activityId); }));
   $$(".open-lesson").forEach(button => button.addEventListener("click", () => openLesson(button.dataset.courseId, button.dataset.activityId)));
-  $$(".continue-course").forEach(button => button.addEventListener("click", () => openLesson(button.dataset.courseId, button.dataset.activityId)));
   $$(".open-student-course").forEach(button => button.addEventListener("click", () => { activeStudentCourseId = button.dataset.courseId; activeStudentCourseSection = "modules"; renderStudent(); }));
   $("#back-to-student-courses")?.addEventListener("click", () => { activeStudentCourseId = null; activeStudentCourseSection = "modules"; renderStudent(); });
   $$(".student-course-nav-button").forEach(button => button.addEventListener("click", () => { activeStudentCourseSection = button.dataset.section; renderStudent(); }));
@@ -1422,14 +1420,9 @@ function renderStudentCourseDirectory(courses, summaries) {
 }
 function renderStudentCourseWorkspace(course, myGrades) {
   const summary = courseStudentSummary(course);
-  const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
-  const accessibleActivities = accessibleCourseActivities(course);
-  const lastAccessible = accessibleActivities.find(activity => activity.id === progress.lastActivityId);
-  const next = accessibleActivities.find(activity => !activityCompleted(activity, progress, myGrades));
-  const target = lastAccessible?.id || next?.id || accessibleActivities[0]?.id || "";
   const gradesActive = activeStudentCourseSection === "grades";
   const mainContent = gradesActive ? renderStudentCourseGrades(course, myGrades) : renderStudentCourseModules(course, myGrades);
-  return `<div class="student-course-page"><aside class="student-course-sidebar"><div class="student-course-sidebar-title"><span>Curso</span><h2>${esc(course.name)}</h2></div><nav aria-label="Navegación del curso"><button class="student-course-nav-button ${gradesActive ? "" : "active"}" data-section="modules" type="button">${modernIcon("modules")}<span>Módulos</span></button><button class="student-course-nav-button ${gradesActive ? "active" : ""}" data-section="grades" type="button">${modernIcon("grade")}<span>Calificaciones</span></button></nav><div class="student-course-sidebar-progress"><span><b>Progreso</b><strong>${summary.percent}%</strong></span><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${summary.percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><span style="width:${summary.percent}%"></span></div></div><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button></aside><main class="student-course-content"><header class="student-course-main-header"><h2>${gradesActive ? "Calificaciones" : "Módulos"}</h2>${!gradesActive && target ? `<button class="btn primary continue-course" data-course-id="${esc(course.id)}" data-activity-id="${esc(target)}" type="button">Continuar</button>` : ""}</header>${mainContent}</main></div>`;
+  return `<div class="student-course-page"><aside class="student-course-sidebar"><div class="student-course-sidebar-title"><span>Curso</span><h2>${esc(course.name)}</h2></div><nav aria-label="Navegación del curso"><button class="student-course-nav-button ${gradesActive ? "" : "active"}" data-section="modules" type="button">${modernIcon("modules")}<span>Módulos</span></button><button class="student-course-nav-button ${gradesActive ? "active" : ""}" data-section="grades" type="button">${modernIcon("grade")}<span>Calificaciones</span></button></nav><div class="student-course-sidebar-progress"><span><b>Progreso</b><strong>${summary.percent}%</strong></span><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${summary.percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><span style="width:${summary.percent}%"></span></div></div><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button></aside><main class="student-course-content"><header class="student-course-main-header"><h2>${gradesActive ? "Calificaciones" : "Módulos"}</h2></header>${mainContent}</main></div>`;
 }
 function renderStudentCourseGrades(course, myGrades) {
   const grades = myGrades.filter(grade => grade.courseId === course.id).sort((left, right) => new Date(right.date) - new Date(left.date));
@@ -1471,28 +1464,16 @@ function renderStudentCourseModules(course, myGrades) {
       const progressItems = module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none");
       const moduleCompletedCount = progressItems.filter(activity => activityCompleted(activity, progress, myGrades)).length;
       const moduleComplete = progressItems.length > 0 && moduleCompletedCount === progressItems.length;
-      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-order">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `🔒 ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span><b>${moduleComplete ? "✓" : locked ? "🔒" : "⌄"}</b></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
+      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-order">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `🔒 ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span><b class="student-module-chevron" aria-hidden="true">${locked ? "🔒" : "›"}</b></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
         if (activity.type === "heading") return `<h5 class="student-module-heading">${esc(activity.title)}</h5>`;
-        const completed = activityCompleted(activity, progress, myGrades);
-        const inProgress = !completed && progress.lastActivityId === activity.id;
         const exam = activity.examId ? publishedExams.find(item => item.id === activity.examId) : null;
         const actionClass = exam && ["practice","quiz"].includes(activity.type) ? "start-exam" : "open-lesson";
         const actionData = exam ? `data-id="${esc(exam.id)}"` : `data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}"`;
-        const status = completed ? (activity.type === "task" ? "Entregado" : "Completado") : inProgress ? "En progreso" : activity.dueAt && new Date(activity.dueAt) < new Date() ? "Atrasado" : "No iniciado";
-        const manual = activity.completionRule === "manual";
-        return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="activity-type-icon">${modernIcon(activity.type)}</span><button class="${actionClass}" ${actionData} type="button"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, publishedExams))} · ${status}</small></button>${manual ? `<button class="student-activity-action ${completed ? "is-complete" : ""}" data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}" type="button" aria-label="${completed ? "Marcar como pendiente" : "Marcar como completado"}">${completed ? "✓" : "○"}</button>` : `<span class="student-activity-state" aria-label="${status}">${completed ? "✓" : "○"}</span>`}</div>`;
+        return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="activity-type-icon">${modernIcon(activity.type)}</span><button class="${actionClass}" ${actionData} type="button"><strong>${esc(activity.title)}</strong></button></div>`;
       }).join("") : `<p class="module-empty">No hay actividades publicadas.</p>`}</div>`}</details>`;
       previousComplete = moduleComplete;
       return markup;
     }).join("")}</div></section>`;
-}
-function toggleActivityProgress(courseId, activityId) {
-  const progress = courseProgress[courseId] || { completed:{}, lastActivityId:"" };
-  progress.completed = { ...(progress.completed || {}), [activityId]: !progress.completed?.[activityId] };
-  progress.lastActivityId = activityId;
-  courseProgress[courseId] = progress;
-  saveCourseProgress();
-  renderStudent();
 }
 function accessibleCourseActivities(course) {
   const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published && activity.type !== "heading") }));

@@ -90,6 +90,10 @@ assert.doesNotMatch(appSource, /student-course-grades/, "El acceso contextual no
 assert.match(cssSource, /body\.student-course-open\.app-shell-mode > main\s*\{[\s\S]*?padding:0;/, "El curso interno debe ocupar la pantalla sin marco exterior");
 assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s\S]*?max-width:none;[\s\S]*?min-height:100vh;/, "La estructura del curso debe usar todo el ancho y alto");
 assert.match(cssSource, /body\.student-course-open \.student-course-content\s*\{[\s\S]*?width:100%;[\s\S]*?max-width:none;[\s\S]*?margin:0;/, "El contenido no debe heredar el centrado del main general");
+assert.doesNotMatch(appSource, /student-activity-action|student-activity-state/, "Los contenidos no deben repetir controles circulares de finalización");
+assert.doesNotMatch(appSource, /continue-course/, "La cabecera de módulos no debe repetir el acceso al contenido");
+assert.match(appSource, /student-module-chevron/, "Cada módulo debe conservar únicamente su control de expansión");
+assert.match(cssSource, /\.student-module\[open\] summary > \.student-module-chevron\s*\{[\s\S]*?rotate\(90deg\)/, "El chevrón debe indicar visualmente la expansión");
 assert.doesNotMatch(htmlSource, /class="lesson-tabs"/, "La página de contenido no debe mostrar pestañas vacías o redundantes");
 assert.doesNotMatch(appSource, /renderLessonTabs/, "El contenido no debe duplicarse en paneles secundarios");
 assert.match(appSource, /ACTIVE_LESSON_KEY/, "La lección activa debe conservarse durante recargas y sincronizaciones");

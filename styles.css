@@ -4951,6 +4951,13 @@ body.student-course-open .student-course-content-head {
   font-size:12px;
   box-shadow:0 3px 8px #35406f20;
 }
+.student-module summary > .student-module-chevron {
+  font-size:20px;
+  transition:transform .18s ease;
+}
+.student-module[open] summary > .student-module-chevron {
+  transform:rotate(90deg);
+}
 .student-module.is-locked summary > b {
   color:#69738b;
   background:#e5e7ee;
@@ -4960,7 +4967,7 @@ body.student-course-open .student-course-content-head {
   background:#fff;
 }
 .student-activity {
-  grid-template-columns:40px minmax(0,1fr) 36px;
+  grid-template-columns:40px minmax(0,1fr);
   min-height:58px;
   gap:13px;
   padding:7px 17px;
