@@ -3711,6 +3711,57 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
   }
 }
 
+/* Panel del alumno alineado con el tablero docente y sin bloques redundantes. */
+#student-overview:empty {
+  display:none;
+}
+.student-course-gallery.canvas-dashboard-grid {
+  margin:26px 0 32px;
+}
+.student-dashboard-course-card .canvas-dashboard-card-body {
+  display:flex;
+  min-height:174px;
+  flex-direction:column;
+}
+.student-dashboard-course-card .canvas-dashboard-card-body > p {
+  min-height:34px;
+}
+.student-dashboard-progress {
+  display:grid;
+  gap:8px;
+  margin-top:15px;
+}
+.student-dashboard-progress > span {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#708092;
+  font-size:10.5px;
+}
+.student-dashboard-progress b {
+  color:#0b7185;
+  font-size:11.5px;
+}
+.student-dashboard-progress .course-progress-track {
+  height:6px;
+  overflow:hidden;
+  border-radius:99px;
+  background:#e7edf2;
+}
+.student-dashboard-progress .course-progress-track i {
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:#168da2;
+}
+.student-dashboard-actions {
+  margin-top:auto;
+  justify-content:flex-end;
+}
+.student-dashboard-actions .open-student-course {
+  width:100%;
+}
+
 /* Cabecera de curso compacta: evita repetir la inicial y la etiqueta "Curso". */
 .course-workspace-page > .course-context-bar {
   display: grid;

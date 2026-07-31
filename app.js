@@ -1408,13 +1408,10 @@ function renderStudent() {
 }
 function renderStudentCourseDirectory(courses, summaries) {
   if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Todavía no tienes cursos disponibles</strong><p>Los cursos publicados por el profesor aparecerán aquí.</p></div>`;
-  return `<section class="student-library-head"><div><span class="eyebrow">MIS CURSOS</span><h3>Continúa aprendiendo</h3><p>Abre un curso para consultar sus módulos, páginas, archivos y evaluaciones.</p></div><span>${quantity(courses.length, "curso disponible", "cursos disponibles")}</span></section><div class="student-course-gallery">${courses.map((course, index) => {
+  return `<div class="canvas-dashboard-grid student-course-gallery">${courses.map(course => {
     const summary = summaries.find(item => item.course.id === course.id) || { total:0, completed:0, percent:0 };
-    const modules = normalizeModules(course.modules);
-    const examCount = publishedExams.filter(exam => exam.courseId === course.id).length;
-    const progressMarkup = summary.total ? `<div class="student-card-progress"><span><b>${summary.percent}%</b><span>completado</span></span><div class="course-progress-track"><i style="width:${summary.percent}%"></i></div></div>` : `<div class="student-card-empty-progress">Contenido en preparación</div>`;
-    const contentMeta = [summary.total ? quantity(summary.total, "actividad") : "", examCount ? quantity(examCount, "evaluación", "evaluaciones") : ""].filter(Boolean).join(" · ") || "Sin actividades disponibles";
-    return `<article class="student-library-card tone-${index % 4}"><div class="student-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${modules.length ? quantity(modules.length, "módulo", "módulos") : "En preparación"}</small></div><div class="student-course-card-body"><span class="eyebrow">${esc(course.teacherName || "Profesor")}</span><h4>${esc(course.name)}</h4><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p>${progressMarkup}<div class="student-card-footer"><small>${esc(contentMeta)}</small><button class="open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso <span aria-hidden="true">→</span></button></div></div></article>`;
+    const progressMarkup = summary.total ? `<div class="student-dashboard-progress"><span><b>${summary.percent}%</b><span>completado</span></span><div class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><i style="width:${summary.percent}%"></i></div></div>` : "";
+    return `<article class="canvas-dashboard-card student-dashboard-course-card"><div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div><div class="canvas-dashboard-card-body"><button class="open-student-course canvas-course-title" data-course-id="${esc(course.id)}" type="button">${esc(course.name)}</button><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p>${progressMarkup}<div class="canvas-dashboard-actions student-dashboard-actions"><button class="open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></div></div></article>`;
   }).join("")}</div>`;
 }
 function renderStudentCourseWorkspace(course, myGrades) {
@@ -1439,10 +1436,7 @@ function activityCompleted(activity, progress, myGrades = []) {
   return Boolean(progress.completed?.[activity.id]);
 }
 function renderStudentOverview(courses, summaries) {
-  const nextCandidates = courses.flatMap(course => accessibleCourseActivities(course).filter(activity => !courseProgress[course.id]?.completed?.[activity.id]).map(activity => ({ course, activity })));
-  const next = nextCandidates[0];
-  const overall = summaries.length ? Math.round(summaries.reduce((total, summary) => total + summary.percent, 0) / summaries.length) : 0;
-  $("#student-overview").innerHTML = `<div class="student-home-layout"><section class="overview-panel student-resume-panel"><div class="overview-panel-head"><div><span class="eyebrow">CONTINUAR</span><h3>${next ? "Retoma tu aprendizaje" : "Tu aprendizaje"}</h3></div><span class="student-overall-progress">${overall}% general</span></div>${next ? `<div class="student-resume-body"><span class="activity-type-icon">${modernIcon(next.activity.type)}</span><div><small>${esc(next.course.name)}</small><h4>${esc(next.activity.title)}</h4><p>${activityTypeLabel(next.activity.type)} · ${esc(next.activity.moduleTitle)}</p><div class="course-progress-track"><span style="width:${overall}%"></span></div></div><button class="btn primary continue-course" data-course-id="${esc(next.course.id)}" data-activity-id="${esc(next.activity.id)}" type="button">Continuar <span aria-hidden="true">→</span></button></div>` : `<div class="lms-empty-state"><strong>${courses.length ? "Todo está al día" : "No hay cursos disponibles"}</strong><p>Cuando tengas una actividad disponible aparecerá aquí.</p></div>`}</section></div>`;
+  $("#student-overview").innerHTML = "";
 }
 function renderStudentCourseModules(course, myGrades) {
   const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published) }));

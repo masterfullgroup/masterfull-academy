@@ -72,6 +72,12 @@ assert.match(htmlSource, /module-content-editor-actions/, "Las acciones del edit
 assert.match(cssSource, /\.module-content-editor-footer\s*\{[\s\S]*?position:sticky;[\s\S]*?background:#fff;/, "La barra de acciones debe permanecer visible y usar una superficie limpia");
 assert.doesNotMatch(cssSource, /\.app-shell-mode footer\s*\{/, "El pie principal no debe desplazar las barras internas del editor");
 assert.match(cssSource, /\.app-shell-mode > footer\s*\{\s*margin-left:/, "El desplazamiento lateral debe limitarse al pie principal");
+assert.doesNotMatch(appSource, /Continúa aprendiendo/, "El panel del alumno no debe repetir el llamado a continuar");
+assert.doesNotMatch(appSource, /student-resume-panel/, "El alumno no debe recibir una tarjeta adicional de aprendizaje");
+assert.doesNotMatch(appSource, /student-card-footer/, "Las tarjetas no deben repetir recuentos de actividades y evaluaciones");
+assert.doesNotMatch(appSource, /contentMeta/, "El directorio del alumno no debe calcular metadatos redundantes");
+assert.match(appSource, /student-dashboard-course-card/, "Las tarjetas del alumno deben compartir la estructura visual del tablero docente");
+assert.match(appSource, /student-dashboard-progress/, "El progreso útil debe mantenerse de forma compacta");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
