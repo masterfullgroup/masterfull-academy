@@ -3,6 +3,7 @@ const ACTIVE_ATTEMPT_KEY = "aulaquiz_active_attempt_v2";
 const PENDING_RESULTS_KEY = "aulaquiz_pending_results_v1";
 const SOUND_KEY = "aulaquiz_sound_enabled_v1";
 const COURSE_PROGRESS_KEY = "masterfull_course_progress_v1";
+const ACTIVE_LESSON_KEY = "masterfull_active_lesson_v1";
 const CATALOG_URL = "./data/catalog.json";
 const LEGACY_MODULE_ROW_PREFIX = "__mfmod__:";
 
@@ -43,9 +44,9 @@ let activeTeacherCourseSection = "overview";
 let activeTeacherWorkspaceOrigin = "exams";
 let activeStudentCourseId = null;
 let activeStudentCourseSection = "modules";
-let activeLessonCourseId = null;
-let activeLessonActivityId = null;
-let activeLessonTab = "description";
+const savedLesson = load(ACTIVE_LESSON_KEY, { courseId:"", activityId:"" });
+let activeLessonCourseId = savedLesson.courseId || null;
+let activeLessonActivityId = savedLesson.activityId || null;
 let activityEditorRange = null;
 let activityEditorTableCell = null;
 
@@ -61,6 +62,10 @@ function load(key, fallback) {
 function saveDrafts() { localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }
 function savePending() { localStorage.setItem(PENDING_RESULTS_KEY, JSON.stringify(pendingResults)); }
 function saveCourseProgress() { localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(courseProgress)); }
+function saveActiveLesson() {
+  if (activeLessonCourseId && activeLessonActivityId) localStorage.setItem(ACTIVE_LESSON_KEY, JSON.stringify({ courseId:activeLessonCourseId, activityId:activeLessonActivityId }));
+  else localStorage.removeItem(ACTIVE_LESSON_KEY);
+}
 function normalizeModules(value) {
   if (!Array.isArray(value)) return [];
   const supportedTypes = ["page","lesson","file","video","pdf","download","practice","task","quiz","discussion","live","heading","link"];
@@ -536,7 +541,9 @@ function renderApp() {
     }
     switchTab("student", button.dataset.studentTab, button);
   }));
-  if (isTeacher) renderTeacher(); else renderStudent();
+  if (isTeacher) renderTeacher();
+  else if (activeLessonCourseId && activeLessonActivityId) renderLesson();
+  else renderStudent();
 }
 
 function bindStaticEvents() {
@@ -627,13 +634,12 @@ function bindStaticEvents() {
     activityEditorTableCell = event.target.closest("td, th");
   });
   document.addEventListener("selectionchange", rememberActivityEditorSelection);
-  $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; renderStudent(); });
+  $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; saveActiveLesson(); renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
   $("#lesson-complete").addEventListener("click", completeActiveLesson);
   $("#lesson-previous").addEventListener("click", () => navigateLesson(-1));
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));
-  $$(".lesson-tab").forEach(button => button.addEventListener("click", () => { activeLessonTab = button.dataset.lessonTab; renderLessonTabs(); }));
   $("#publish-course-form").addEventListener("submit", publishSelectedCourseExams);
   $("#exam-editor-form").addEventListener("submit", saveExamDraft);
   $("#editor-option-count").addEventListener("change", changeOptionCount);
@@ -750,6 +756,9 @@ async function logout() {
   activeQuestions = [];
   activeTeacherCourseId = null;
   activeStudentCourseId = null;
+  activeLessonCourseId = null;
+  activeLessonActivityId = null;
+  saveActiveLesson();
   if (sb) await sb.auth.signOut({ scope: "local" });
   currentUser = null;
   results = [];
@@ -1506,7 +1515,7 @@ function openLesson(courseId, activityId) {
   if (!course || !accessibleCourseActivities(course).some(activity => activity.id === activityId)) return;
   activeLessonCourseId = courseId;
   activeLessonActivityId = activityId;
-  activeLessonTab = "description";
+  saveActiveLesson();
   const progress = courseProgress[courseId] || { completed:{}, lastActivityId:"" };
   progress.lastActivityId = activityId;
   const activity = accessibleCourseActivities(course).find(item => item.id === activityId);
@@ -1532,13 +1541,19 @@ function lessonMediaMarkup(activity) {
     return `<div class="lesson-media-placeholder"><span>${modernIcon("video")}</span><strong>Clase en video</strong><p>${url ? "Usa el enlace del material para abrir el recurso audiovisual." : "El profesor todavía no ha agregado el video de esta clase."}</p></div>`;
   }
   if (activity.type === "pdf" && url) return `<div class="lesson-document-preview"><span>${modernIcon("pdf")}</span><div><strong>Documento de la clase</strong><p>Consulta el PDF en una pestaña nueva o descárgalo para estudiar sin conexión.</p></div><a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Abrir PDF</a></div>`;
-  return `<div class="lesson-media-placeholder compact"><span>${modernIcon(activity.type)}</span><strong>${activityTypeLabel(activity.type)}</strong><p>Revisa la explicación, los materiales y los recursos asociados a esta actividad.</p></div>`;
+  return "";
 }
 function renderLesson() {
   const course = publishedCourses.find(item => item.id === activeLessonCourseId);
   const activities = course ? accessibleCourseActivities(course) : [];
   const activityIndex = activities.findIndex(activity => activity.id === activeLessonActivityId);
-  if (!course || activityIndex < 0) { renderStudent(); return; }
+  if (!course || activityIndex < 0) {
+    activeLessonCourseId = null;
+    activeLessonActivityId = null;
+    saveActiveLesson();
+    renderStudent();
+    return;
+  }
   const activity = activities[activityIndex];
   const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
   const allActivities = normalizeModules(course.modules).filter(module => module.published).flatMap(module => module.activities.filter(item => item.published && item.type !== "heading" && item.completionRule !== "none"));
@@ -1548,8 +1563,10 @@ function renderLesson() {
   $("#lesson-sidebar-course").textContent = course.name;
   $("#lesson-title").textContent = activity.title;
   $("#lesson-type").textContent = `${activity.moduleTitle} · ${activityTypeLabel(activity.type)}`;
-  $("#lesson-description").innerHTML = renderActivityContent(activity.description || "Avanza a tu ritmo y marca esta actividad como completada cuando termines.");
-  $("#lesson-media").innerHTML = lessonMediaMarkup(activity);
+  $("#lesson-description").innerHTML = renderActivityContent(activity.description || "Esta página todavía no tiene contenido publicado.");
+  const mediaMarkup = lessonMediaMarkup(activity);
+  $("#lesson-media").innerHTML = mediaMarkup;
+  $("#lesson-media").classList.toggle("hidden", !mediaMarkup);
   $("#lesson-progress-label").textContent = `${percent}% completado`;
   $("#lesson-progress-bar").style.width = `${percent}%`;
   const completed = Boolean(progress.completed?.[activity.id]);
@@ -1560,9 +1577,9 @@ function renderLesson() {
   $("#lesson-next").disabled = activityIndex === activities.length - 1;
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
   const url = safeActivityUrl(activity.url);
-  $("#lesson-materials-card").innerHTML = url ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Material de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Abrir recurso ↗</a>` : `<div><span class="activity-type-icon">${modernIcon("download")}</span><span><strong>Materiales descargables</strong><small>No hay archivos adicionales para esta clase.</small></span></div>`;
+  $("#lesson-materials-card").innerHTML = url ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Recurso de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Abrir recurso ↗</a>` : "";
+  $("#lesson-materials-card").classList.toggle("hidden", !url);
   renderLessonTree(course, activity.id);
-  renderLessonTabs();
   show("lesson-view");
   closeLessonSidebar();
 }
@@ -1574,21 +1591,6 @@ function renderLessonTree(course, activeActivityId) {
     return `<details class="lesson-tree-module ${moduleAccessible ? "" : "is-locked"}" ${module.activities.some(activity => activity.id === activeActivityId) ? "open" : ""}><summary><span>${index + 1}</span><strong>${esc(module.title)}</strong><b>${moduleAccessible ? "⌄" : "🔒"}</b></summary><div>${moduleAccessible ? module.activities.map(activity => `<button class="lesson-tree-activity ${activity.id === activeActivityId ? "active" : ""}" data-activity-id="${esc(activity.id)}" type="button" ${accessibleIds.has(activity.id) ? "" : "disabled"}><span>${modernIcon(activity.type)}</span><span><strong>${esc(activity.title)}</strong><small>${progress.completed?.[activity.id] ? "Completado" : activity.id === activeActivityId ? "En progreso" : "No iniciado"}</small></span><b>${progress.completed?.[activity.id] ? "✓" : ""}</b></button>`).join("") : `<p>Completa el requisito anterior para desbloquearlo.</p>`}</div></details>`;
   }).join("");
   $$(".lesson-tree-activity:not(:disabled)").forEach(button => button.addEventListener("click", () => openLesson(course.id, button.dataset.activityId)));
-}
-function renderLessonTabs() {
-  const course = publishedCourses.find(item => item.id === activeLessonCourseId);
-  const activity = course ? accessibleCourseActivities(course).find(item => item.id === activeLessonActivityId) : null;
-  if (!activity) return;
-  $$(".lesson-tab").forEach(button => button.classList.toggle("active", button.dataset.lessonTab === activeLessonTab));
-  const url = safeActivityUrl(activity.url);
-  const contents = {
-    description: `<h3>Descripción de la clase</h3><div class="lesson-rich-content">${renderActivityContent(activity.description || "Esta actividad forma parte de tu ruta de aprendizaje. Revisa el contenido principal y completa los materiales indicados antes de continuar.")}</div><div class="lesson-objective"><strong>Objetivo</strong><span>Comprender y aplicar los conceptos presentados en ${esc(activity.title)}.</span></div>`,
-    materials: `<h3>Materiales</h3>${url ? `<a class="lesson-resource-row" href="${esc(url)}" target="_blank" rel="noopener"><span>${modernIcon(activity.type)}</span><span><strong>${esc(activity.title)}</strong><small>Abrir material asociado</small></span><b>↗</b></a>` : `<p class="muted">Esta clase no tiene materiales adicionales.</p>`}`,
-    evaluation: `<h3>Evaluación</h3><p>${activity.type === "quiz" ? "Completa la evaluación indicada por tu profesor desde la sección de evaluaciones del curso." : "No hay una evaluación vinculada directamente a esta clase."}</p>`,
-    comments: `<h3>Comentarios</h3><p class="muted">El espacio de comentarios estará disponible en una próxima etapa.</p>`,
-    resources: `<h3>Recursos descargables</h3>${url && ["pdf","download"].includes(activity.type) ? `<a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Descargar o abrir recurso</a>` : `<p class="muted">No se han agregado recursos descargables.</p>`}`
-  };
-  $("#lesson-tab-content").innerHTML = contents[activeLessonTab] || contents.description;
 }
 function completeActiveLesson() {
   const progress = courseProgress[activeLessonCourseId] || { completed:{}, lastActivityId:"" };

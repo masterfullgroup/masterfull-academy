@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260731-06">
+  <link rel="stylesheet" href="styles.css?v=20260731-07">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -136,19 +136,15 @@
     <section id="lesson-view" class="view">
       <div class="lesson-shell">
         <aside class="lesson-sidebar" id="lesson-sidebar" aria-label="Contenido del curso">
-          <div class="lesson-sidebar-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><strong id="lesson-sidebar-course"></strong></div><button id="lesson-sidebar-close" class="icon-btn" type="button" aria-label="Cerrar contenido">×</button></div>
+          <div class="lesson-sidebar-head"><strong id="lesson-sidebar-course"></strong><button id="lesson-sidebar-close" class="icon-btn" type="button" aria-label="Cerrar contenido">×</button></div>
           <div id="lesson-module-tree" class="lesson-module-tree"></div>
         </aside>
         <div class="lesson-main">
           <header class="lesson-topbar"><button id="lesson-menu-toggle" class="btn secondary" type="button" aria-expanded="false">☰ Contenido</button><button id="lesson-return" class="lesson-return" type="button">← Volver al curso</button><div class="lesson-progress-compact"><span id="lesson-progress-label">0% completado</span><div class="course-progress-track"><span id="lesson-progress-bar"></span></div></div></header>
           <article class="lesson-content">
             <div id="lesson-media" class="lesson-media"></div>
-            <div class="lesson-title-row"><div><span id="lesson-type" class="eyebrow"></span><h1 id="lesson-title"></h1><div id="lesson-description" class="muted lesson-rich-content"></div></div><button id="lesson-complete" class="btn primary" type="button">Marcar como completado</button></div>
-            <div id="lesson-materials-card" class="lesson-materials-card"></div>
-            <nav class="lesson-tabs" aria-label="Información de la clase">
-              <button class="lesson-tab active" data-lesson-tab="description" type="button">Descripción</button><button class="lesson-tab" data-lesson-tab="materials" type="button">Materiales</button><button class="lesson-tab" data-lesson-tab="evaluation" type="button">Evaluación</button><button class="lesson-tab" data-lesson-tab="comments" type="button">Comentarios</button><button class="lesson-tab" data-lesson-tab="resources" type="button">Recursos descargables</button>
-            </nav>
-            <section id="lesson-tab-content" class="lesson-tab-content"></section>
+            <header class="lesson-title-row"><div><span id="lesson-type" class="eyebrow"></span><h1 id="lesson-title"></h1></div><button id="lesson-complete" class="btn primary" type="button">Marcar como completado</button></header>
+            <section class="lesson-reading-panel"><div id="lesson-description" class="lesson-rich-content"></div><div id="lesson-materials-card" class="lesson-materials-card"></div></section>
             <footer class="lesson-navigation"><button id="lesson-previous" class="btn secondary" type="button">← Anterior</button><span id="lesson-position"></span><button id="lesson-next" class="btn primary" type="button">Siguiente →</button></footer>
           </article>
         </div>
@@ -402,6 +398,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260731-06"></script>
+  <script src="app.js?v=20260731-07"></script>
 </body>
 </html>
