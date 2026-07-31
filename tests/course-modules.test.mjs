@@ -60,7 +60,8 @@ assert.match(cssSource, /\.app-shell-mode #session-area\s*\{[\s\S]*?flex:0 0 aut
 assert.doesNotMatch(appSource, /<nav class="shell-teacher-nav"/, "La barra docente no debe repetir la única sección Cursos");
 assert.doesNotMatch(appSource, /canvas-course-meta/, "Las tarjetas del tablero no deben repetir métricas visibles dentro del curso");
 assert.match(appSource, /canvas-dashboard-actions/, "Cada curso debe mostrar acciones directas");
-assert.match(appSource, /class="\$\{deleteClass\}"/, "Cada tarjeta debe permitir eliminar el curso");
+assert.doesNotMatch(appSource, /canvas-dashboard-actions[\s\S]*?class="\$\{deleteClass\}"/, "Las tarjetas del tablero deben mostrar solo la accion de abrir curso");
+assert.match(appSource, /class="\$\{deleteClass\} danger"/, "La eliminacion debe permanecer en el menu de acciones del curso");
 assert.doesNotMatch(cssSource, /\.canvas-dashboard-cover::after/, "Las tarjetas del tablero no deben incluir adornos circulares");
 assert.doesNotMatch(cssSource, /\.canvas-course-cover > button::after/, "Las demás tarjetas de curso tampoco deben incluir adornos circulares");
 assert.match(cssSource, /\.app-shell-mode \.user-menu\s*\{[\s\S]*?border-radius:0;[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/, "La información de cuenta debe integrarse sin otra tarjeta");
