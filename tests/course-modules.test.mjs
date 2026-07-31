@@ -4,6 +4,9 @@ import vm from "node:vm";
 
 const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
 const htmlSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+assert.doesNotMatch(appSource, /course-context-mark/, "La cabecera no debe repetir el curso con una inicial decorativa");
+assert.doesNotMatch(appSource, /<span>CURSO<\/span><h1>/, "La cabecera no debe repetir la etiqueta Curso");
+assert.match(appSource, /course-context-actions/, "La cabecera debe agrupar el estado y la vista del alumno");
 assert.match(appSource, /renderTeacherCourseModulesCanvas/, "El curso docente debe usar la estructura compacta de módulos");
 assert.match(appSource, /collapse-all-modules/, "Los módulos deben poder contraerse en conjunto");
 assert.match(appSource, /row-action-menu/, "Las acciones de filas deben agruparse en menús verticales");

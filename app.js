@@ -909,10 +909,8 @@ function renderTeacherCourseWorkspace(course, exams) {
   else content = renderTeacherCourseOverview(course, exams, publishedCount, questionCount);
   return `<div class="course-workspace-page">
     <header class="course-context-bar">
-      <button class="course-workspace-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Cursos</button>
-      <div class="course-context-title"><span class="course-context-mark">${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><div><span>CURSO</span><h1>${esc(course.name)}</h1></div></div>
-      <span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Borrador" : "Publicado"}</span>
-      <button class="btn secondary student-preview-toggle ${isStudentPreview ? "active" : ""}" id="toggle-student-preview" type="button">${modernIcon(isStudentPreview ? "edit" : "profile")} ${isStudentPreview ? "Volver a editar" : "Vista del alumno"}</button>
+      <div class="course-context-title"><button class="course-workspace-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Cursos</button><span class="course-context-divider" aria-hidden="true"></span><h1>${esc(course.name)}</h1></div>
+      <div class="course-context-actions"><span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Borrador" : "Publicado"}</span><button class="btn secondary student-preview-toggle ${isStudentPreview ? "active" : ""}" id="toggle-student-preview" type="button">${modernIcon(isStudentPreview ? "edit" : "profile")} ${isStudentPreview ? "Volver a editar" : "Vista del alumno"}</button></div>
     </header>
     <div class="course-workspace-layout ${isStudentPreview ? "student-preview-active" : ""}">
       <aside class="course-workspace-sidebar">
