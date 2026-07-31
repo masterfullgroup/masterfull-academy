@@ -4,6 +4,7 @@ import vm from "node:vm";
 
 const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
 const htmlSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const cssSource = fs.readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 assert.doesNotMatch(appSource, /course-context-mark/, "La cabecera no debe repetir el curso con una inicial decorativa");
 assert.doesNotMatch(appSource, /<span>CURSO<\/span><h1>/, "La cabecera no debe repetir la etiqueta Curso");
 assert.match(appSource, /course-context-actions/, "La cabecera debe agrupar el estado y la vista del alumno");
@@ -40,6 +41,8 @@ assert.doesNotMatch(appSource, /\["modules", `Módulos \(\$\{/, "La navegación 
 assert.doesNotMatch(appSource, /\["exams", `Evaluaciones \(\$\{/, "La navegación no debe mostrar el total de evaluaciones");
 assert.match(appSource, /question-bank-search/, "El banco de preguntas debe incluir búsqueda");
 assert.match(appSource, /question-bank-card-metrics/, "Cada banco debe presentar sus métricas");
+assert.match(cssSource, /\.canvas-item-copy small\s*\{\s*display:none/, "Los módulos docentes deben mostrar solo el nombre del contenido");
+assert.match(cssSource, /\.student-activity small\s*\{\s*display:none/, "Los módulos del alumno deben mostrar solo el nombre del contenido");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
