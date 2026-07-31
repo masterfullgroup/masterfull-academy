@@ -1005,9 +1005,21 @@ function renderTeacherCourseModulesCanvas(course, exams = []) {
 
 function renderTeacherCourseOverview(course, exams, publishedCount, questionCount) {
   const recent = exams.slice(0, 3);
-  return `<div class="course-overview-grid">
-    <section class="course-overview-main"><span class="eyebrow">RESUMEN</span><h2>Contenido de ${esc(course.name)}</h2><p>Administra desde aquí el contenido y las evaluaciones de este curso.</p>${recent.length ? `<div class="course-recent-list">${recent.map(exam => `<button class="course-recent-exam edit-exam" data-id="${esc(exam.id)}" type="button"><span>${modernIcon("exams")}</span><span><strong>${esc(exam.title)}</strong><small>${exam.minutes} min · ${quantity(exam.questions.length, "pregunta")}</small></span><b>Editar →</b></button>`).join("")}</div>` : `<div class="course-workspace-empty"><strong>Aún no hay evaluaciones</strong><p>Crea la primera evaluación de este curso.</p></div>`}</section>
-    <aside class="course-overview-stats"><div><span>Evaluaciones</span><strong>${exams.length}</strong></div><div><span>Publicadas</span><strong>${publishedCount}</strong></div><div><span>Preguntas en bancos</span><strong>${questionCount}</strong></div></aside>
+  const modules = normalizeModules(course.modules);
+  const activityCount = modules.reduce((total, module) => total + module.activities.length, 0);
+  const metrics = [
+    ["Módulos", modules.length, "courses", "Estructura del curso"],
+    ["Elementos", activityCount, "page", "Contenido organizado"],
+    ["Evaluaciones", exams.length, "quiz", `${publishedCount} publicadas`],
+    ["Preguntas", questionCount, "practice", "En bancos del curso"]
+  ];
+  return `<div class="course-home">
+    <div class="course-subpage-head course-home-heading"><div><span class="eyebrow">INICIO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Administra el contenido, las evaluaciones y el progreso de este curso.")}</p></div><button class="btn primary course-home-open-modules" type="button">${modernIcon("courses")} Gestionar módulos</button></div>
+    <section class="course-home-metrics" aria-label="Resumen del curso">${metrics.map(([label, value, icon, detail]) => `<article><span class="course-home-metric-icon">${modernIcon(icon)}</span><div><small>${label}</small><strong>${value}</strong><p>${detail}</p></div></article>`).join("")}</section>
+    <section class="course-home-panel">
+      <header class="course-home-panel-head"><div><span class="eyebrow">ACTIVIDAD RECIENTE</span><h3>Evaluaciones del curso</h3><p>Accede rápidamente a las últimas evaluaciones configuradas.</p></div><button class="btn secondary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluación</button></header>
+      ${recent.length ? `<div class="course-recent-list">${recent.map(exam => `<button class="course-recent-exam edit-exam" data-id="${esc(exam.id)}" type="button"><span class="course-recent-icon">${modernIcon("quiz")}</span><span class="course-recent-copy"><strong>${esc(exam.title)}</strong><small><b>${exam.minutes} min</b><b>${quantity(exam.questions.length, "pregunta")}</b><b>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</b></small></span><span class="course-recent-action">Editar <b aria-hidden="true">→</b></span></button>`).join("")}</div>` : `<div class="course-workspace-empty course-home-empty"><strong>Aún no hay evaluaciones</strong><p>Crea la primera para comenzar a construir el recorrido del curso.</p></div>`}
+    </section>
   </div>`;
 }
 function renderTeacherCourseExams(course, exams) {
@@ -1115,6 +1127,11 @@ function bindTeacherExamWorkspaceActions() {
   });
   $$(".course-subpage").forEach(button => button.addEventListener("click", () => {
     activeTeacherCourseSection = button.dataset.courseSection;
+    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
+    bindTeacherExamWorkspaceActions();
+  }));
+  $$(".course-home-open-modules").forEach(button => button.addEventListener("click", () => {
+    activeTeacherCourseSection = "modules";
     renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     bindTeacherExamWorkspaceActions();
   }));

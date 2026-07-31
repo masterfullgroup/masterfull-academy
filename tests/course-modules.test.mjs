@@ -16,6 +16,8 @@ assert.match(appSource, /teacher-course-open/, "Al abrir un curso debe activarse
 assert.match(appSource, /document\.body\.classList\.toggle\("teacher-course-open"/, "El modo de enfoque debe sincronizarse con el curso activo");
 assert.match(appSource, /document\.body\.classList\.toggle\("student-course-open"/, "El alumno debe recibir el mismo modo de curso");
 assert.doesNotMatch(appSource, /scrollIntoView|window\.scrollTo/, "Los botones no deben desplazar automáticamente la página");
+assert.match(appSource, /course-home-metrics/, "El inicio del curso debe presentar métricas ordenadas");
+assert.match(appSource, /course-home-open-modules/, "El inicio debe ofrecer acceso directo a los módulos");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
