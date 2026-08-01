@@ -78,7 +78,7 @@ assert.doesNotMatch(appSource, /student-resume-panel/, "El alumno no debe recibi
 assert.doesNotMatch(appSource, /student-card-footer/, "Las tarjetas no deben repetir recuentos de actividades y evaluaciones");
 assert.doesNotMatch(appSource, /contentMeta/, "El directorio del alumno no debe calcular metadatos redundantes");
 assert.match(appSource, /student-dashboard-course-card/, "Las tarjetas del alumno deben compartir la estructura visual del tablero docente");
-assert.match(appSource, /student-dashboard-progress/, "El progreso útil debe mantenerse de forma compacta");
+assert.doesNotMatch(appSource, /student-dashboard-progress/, "Las tarjetas del alumno no deben mostrar progreso ni informacion adicional");
 assert.doesNotMatch(appSource, /student-course-exams/, "Las evaluaciones no deben repetirse fuera de sus módulos");
 assert.doesNotMatch(appSource, /ESPACIO DEL CURSO/, "La cabecera del alumno no debe repetir el contexto del curso");
 assert.doesNotMatch(appSource, /Avanza por las páginas/, "La vista interna no debe añadir instrucciones redundantes");

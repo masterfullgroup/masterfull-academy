@@ -54,17 +54,6 @@ const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const uid = () => crypto.randomUUID();
 const nowIso = () => new Date().toISOString();
-const normalizeCourseCopy = value => String(value || "").trim().toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-function courseDescriptionMarkup(course, fallback) {
-  const description = String(course.description || "").trim();
-  const courseName = String(course.name || "").trim();
-  const normalizedDescription = normalizeCourseCopy(description);
-  const normalizedName = normalizeCourseCopy(courseName);
-  if (!description) return fallback ? `<p>${esc(fallback)}</p>` : "";
-  if (normalizedDescription === normalizedName || normalizedDescription === `curso de ${normalizedName}`) return "";
-  return `<p>${esc(description)}</p>`;
-}
 
 function load(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? structuredClone(fallback); }
@@ -846,7 +835,6 @@ function renderTeacherOverview() {
       <div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${isDraft ? "NO PUBLICADO" : "PUBLICADO"}</small></div>
       <div class="canvas-dashboard-card-body">
         <strong class="canvas-course-title">${esc(course.name)}</strong>
-        ${courseDescriptionMarkup(course, "Curso listo para organizar contenido.")}
         <div class="canvas-dashboard-actions">
           <button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button>
         </div>
@@ -887,7 +875,7 @@ function renderCanvasCourseCard(course, isDraft, index) {
   const deleteClass = isDraft ? "delete-course" : "delete-published-course";
   return `<article class="canvas-course-card tone-${index % 5} ${isDraft ? "draft" : ""}">
     <div class="canvas-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><details class="canvas-course-menu"><summary aria-label="Más acciones para ${esc(course.name)}">⋮</summary><div>${isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar curso</button>` : ""}<button class="create-exam-course" data-id="${esc(course.id)}" type="button">Crear evaluación</button><button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar curso</button><button class="${deleteClass} danger" data-id="${esc(course.id)}" type="button">Eliminar curso</button></div></details></div>
-    <div class="canvas-course-body"><strong class="canvas-course-title">${esc(course.name)}</strong><small>${isDraft ? "No publicado" : "Publicado"}</small>${courseDescriptionMarkup(course, "Curso listo para organizar contenido.")}<footer><span title="Módulos">${modernIcon("page")} ${modules.length}</span><span title="Recursos">${modernIcon("folder")} ${activities}</span><span title="Evaluaciones">${modernIcon("quiz")} ${exams}</span><button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></footer></div>
+    <div class="canvas-course-body"><strong class="canvas-course-title">${esc(course.name)}</strong><small>${isDraft ? "No publicado" : "Publicado"}</small><footer><span title="Módulos">${modernIcon("page")} ${modules.length}</span><span title="Recursos">${modernIcon("folder")} ${activities}</span><span title="Evaluaciones">${modernIcon("quiz")} ${exams}</span><button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></footer></div>
   </article>`;
 }
 function renderTeacherQuickCourses() {
@@ -1421,9 +1409,7 @@ function renderStudent() {
 function renderStudentCourseDirectory(courses, summaries) {
   if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Todavía no tienes cursos disponibles</strong><p>Los cursos publicados por el profesor aparecerán aquí.</p></div>`;
   return `<div class="canvas-dashboard-grid student-course-gallery">${courses.map(course => {
-    const summary = summaries.find(item => item.course.id === course.id) || { total:0, completed:0, percent:0 };
-    const progressMarkup = summary.total ? `<div class="student-dashboard-progress"><span><b>${summary.percent}%</b><span>completado</span></span><div class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><i style="width:${summary.percent}%"></i></div></div>` : "";
-    return `<article class="canvas-dashboard-card student-dashboard-course-card"><div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div><div class="canvas-dashboard-card-body"><strong class="canvas-course-title">${esc(course.name)}</strong>${courseDescriptionMarkup(course, "Contenido académico organizado por módulos.")}${progressMarkup}<div class="canvas-dashboard-actions student-dashboard-actions"><button class="open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></div></div></article>`;
+    return `<article class="canvas-dashboard-card student-dashboard-course-card"><div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div><div class="canvas-dashboard-card-body"><strong class="canvas-course-title">${esc(course.name)}</strong><div class="canvas-dashboard-actions student-dashboard-actions"><button class="open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></div></div></article>`;
   }).join("")}</div>`;
 }
 function renderStudentCourseWorkspace(course, myGrades) {
