@@ -93,8 +93,12 @@ assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s
 assert.match(cssSource, /body\.student-course-open \.student-course-content\s*\{[\s\S]*?width:100%;[\s\S]*?max-width:none;[\s\S]*?margin:0;/, "El contenido no debe heredar el centrado del main general");
 assert.doesNotMatch(appSource, /student-activity-action|student-activity-state/, "Los contenidos no deben repetir controles circulares de finalización");
 assert.doesNotMatch(appSource, /continue-course/, "La cabecera de módulos no debe repetir el acceso al contenido");
-assert.match(appSource, /student-module-chevron/, "Cada módulo debe conservar únicamente su control de expansión");
-assert.match(cssSource, /\.student-module\[open\] summary > \.student-module-chevron\s*\{[\s\S]*?rotate\(90deg\)/, "El chevrón debe indicar visualmente la expansión");
+assert.match(appSource, /class="module-expand-control"/, "Cada módulo debe ofrecer un control de expansión");
+assert.match(cssSource, /\.module-expand-control:empty::before\s*\{\s*content:"\+";/, "El módulo contraído debe mostrar el control +");
+assert.match(cssSource, /details\[open\] > summary \.module-expand-control:empty::before\s*\{\s*content:"−";/, "El módulo expandido debe mostrar el control −");
+assert.match(appSource, /class="module-sequence"[^>]*>\$\{moduleIndex \+ 1\}/, "Los módulos docentes deben usar numeración");
+assert.match(appSource, /class="activity-sequence"[^>]*>\$\{activityIndex \+ 1\}/, "Las actividades deben usar numeración");
+assert.doesNotMatch(appSource, /class="publish-check/, "Los checks de publicación deben sustituirse por numeración y texto");
 assert.doesNotMatch(htmlSource, /class="lesson-tabs"/, "La página de contenido no debe mostrar pestañas vacías o redundantes");
 assert.doesNotMatch(appSource, /renderLessonTabs/, "El contenido no debe duplicarse en paneles secundarios");
 assert.match(appSource, /ACTIVE_LESSON_KEY/, "La lección activa debe conservarse durante recargas y sincronizaciones");
@@ -109,7 +113,7 @@ assert.match(cssSource, /\.lesson-reading-panel > \.lesson-rich-content\s*\{[\s\
 assert.match(htmlSource, /id="lesson-menu-toggle"[\s\S]*?lesson-menu-icon[\s\S]*?Ver módulos/, "El control móvil debe identificarse claramente como acceso a los módulos");
 assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, "El botón de módulos debe tener una apariencia moderna y reconocible");
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
-assert.match(appSource, /module\.activities\.map\(activity =>/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
+assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

@@ -6970,6 +6970,169 @@ body.teacher-course-open .course-workspace-page {
   color:#fff;
 }
 
+/* Navegación de módulos: jerarquía, numeración y controles explícitos. */
+.course-workspace-page > .course-context-bar {
+  min-height:76px;
+  padding:12px 20px;
+}
+.course-context-copy {
+  min-width:0;
+}
+.course-context-copy > span {
+  display:block;
+  margin-bottom:3px;
+  color:#cbd3f4 !important;
+  font-size:9px !important;
+  font-weight:800;
+  letter-spacing:.14em;
+}
+.course-context-bar .course-context-title h1 {
+  font-size:22px;
+  line-height:1.15;
+}
+.course-subpage-head h2,
+.student-course-main-header h2 {
+  font-size:30px;
+  line-height:1.15;
+}
+.canvas-module-card > summary {
+  grid-template-columns:20px 36px minmax(0,1fr) 34px 36px 36px;
+  min-height:72px;
+}
+.module-sequence,
+.activity-sequence {
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  color:#fff;
+  border-radius:9px;
+  background:#4c568f;
+  font-weight:800;
+  line-height:1;
+}
+.module-sequence {
+  width:34px;
+  height:34px;
+  font-size:14px;
+}
+.activity-sequence {
+  width:28px;
+  height:28px;
+  color:#414b78;
+  border:1px solid #d8dcea;
+  border-radius:8px;
+  background:#f1f2f8;
+  font-size:11px;
+}
+.module-expand-control {
+  display:grid;
+  width:32px;
+  height:32px;
+  place-items:center;
+  color:#424b82;
+  border:1px solid #cbd0e1;
+  border-radius:8px;
+  background:#fff;
+  font-size:20px;
+  font-weight:500;
+  line-height:1;
+}
+.module-expand-control:empty::before {
+  content:"+";
+}
+details[open] > summary .module-expand-control:empty::before {
+  content:"−";
+}
+.canvas-module-heading {
+  grid-template-columns:20px 28px minmax(0,1fr) auto;
+}
+.canvas-module-item {
+  grid-template-columns:20px 28px 36px minmax(0,1fr) 38px;
+}
+.student-module summary > .module-expand-control {
+  color:#424b82;
+  background:#fff;
+  box-shadow:none;
+}
+.student-module.is-locked summary > .module-expand-control {
+  font-size:13px;
+}
+.student-activity {
+  grid-template-columns:28px 36px minmax(0,1fr);
+}
+.lesson-tree-module summary > .module-expand-control {
+  width:26px;
+  height:26px;
+  color:#dbeafe;
+  border-color:#ffffff30;
+  background:#ffffff0b;
+  border-radius:7px;
+  font-size:17px;
+}
+.lesson-tree-activity {
+  grid-template-columns:27px minmax(0,1fr);
+}
+.lesson-tree-activity > .activity-sequence {
+  width:25px;
+  height:25px;
+  color:#dbeafe;
+  border-color:#ffffff25;
+  background:#ffffff12;
+}
+
+@media (max-width:700px) {
+  .course-workspace-page > .course-context-bar {
+    min-height:0;
+    padding:12px;
+  }
+  .course-context-bar .course-context-title h1 {
+    font-size:18px;
+  }
+  .course-subpage-head h2,
+  .student-course-main-header h2 {
+    font-size:25px;
+  }
+  .canvas-module-toolbar {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    overflow:visible;
+  }
+  .canvas-module-toolbar .btn {
+    width:100%;
+    min-height:42px;
+    justify-content:center;
+  }
+  .canvas-module-card > summary {
+    grid-template-columns:16px 32px minmax(0,1fr) 32px 34px;
+    min-height:68px;
+    gap:8px;
+    padding:10px;
+  }
+  .canvas-module-card > summary > .row-action-menu {
+    grid-column:5;
+  }
+  .canvas-module-card > summary > .module-quick-add {
+    display:none;
+  }
+  .module-sequence {
+    width:32px;
+    height:32px;
+  }
+  .canvas-module-item {
+    grid-template-columns:16px 26px 34px minmax(0,1fr) 34px;
+    gap:8px;
+  }
+  .canvas-module-heading {
+    grid-template-columns:16px 26px minmax(0,1fr) 34px;
+  }
+  .student-module summary {
+    min-height:70px;
+  }
+  .student-activity {
+    grid-template-columns:26px 34px minmax(0,1fr);
+  }
+}
+
 @media (min-width:901px) {
   .app-shell-mode .brand {
     display:flex;
