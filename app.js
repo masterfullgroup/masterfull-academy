@@ -24,6 +24,7 @@ let publishedExams = [];
 let results = [];
 let activeExam = null;
 let activeCourse = null;
+let resultCourseId = "";
 let activeQuestions = [];
 let timerInterval = null;
 let secondsLeft = 0;
@@ -651,7 +652,7 @@ function bindStaticEvents() {
     event.preventDefault();
     if (confirm("¿Deseas entregar el examen con tus respuestas actuales?")) finishExam(false);
   });
-  $("#return-student").addEventListener("click", () => { activeExam = null; activeQuestions = []; finishingExam = false; renderStudent(); });
+  $("#return-student").addEventListener("click", returnFromResult);
   $("#export-grades").addEventListener("click", exportGrades);
   $("#refresh-results").addEventListener("click", async () => { await refreshResults(true); renderTeacher(); });
   ["teacher-search","teacher-course-filter","teacher-exam-filter"].forEach(id => {
@@ -957,7 +958,7 @@ function renderTeacherCourseWorkspace(course, exams) {
   else content = renderTeacherCourseOverview(course, exams, publishedCount, questionCount);
   return `<div class="course-workspace-page">
     <header class="course-context-bar">
-      <div class="course-context-title"><button class="course-workspace-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Cursos</button><span class="course-context-divider" aria-hidden="true"></span><div class="course-context-copy"><span>CURSO ACTUAL</span><h1>${esc(course.name)}</h1></div></div>
+      <div class="course-context-title"><button class="course-workspace-back contextual-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Cursos</button><span class="course-context-divider" aria-hidden="true"></span><div class="course-context-copy"><span>CURSO ACTUAL</span><h1>${esc(course.name)}</h1></div></div>
       <div class="course-context-actions"><span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Borrador" : "Publicado"}</span><button class="btn secondary student-preview-toggle ${isStudentPreview ? "active" : ""}" id="toggle-student-preview" type="button">${modernIcon(isStudentPreview ? "edit" : "eye")} ${isStudentPreview ? "Volver a editar" : "Vista del alumno"}</button></div>
     </header>
     <div class="course-workspace-layout ${isStudentPreview ? "student-preview-active" : ""}">
@@ -1417,7 +1418,7 @@ function renderStudentCourseWorkspace(course, myGrades) {
   const summary = courseStudentSummary(course);
   const gradesActive = activeStudentCourseSection === "grades";
   const mainContent = gradesActive ? renderStudentCourseGrades(course, myGrades) : renderStudentCourseModules(course, myGrades);
-  return `<div class="student-course-page"><aside class="student-course-sidebar"><div class="student-course-sidebar-title"><span>Curso</span><h2>${esc(course.name)}</h2></div><nav aria-label="Navegación del curso"><button class="student-course-nav-button ${gradesActive ? "" : "active"}" data-section="modules" type="button">${modernIcon("modules")}<span>Módulos</span></button><button class="student-course-nav-button ${gradesActive ? "active" : ""}" data-section="grades" type="button">${modernIcon("grade")}<span>Calificaciones</span></button></nav><div class="student-course-sidebar-progress"><span><b>Progreso</b><strong>${summary.percent}%</strong></span><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${summary.percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><span style="width:${summary.percent}%"></span></div></div><button class="course-workspace-back" id="back-to-student-courses" type="button">← Mis cursos</button></aside><main class="student-course-content"><header class="student-course-main-header"><h2>${gradesActive ? "Calificaciones" : "Módulos"}</h2></header>${mainContent}</main></div>`;
+  return `<div class="student-course-page"><aside class="student-course-sidebar"><div class="student-course-sidebar-title"><span>Curso</span><h2>${esc(course.name)}</h2></div><nav aria-label="Navegación del curso"><button class="student-course-nav-button ${gradesActive ? "" : "active"}" data-section="modules" type="button">${modernIcon("modules")}<span>Módulos</span></button><button class="student-course-nav-button ${gradesActive ? "active" : ""}" data-section="grades" type="button">${modernIcon("grade")}<span>Calificaciones</span></button></nav><div class="student-course-sidebar-progress"><span><b>Progreso</b><strong>${summary.percent}%</strong></span><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${summary.percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><span style="width:${summary.percent}%"></span></div></div><button class="course-workspace-back contextual-back" id="back-to-student-courses" type="button"><span aria-hidden="true">←</span> Mis cursos</button></aside><main class="student-course-content"><header class="student-course-main-header"><h2>${gradesActive ? "Calificaciones" : "Módulos"}</h2></header>${mainContent}</main></div>`;
 }
 function renderStudentCourseGrades(course, myGrades) {
   const grades = myGrades.filter(grade => grade.courseId === course.id).sort((left, right) => new Date(right.date) - new Date(left.date));
@@ -1719,7 +1720,7 @@ async function finishExam(timeExpired, reason = "", silent = false) {
     renderExamResult(rowGrade, attemptsFinished, saved);
     if (attemptsFinished) {
       const completedGrades = [...results.filter(item => item.examId === activeExam.id && item.studentId === currentUser.id && item.review?.length), rowGrade].filter((item, idx, arr) => arr.findIndex(other => other.submissionId === item.submissionId) === idx);
-      $("#result-review").innerHTML = `<h3 class="review-heading">Revisión de todos tus intentos</h3>${reviewMarkup(completedGrades)}`;
+      $("#result-review").innerHTML = reviewSectionMarkup(completedGrades);
     }
   }
 }
@@ -1778,11 +1779,24 @@ async function sendResultKeepalive(payload) {
   }
 }
 function renderExamResult(grade, includeReview = false, saved = false) {
+  resultCourseId = grade.courseId || activeExam?.courseId || activeCourse?.id || activeStudentCourseId || "";
+  $("#result-title").textContent = grade.examTitle || "Evaluación completada";
   $("#result-score").textContent = grade.score;
-  $("#result-message").textContent = `${grade.correct} de ${grade.total} respuestas correctas. ${grade.completionReason || ""}`;
-  $("#result-encouragement").textContent = `${encouragementFor(grade.score)} ${saved ? "Resultado guardado correctamente." : "Resultado pendiente de sincronización."}`;
-  $("#result-review").innerHTML = includeReview ? reviewMarkup([grade]) : "";
+  $("#result-message").textContent = `${grade.correct} de ${grade.total} respuestas correctas · Intento ${grade.attempt || 1}`;
+  $("#result-encouragement").textContent = encouragementFor(grade.score);
+  $("#result-sync-status").textContent = saved ? "Resultado guardado" : "Pendiente de sincronización";
+  $("#result-sync-status").classList.toggle("is-pending", !saved);
+  $("#result-review").innerHTML = includeReview ? reviewSectionMarkup([grade]) : "";
   show("result-view");
+}
+function returnFromResult() {
+  const courseId = resultCourseId || activeExam?.courseId || activeCourse?.id || "";
+  activeExam = null;
+  activeQuestions = [];
+  finishingExam = false;
+  activeStudentCourseId = publishedCourses.some(course => course.id === courseId) ? courseId : null;
+  activeStudentCourseSection = "modules";
+  renderStudent();
 }
 function encouragementFor(score) {
   if (score >= 18) return "¡Excelente trabajo! Tu esfuerzo y preparación se notan.";
@@ -1791,16 +1805,20 @@ function encouragementFor(score) {
   return "No te rindas. Revisar tus respuestas es el primer paso para mejorar.";
 }
 function reviewMarkup(grades) {
-  return `<div class="attempt-review-list">${grades.map(grade => `<section class="attempt-review"><div class="attempt-review-head"><div><span class="eyebrow">INTENTO ${grade.attempt || 1}</span><h3>${esc(grade.examTitle)}</h3></div><strong>${grade.score}/20</strong></div>${(grade.review || []).map((question, index) => {
+  return `<div class="attempt-review-list">${grades.map(grade => `<section class="attempt-review"><div class="attempt-review-head"><div><span class="eyebrow">INTENTO ${grade.attempt || 1}</span><h3>Revisión de respuestas</h3></div><strong>${grade.score}<small>/20</small></strong></div>${(grade.review || []).map((question, index) => {
     const answeredCorrectly = question.selected === question.correct;
-    return `<article class="review-question ${answeredCorrectly ? "review-correct" : "review-incorrect"}"><div class="review-question-title"><span>${answeredCorrectly ? "✓ Correcta" : "✕ Incorrecta"}</span><strong>Pregunta ${index + 1}</strong></div><h4>${esc(question.text)}</h4>${questionImageMarkup(question, "review-image")}<div>${question.options.map((option, optionIndex) => {
+    const unanswered = question.selected === null || question.selected === undefined;
+    return `<article class="review-question ${answeredCorrectly ? "review-correct" : "review-incorrect"}"><div class="review-question-title"><strong>Pregunta ${index + 1}</strong><span>${answeredCorrectly ? "✓ Correcta" : unanswered ? "Sin respuesta" : "✕ Incorrecta"}</span></div><h4>${esc(question.text)}</h4>${questionImageMarkup(question, "review-image")}<div class="review-options">${question.options.map((option, optionIndex) => {
       const classes = ["review-option"];
       if (optionIndex === question.correct) classes.push("correct-answer");
       if (optionIndex === question.selected && optionIndex !== question.correct) classes.push("wrong-answer");
-      const marker = optionIndex === question.correct ? "✓" : optionIndex === question.selected ? "✕" : "○";
-      return `<div class="${classes.join(" ")}"><span>${marker}</span><span>${esc(option)}</span>${optionIndex === question.correct ? "<small>Respuesta correcta</small>" : optionIndex === question.selected ? "<small>Tu respuesta</small>" : ""}</div>`;
-    }).join("")}</div>${question.selected === null ? `<p class="unanswered">No respondiste esta pregunta.</p>` : ""}</article>`;
+      const label = optionIndex === question.correct ? (optionIndex === question.selected ? "Tu respuesta · Correcta" : "Respuesta correcta") : optionIndex === question.selected ? "Tu respuesta" : "";
+      return `<div class="${classes.join(" ")}"><span class="review-option-marker">${String.fromCharCode(65 + optionIndex)}</span><span>${esc(option)}</span>${label ? `<small>${label}</small>` : ""}</div>`;
+    }).join("")}</div>${unanswered ? `<p class="unanswered">Esta pregunta quedó sin respuesta.</p>` : ""}</article>`;
   }).join("")}</section>`).join("")}</div>`;
+}
+function reviewSectionMarkup(grades) {
+  return `<header class="result-review-heading"><span class="eyebrow">DETALLE</span><h2>${grades.length > 1 ? "Revisión de intentos" : "Revisión de respuestas"}</h2><p>Consulta cada pregunta y compara tu respuesta con la opción correcta.</p></header>${reviewMarkup(grades)}`;
 }
 function showAttemptReview(gradeId) {
   const grade = results.find(item => item.id === gradeId && item.studentId === currentUser.id);
@@ -1812,7 +1830,7 @@ function showExamReviews(examId) {
   const best = grades.reduce((current, grade) => grade.score > current.score ? grade : current, grades[0]);
   renderExamResult(best, false, true);
   $("#result-message").textContent = `${grades.length} ${grades.length === 1 ? "intento completado" : "intentos completados"}. Aquí puedes revisar todas tus respuestas.`;
-  $("#result-review").innerHTML = reviewMarkup(grades);
+  $("#result-review").innerHTML = reviewSectionMarkup(grades);
 }
 function recoverInterruptedAttempt() {
   if (!currentUser) return;

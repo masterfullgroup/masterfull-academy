@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260803-7">
+  <link rel="stylesheet" href="styles.css?v=20260803-8">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -140,7 +140,7 @@
           <div id="lesson-module-tree" class="lesson-module-tree"></div>
         </aside>
         <div class="lesson-main">
-          <header class="lesson-topbar"><button id="lesson-menu-toggle" class="lesson-menu-toggle" type="button" aria-expanded="false" aria-controls="lesson-sidebar"><svg class="lesson-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Ver módulos</span></button><button id="lesson-return" class="lesson-return" type="button">← Volver al curso</button></header>
+          <header class="lesson-topbar"><button id="lesson-return" class="lesson-return contextual-back" type="button"><span aria-hidden="true">←</span> Volver a módulos</button><button id="lesson-menu-toggle" class="lesson-menu-toggle" type="button" aria-expanded="false" aria-controls="lesson-sidebar"><svg class="lesson-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Ver módulos</span></button></header>
           <article class="lesson-content">
             <div id="lesson-media" class="lesson-media"></div>
             <header class="lesson-title-row"><div><span id="lesson-type" class="eyebrow"></span><h1 id="lesson-title"></h1></div><button id="lesson-complete" class="btn primary" type="button">Marcar como completado</button></header>
@@ -161,13 +161,13 @@
     </section>
 
     <section id="result-view" class="view">
-      <div class="panel narrow result-panel">
-        <div class="result-icon">✓</div><span class="eyebrow">EXAMEN FINALIZADO</span>
-        <h2>Tu resultado</h2><div class="big-score"><span id="result-score">0</span><small>/ 20</small></div>
-        <p id="result-message" class="muted"></p>
-        <p id="result-encouragement" class="encouragement"></p>
+      <div class="result-shell">
+        <header class="result-page-header"><button class="contextual-back" id="return-student" type="button"><span aria-hidden="true">←</span> Volver a módulos</button><span>Revisión de evaluación</span></header>
+        <section class="result-summary-card" aria-labelledby="result-title">
+          <div class="result-summary-copy"><span class="eyebrow">RESULTADO</span><h1 id="result-title">Evaluación completada</h1><p id="result-message"></p><p id="result-encouragement"></p><span id="result-sync-status" class="result-sync-status"></span></div>
+          <div class="big-score" aria-label="Calificación obtenida"><span id="result-score">0</span><small>/ 20</small></div>
+        </section>
         <div id="result-review"></div>
-        <button class="btn primary" id="return-student">← Volver a mis cursos</button>
       </div>
     </section>
   </main>
@@ -399,6 +399,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260803-7"></script>
+  <script src="app.js?v=20260803-8"></script>
 </body>
 </html>

@@ -96,6 +96,8 @@ assert.match(appSource, /activeStudentCourseSection/, "El curso debe conservar s
 assert.match(appSource, /renderStudentCourseGrades/, "El alumno debe consultar las calificaciones del curso específico");
 assert.match(appSource, /myGrades\.filter\(grade => grade\.courseId === course\.id\)/, "Las calificaciones internas deben filtrarse por curso");
 assert.match(cssSource, /\.student-course-sidebar\s*\{[\s\S]*?flex-direction:column;/, "La navegación del curso debe ocupar el lateral izquierdo");
+assert.match(cssSource, /\.student-course-sidebar\s*\{[\s\S]*?position:sticky;[\s\S]*?height:100vh;/, "La barra lateral del curso debe permanecer fija durante el desplazamiento");
+assert.match(cssSource, /\.student-course-sidebar-progress\s*\{[\s\S]*?margin-top:22px;/, "El progreso debe aparecer inmediatamente después de la navegación");
 assert.doesNotMatch(appSource, /student-course-grades/, "El acceso contextual no debe enviar al alumno a la tabla global");
 assert.match(cssSource, /body\.student-course-open\.app-shell-mode > main\s*\{[\s\S]*?padding:0;/, "El curso interno debe ocupar la pantalla sin marco exterior");
 assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s\S]*?max-width:none;[\s\S]*?min-height:100vh;/, "La estructura del curso debe usar todo el ancho y alto");
@@ -146,6 +148,15 @@ function extractFunction(name) {
 const saveExamSource = extractFunction("saveExamDraft");
 assert.match(htmlSource, /class="editor-sticky-bar"[\s\S]*?class="exam-editor-header-actions"[\s\S]*?class="modal-close"/, "Cerrar debe permanecer dentro de la cabecera fija del editor");
 assert.match(saveExamSource, /persistPublishedCourseModules[\s\S]*?cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "La asignación debe persistirse antes de cerrar el editor y actualizar la vista");
+assert.match(htmlSource, /id="return-student"[^>]*>[\s\S]*?Volver a módulos/, "La revisión debe regresar a los módulos del curso");
+assert.match(htmlSource, /id="lesson-return" class="lesson-return contextual-back"[\s\S]*?Volver a módulos/, "La lección debe usar el mismo patrón de regreso a módulos");
+assert.match(appSource, /course-workspace-back contextual-back[\s\S]*?back-to-student-courses/, "Las páginas internas deben compartir el patrón de navegación contextual");
+assert.doesNotMatch(htmlSource, /Volver a mis cursos/, "La revisión no debe conservar el antiguo regreso al directorio general");
+assert.match(appSource, /function returnFromResult[\s\S]*?activeStudentCourseId = publishedCourses\.some[\s\S]*?activeStudentCourseSection = "modules";/, "El regreso desde resultados debe restaurar el módulo del curso evaluado");
+assert.match(cssSource, /body\.result-game-mode > \.topbar,[\s\S]*?display:none !important;/, "La revisión no debe mostrar nombre, correo ni acciones globales del alumno");
+assert.match(cssSource, /body\.result-game-mode #return-student\s*\{[\s\S]*?position:static;[\s\S]*?background:#fff;[\s\S]*?box-shadow:none;/, "El regreso de resultados no debe conservar el antiguo botón rojo flotante");
+assert.match(htmlSource, /class="result-page-header"[\s\S]*?class="result-summary-card"/, "El resultado debe usar una cabecera y un resumen profesional separados");
+assert.match(appSource, /function reviewSectionMarkup[\s\S]*?Revisión de respuestas/, "La revisión debe agrupar intentos y respuestas sin encabezados redundantes");
 
 const context = {
   courseProgress: {},
