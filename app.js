@@ -961,7 +961,7 @@ function renderTeacherCourseWorkspace(course, exams) {
     </header>
     <div class="course-workspace-layout ${isStudentPreview ? "student-preview-active" : ""}">
       <aside class="course-workspace-sidebar">
-        <div class="course-sidebar-heading"><strong>${esc(course.name)}</strong></div>
+        <div class="course-sidebar-heading"><strong>Navegación del curso</strong></div>
         <nav class="course-workspace-nav" aria-label="Secciones de ${esc(course.name)}">${sections.map(([id, label, icon]) => `<button class="course-subpage ${activeTeacherCourseSection === id ? "active" : ""}" data-course-section="${id}" type="button">${modernIcon(icon)}<span>${label}</span></button>`).join("")}</nav>
       </aside>
       <main class="course-workspace-content">${content}</main>
