@@ -3951,7 +3951,7 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
 }
 .student-dashboard-course-card .canvas-dashboard-card-body {
   display:flex;
-  min-height:174px;
+  min-height:0;
   flex-direction:column;
 }
 .student-dashboard-course-card .canvas-dashboard-card-body > p {
@@ -3986,11 +3986,11 @@ body:not(.app-shell-mode) .topbar .sound-btn { min-width: 0; }
   background:#168da2;
 }
 .student-dashboard-actions {
-  margin-top:auto;
-  justify-content:flex-end;
+  margin-top:13px;
+  justify-content:flex-start;
 }
 .student-dashboard-actions .open-student-course {
-  width:100%;
+  width:auto;
 }
 
 /* Cabecera de curso compacta: evita repetir la inicial y la etiqueta "Curso". */
@@ -4980,9 +4980,9 @@ body.student-course-open .student-course-content-head {
   box-shadow:0 15px 36px #1b294115;
 }
 .student-module summary {
-  grid-template-columns:42px minmax(0,1fr) 32px;
-  min-height:76px;
-  gap:13px;
+  grid-template-columns:32px 36px minmax(0,1fr);
+  min-height:72px;
+  gap:12px;
   padding:13px 17px;
   border:0;
   background:linear-gradient(180deg,#fafafd,#f5f6fa);
@@ -4990,15 +4990,6 @@ body.student-course-open .student-course-content-head {
 .student-module[open] summary {
   border-bottom:1px solid #e0e3eb;
   background:linear-gradient(180deg,#fafafd,#f5f6fa);
-}
-.student-module summary .module-order {
-  width:36px;
-  height:36px;
-  color:#fff;
-  border:0;
-  border-radius:9px;
-  background:#4c568f;
-  box-shadow:0 3px 8px #35406f20;
 }
 .student-module summary strong {
   color:#222e48;
@@ -5010,36 +5001,27 @@ body.student-course-open .student-course-content-head {
   color:#7b8498;
   font-size:10.5px;
 }
-.student-module summary > b {
-  display:grid;
-  width:28px;
-  height:28px;
-  place-items:center;
-  color:#fff;
-  border-radius:50%;
-  background:#4c568f;
-  font-size:12px;
-  box-shadow:0 3px 8px #35406f20;
+.student-module summary .module-disclosure {
+  width:32px;
+  height:32px;
 }
-.student-module summary > .student-module-chevron {
-  font-size:20px;
-  transition:transform .18s ease;
-}
-.student-module[open] summary > .student-module-chevron {
+.student-module[open] summary .module-disclosure {
   transform:rotate(90deg);
 }
-.student-module.is-locked summary > b {
-  color:#69738b;
-  background:#e5e7ee;
-  box-shadow:none;
+.student-module summary:hover .module-disclosure {
+  color:#3f4797;
+  background:#ebeaf6;
+}
+.student-module.is-locked summary .module-disclosure {
+  color:#7b8498;
 }
 .student-activity-list {
   background:#fff;
 }
 .student-activity {
-  grid-template-columns:40px minmax(0,1fr);
-  min-height:58px;
-  gap:13px;
+  grid-template-columns:20px 36px minmax(0,1fr);
+  min-height:59px;
+  gap:11px;
   padding:7px 17px;
   border-bottom-color:#e8eaf0;
   background:#fff;
@@ -5058,6 +5040,31 @@ body.student-course-open .student-course-content-head {
 }
 .student-activity .open-lesson:hover strong {
   color:#3f4499;
+}
+.student-activity > .open-lesson,
+.app-shell-mode #student-view .student-activity > .start-exam {
+  display:flex;
+  width:100%;
+  min-width:0;
+  min-height:36px;
+  align-items:center;
+  justify-content:flex-start;
+  padding:6px 0;
+  color:inherit;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  text-align:left;
+  cursor:pointer;
+}
+.app-shell-mode #student-view .student-activity > .start-exam:hover strong {
+  color:#3f4499;
+}
+.student-activity-spacer {
+  display:block;
+  width:20px;
+  height:1px;
 }
 .student-activity strong {
   color:#202c45;
@@ -7187,16 +7194,8 @@ details[open] > summary .module-expand-control:empty::before {
 .canvas-module-item {
   grid-template-columns:20px 36px minmax(0,1fr) 38px;
 }
-.student-module summary > .module-expand-control {
-  color:#424b82;
-  background:#fff;
-  box-shadow:none;
-}
-.student-module.is-locked summary > .module-expand-control {
-  font-size:13px;
-}
 .student-activity {
-  grid-template-columns:28px 36px minmax(0,1fr);
+  grid-template-columns:20px 36px minmax(0,1fr);
 }
 .lesson-tree-module summary > .module-expand-control {
   width:26px;
@@ -7264,10 +7263,15 @@ details[open] > summary .module-expand-control:empty::before {
     grid-template-columns:16px minmax(0,1fr) 34px;
   }
   .student-module summary {
-    min-height:70px;
+    grid-template-columns:28px 32px minmax(0,1fr);
+    min-height:68px;
+    gap:8px;
+    padding:10px;
   }
   .student-activity {
-    grid-template-columns:26px 34px minmax(0,1fr);
+    grid-template-columns:16px 34px minmax(0,1fr);
+    gap:8px;
+    padding:9px 12px;
   }
 }
 

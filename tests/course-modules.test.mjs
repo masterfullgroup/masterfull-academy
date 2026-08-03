@@ -84,6 +84,9 @@ assert.doesNotMatch(appSource, /student-resume-panel/, "El alumno no debe recibi
 assert.doesNotMatch(appSource, /student-card-footer/, "Las tarjetas no deben repetir recuentos de actividades y evaluaciones");
 assert.doesNotMatch(appSource, /contentMeta/, "El directorio del alumno no debe calcular metadatos redundantes");
 assert.match(appSource, /student-dashboard-course-card/, "Las tarjetas del alumno deben compartir la estructura visual del tablero docente");
+assert.match(appSource, /manage-course-content open-student-course/, "El botón del alumno debe compartir tamaño, posición y acabado con el botón docente");
+assert.match(cssSource, /\.student-dashboard-course-card \.canvas-dashboard-card-body\s*\{[\s\S]*?min-height:0;/, "La tarjeta del alumno no debe conservar una altura vacía artificial");
+assert.match(cssSource, /\.student-dashboard-actions\s*\{[\s\S]*?justify-content:flex-start;/, "El acceso al curso del alumno debe quedar alineado a la izquierda");
 assert.doesNotMatch(appSource, /student-dashboard-progress/, "Las tarjetas del alumno no deben mostrar progreso ni informacion adicional");
 assert.doesNotMatch(appSource, /student-course-exams/, "Las evaluaciones no deben repetirse fuera de sus módulos");
 assert.doesNotMatch(appSource, /ESPACIO DEL CURSO/, "La cabecera del alumno no debe repetir el contexto del curso");
@@ -104,6 +107,11 @@ assert.doesNotMatch(teacherCanvasSource, /module-expand-control/, "El módulo do
 assert.match(cssSource, /\.canvas-module-card\[open\] > summary \.module-disclosure\s*\{[\s\S]*?transform:rotate\(90deg\);/, "La flecha debe cambiar de orientación al desplegar el módulo");
 assert.match(appSource, /class="module-sequence"[^>]*>\$\{moduleIndex \+ 1\}/, "Los módulos docentes deben usar numeración");
 assert.doesNotMatch(teacherCanvasSource, /class="activity-sequence"/, "Las actividades docentes no deben mostrar numeración redundante");
+const studentModulesSource = appSource.slice(appSource.indexOf("function renderStudentCourseModules"), appSource.indexOf("function accessibleCourseActivities"));
+assert.match(studentModulesSource, /class="module-disclosure"[^>]*>›<\/span><span class="module-sequence"/, "El alumno debe usar la misma flecha y numeración de módulo que el profesor");
+assert.doesNotMatch(studentModulesSource, /class="activity-sequence"/, "Las actividades del alumno no deben mostrar numeración redundante");
+assert.doesNotMatch(studentModulesSource, /class="module-expand-control"/, "El alumno no debe mostrar el antiguo botón de expansión");
+assert.match(cssSource, /#student-view \.student-activity > \.start-exam\s*\{[\s\S]*?background:transparent;/, "Las evaluaciones del módulo no deben convertirse en franjas de color");
 assert.doesNotMatch(appSource, /class="publish-check/, "Los checks de publicación deben sustituirse por numeración y texto");
 assert.doesNotMatch(htmlSource, /class="lesson-tabs"/, "La página de contenido no debe mostrar pestañas vacías o redundantes");
 assert.doesNotMatch(appSource, /renderLessonTabs/, "El contenido no debe duplicarse en paneles secundarios");

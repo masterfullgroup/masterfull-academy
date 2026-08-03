@@ -1410,7 +1410,7 @@ function renderStudent() {
 function renderStudentCourseDirectory(courses, summaries) {
   if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Todavía no tienes cursos disponibles</strong><p>Los cursos publicados por el profesor aparecerán aquí.</p></div>`;
   return `<div class="canvas-dashboard-grid student-course-gallery">${courses.map(course => {
-    return `<article class="canvas-dashboard-card student-dashboard-course-card"><div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div><div class="canvas-dashboard-card-body"><strong class="canvas-course-title">${esc(course.name)}</strong><div class="canvas-dashboard-actions student-dashboard-actions"><button class="open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></div></div></article>`;
+    return `<article class="canvas-dashboard-card student-dashboard-course-card"><div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div><div class="canvas-dashboard-card-body"><strong class="canvas-course-title">${esc(course.name)}</strong><div class="canvas-dashboard-actions student-dashboard-actions"><button class="manage-course-content open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></div></div></article>`;
   }).join("")}</div>`;
 }
 function renderStudentCourseWorkspace(course, myGrades) {
@@ -1459,12 +1459,12 @@ function renderStudentCourseModules(course, myGrades) {
       const progressItems = module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none");
       const moduleCompletedCount = progressItems.filter(activity => activityCompleted(activity, progress, myGrades)).length;
       const moduleComplete = progressItems.length > 0 && moduleCompletedCount === progressItems.length;
-      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-order">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `Bloqueado · ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span><b class="module-expand-control" aria-hidden="true">${locked ? "🔒" : ""}</b></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map((activity, activityIndex) => {
+      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `Bloqueado · ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
         if (activity.type === "heading") return `<h5 class="student-module-heading">${esc(activity.title)}</h5>`;
         const exam = activity.examId ? publishedExams.find(item => item.id === activity.examId) : null;
         const actionClass = exam && ["practice","quiz"].includes(activity.type) ? "start-exam" : "open-lesson";
         const actionData = exam ? `data-id="${esc(exam.id)}"` : `data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}"`;
-        return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="activity-sequence">${activityIndex + 1}</span><span class="activity-type-icon">${modernIcon(activity.type)}</span><button class="${actionClass}" ${actionData} type="button"><strong>${esc(activity.title)}</strong></button></div>`;
+        return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="student-activity-spacer" aria-hidden="true"></span><span class="activity-type-icon">${modernIcon(activity.type)}</span><button class="${actionClass}" ${actionData} type="button"><strong>${esc(activity.title)}</strong></button></div>`;
       }).join("") : `<p class="module-empty">No hay actividades publicadas.</p>`}</div>`}</details>`;
       previousComplete = moduleComplete;
       return markup;
