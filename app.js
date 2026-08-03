@@ -1506,7 +1506,7 @@ function safeActivityUrl(value) {
   return /^(https?:\/\/|\.\/|\/)/i.test(url) ? url : "";
 }
 function youtubeEmbedUrl(url) {
-  const match = String(url || "").match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+  const match = String(url || "").match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
   return match ? `https://www.youtube-nocookie.com/embed/${match[1]}` : "";
 }
 function lessonMediaMarkup(activity) {
@@ -1515,9 +1515,9 @@ function lessonMediaMarkup(activity) {
     const youtube = youtubeEmbedUrl(url);
     if (youtube) return `<div class="lesson-video-frame"><iframe src="${esc(youtube)}" title="Video: ${esc(activity.title)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
     if (url && /\.(mp4|webm|ogg)(?:\?|$)/i.test(url)) return `<video controls preload="metadata"><source src="${esc(url)}">Tu navegador no puede reproducir este video.</video>`;
-    return `<div class="lesson-media-placeholder"><span>${modernIcon("video")}</span><strong>Clase en video</strong><p>${url ? "Usa el enlace del material para abrir el recurso audiovisual." : "El profesor todavía no ha agregado el video de esta clase."}</p></div>`;
+    return `<div class="lesson-media-placeholder"><span>${modernIcon("video")}</span><strong>Video no disponible</strong><p>${url ? "Este enlace no admite reproducción integrada. Solicita al profesor un enlace compatible." : "El profesor todavía no ha agregado el video de esta clase."}</p></div>`;
   }
-  if (activity.type === "pdf" && url) return `<div class="lesson-document-preview"><span>${modernIcon("pdf")}</span><div><strong>Documento de la clase</strong><p>Consulta el PDF en una pestaña nueva o descárgalo para estudiar sin conexión.</p></div><a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Abrir PDF</a></div>`;
+  if (activity.type === "pdf" && url) return `<iframe class="lesson-pdf-frame" src="${esc(url)}" title="Documento: ${esc(activity.title)}" loading="lazy"></iframe>`;
   return "";
 }
 function renderLesson() {
@@ -1548,8 +1548,9 @@ function renderLesson() {
   $("#lesson-next").disabled = activityIndex === activities.length - 1;
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
   const url = safeActivityUrl(activity.url);
-  $("#lesson-materials-card").innerHTML = url ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Recurso de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Abrir recurso ↗</a>` : "";
-  $("#lesson-materials-card").classList.toggle("hidden", !url);
+  const externalResource = url && !["video", "pdf"].includes(activity.type);
+  $("#lesson-materials-card").innerHTML = externalResource ? `<div><span class="activity-type-icon">${modernIcon(activity.type)}</span><span><strong>Material complementario</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Consultar material ↗</a>` : "";
+  $("#lesson-materials-card").classList.toggle("hidden", !externalResource);
   renderLessonTree(course, activity.id);
   show("lesson-view");
   closeLessonSidebar();

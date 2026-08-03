@@ -2470,6 +2470,7 @@ body:not(.app-shell-mode) .topbar .menu-icon { width: 16px; height: 16px; }
   .app-shell-mode .brand { padding:6px 4px 30px; }
   .app-shell-mode .brand::after { left:52px; top:36px; }
 }
+
 .app-shell-mode { background:#f5f7fa; }
 .app-shell-mode .shell-nav-item { min-height:39px; padding:9px 11px; border-radius:6px; font-size:12px; }
 .app-shell-mode .shell-nav-item.active { color:#fff; background:#2563eb; box-shadow:none; }
@@ -7670,5 +7671,101 @@ details[open] > summary .module-expand-control:empty::before {
   }
   .app-shell-mode .user-actions {
     padding-top:9px;
+  }
+}
+
+/* Lectura del alumno: navegación lateral y recursos integrados */
+.student-activity > .start-exam {
+  display:flex;
+  width:100%;
+  min-width:0;
+  min-height:36px;
+  align-items:center;
+  justify-content:flex-start;
+  padding:6px 0;
+  color:inherit;
+  border:0;
+  border-radius:0;
+  outline:0;
+  background:transparent;
+  box-shadow:none;
+  text-align:left;
+}
+.student-activity > .start-exam:hover,
+.student-activity > .start-exam:focus-visible {
+  background:transparent;
+  box-shadow:none;
+}
+.lesson-sidebar-head {
+  align-items:flex-start;
+  padding:20px 16px 16px;
+}
+.lesson-sidebar-head-content {
+  display:grid;
+  min-width:0;
+  flex:1;
+  gap:14px;
+}
+.lesson-sidebar-return {
+  width:100%;
+  min-height:40px;
+  justify-content:flex-start;
+  padding:9px 12px;
+  color:#e4e7f4;
+  border:1px solid #ffffff24;
+  border-radius:9px;
+  background:#ffffff0a;
+  font-size:11px;
+  font-weight:700;
+}
+.lesson-sidebar-return:hover,
+.lesson-sidebar-return:focus-visible {
+  color:#fff;
+  border-color:#ffffff42;
+  background:#ffffff14;
+}
+.lesson-module-tree {
+  padding:14px 12px 20px;
+}
+.lesson-tree-module > div {
+  gap:6px;
+  padding:2px 7px 9px;
+}
+.lesson-tree-activity {
+  min-height:54px;
+  padding:10px 12px;
+  border-radius:8px;
+}
+.lesson-topbar {
+  display:none;
+}
+.lesson-content {
+  padding-top:30px;
+}
+.lesson-title-row {
+  padding:0 2px 22px;
+}
+.lesson-media {
+  margin-bottom:24px;
+}
+.lesson-pdf-frame {
+  display:block;
+  width:100%;
+  min-height:70vh;
+  border:0;
+  background:#fff;
+}
+@media (max-width:900px) {
+  .lesson-topbar {
+    position:sticky;
+    top:0;
+    display:flex;
+    min-height:60px;
+    align-items:center;
+    justify-content:flex-start;
+    padding:10px 16px;
+  }
+  .lesson-menu-toggle {
+    display:inline-flex;
   }
 }

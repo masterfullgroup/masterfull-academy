@@ -113,7 +113,7 @@ const studentModulesSource = appSource.slice(appSource.indexOf("function renderS
 assert.match(studentModulesSource, /class="module-disclosure"[^>]*>›<\/span><span class="module-sequence"/, "El alumno debe usar la misma flecha y numeración de módulo que el profesor");
 assert.doesNotMatch(studentModulesSource, /class="activity-sequence"/, "Las actividades del alumno no deben mostrar numeración redundante");
 assert.doesNotMatch(studentModulesSource, /class="module-expand-control"/, "El alumno no debe mostrar el antiguo botón de expansión");
-assert.match(cssSource, /#student-view \.student-activity > \.start-exam\s*\{[\s\S]*?background:transparent;/, "Las evaluaciones del módulo no deben convertirse en franjas de color");
+assert.match(cssSource, /\.student-activity > \.start-exam\s*\{[\s\S]*?border:0;[\s\S]*?background:transparent;/, "Las evaluaciones del módulo y su previsualización no deben convertirse en franjas de color");
 assert.doesNotMatch(appSource, /class="publish-check/, "Los checks de publicación deben sustituirse por numeración y texto");
 assert.doesNotMatch(htmlSource, /class="lesson-tabs"/, "La página de contenido no debe mostrar pestañas vacías o redundantes");
 assert.doesNotMatch(appSource, /renderLessonTabs/, "El contenido no debe duplicarse en paneles secundarios");
@@ -128,6 +128,11 @@ assert.match(cssSource, /\.lesson-reading-panel\s*\{[\s\S]*?min-height:0;/, "La 
 assert.match(cssSource, /\.lesson-reading-panel > \.lesson-rich-content\s*\{[\s\S]*?text-align:justify;/, "El texto de la lección debe mostrarse justificado");
 assert.match(htmlSource, /id="lesson-menu-toggle"[\s\S]*?lesson-menu-icon[\s\S]*?Ver módulos/, "El control móvil debe identificarse claramente como acceso a los módulos");
 assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, "El botón de módulos debe tener una apariencia moderna y reconocible");
+assert.match(htmlSource, /class="lesson-sidebar-head"[\s\S]*?id="lesson-return"[\s\S]*?id="lesson-module-tree"/, "El regreso debe permanecer dentro de la barra lateral de todas las actividades");
+assert.match(htmlSource, /class="lesson-title-row"[\s\S]*?id="lesson-media"/, "El título de la actividad debe aparecer antes del video o recurso integrado");
+assert.doesNotMatch(appSource, /Abrir recurso/, "El video integrado no debe repetirse como un enlace externo");
+assert.match(appSource, /const externalResource = url && !\["video", "pdf"\]\.includes\(activity\.type\);/, "Los videos y PDF deben permanecer integrados en la página");
+assert.match(cssSource, /\.lesson-tree-module > div\s*\{[\s\S]*?gap:6px;/, "Las opciones laterales deben tener separación visual suficiente");
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
@@ -149,7 +154,7 @@ const saveExamSource = extractFunction("saveExamDraft");
 assert.match(htmlSource, /class="editor-sticky-bar"[\s\S]*?class="exam-editor-header-actions"[\s\S]*?class="modal-close"/, "Cerrar debe permanecer dentro de la cabecera fija del editor");
 assert.match(saveExamSource, /persistPublishedCourseModules[\s\S]*?cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "La asignación debe persistirse antes de cerrar el editor y actualizar la vista");
 assert.match(htmlSource, /id="return-student"[^>]*>[\s\S]*?Volver a calificaciones/, "La revisión debe regresar a las calificaciones del curso");
-assert.match(htmlSource, /id="lesson-return" class="lesson-return contextual-back"[\s\S]*?Volver a módulos/, "La lección debe usar el mismo patrón de regreso a módulos");
+assert.match(htmlSource, /id="lesson-return" class="lesson-sidebar-return contextual-back"[\s\S]*?Volver a módulos/, "La lección debe regresar a módulos desde la barra lateral");
 assert.match(appSource, /course-workspace-back contextual-back[\s\S]*?back-to-student-courses/, "Las páginas internas deben compartir el patrón de navegación contextual");
 assert.doesNotMatch(htmlSource, /Volver a mis cursos/, "La revisión no debe conservar el antiguo regreso al directorio general");
 assert.match(appSource, /function returnFromResult[\s\S]*?activeStudentCourseId = publishedCourses\.some[\s\S]*?activeStudentCourseSection = "grades";/, "El regreso desde resultados debe abrir las calificaciones del curso evaluado");
