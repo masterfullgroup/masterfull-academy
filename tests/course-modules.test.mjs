@@ -148,15 +148,21 @@ function extractFunction(name) {
 const saveExamSource = extractFunction("saveExamDraft");
 assert.match(htmlSource, /class="editor-sticky-bar"[\s\S]*?class="exam-editor-header-actions"[\s\S]*?class="modal-close"/, "Cerrar debe permanecer dentro de la cabecera fija del editor");
 assert.match(saveExamSource, /persistPublishedCourseModules[\s\S]*?cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "La asignación debe persistirse antes de cerrar el editor y actualizar la vista");
-assert.match(htmlSource, /id="return-student"[^>]*>[\s\S]*?Volver a módulos/, "La revisión debe regresar a los módulos del curso");
+assert.match(htmlSource, /id="return-student"[^>]*>[\s\S]*?Volver a calificaciones/, "La revisión debe regresar a las calificaciones del curso");
 assert.match(htmlSource, /id="lesson-return" class="lesson-return contextual-back"[\s\S]*?Volver a módulos/, "La lección debe usar el mismo patrón de regreso a módulos");
 assert.match(appSource, /course-workspace-back contextual-back[\s\S]*?back-to-student-courses/, "Las páginas internas deben compartir el patrón de navegación contextual");
 assert.doesNotMatch(htmlSource, /Volver a mis cursos/, "La revisión no debe conservar el antiguo regreso al directorio general");
-assert.match(appSource, /function returnFromResult[\s\S]*?activeStudentCourseId = publishedCourses\.some[\s\S]*?activeStudentCourseSection = "modules";/, "El regreso desde resultados debe restaurar el módulo del curso evaluado");
+assert.match(appSource, /function returnFromResult[\s\S]*?activeStudentCourseId = publishedCourses\.some[\s\S]*?activeStudentCourseSection = "grades";/, "El regreso desde resultados debe abrir las calificaciones del curso evaluado");
 assert.match(cssSource, /body\.result-game-mode > \.topbar,[\s\S]*?display:none !important;/, "La revisión no debe mostrar nombre, correo ni acciones globales del alumno");
 assert.match(cssSource, /body\.result-game-mode #return-student\s*\{[\s\S]*?position:static;[\s\S]*?background:#fff;[\s\S]*?box-shadow:none;/, "El regreso de resultados no debe conservar el antiguo botón rojo flotante");
 assert.match(htmlSource, /class="result-page-header"[\s\S]*?class="result-summary-card"/, "El resultado debe usar una cabecera y un resumen profesional separados");
-assert.match(appSource, /function reviewSectionMarkup[\s\S]*?Revisión de respuestas/, "La revisión debe agrupar intentos y respuestas sin encabezados redundantes");
+assert.match(appSource, /function reviewSectionMarkup\(grades\)\s*\{\s*return reviewMarkup\(grades\);/, "La revisión no debe repetir encabezados descriptivos");
+assert.doesNotMatch(htmlSource, /result-encouragement|result-sync-status|>RESULTADO</, "El resumen debe conservar únicamente los datos esenciales");
+assert.doesNotMatch(appSource, /No te rindas\. Revisar tus respuestas/, "La frase motivacional solicitada debe eliminarse");
+assert.doesNotMatch(appSource, /id="sound-btn"|soundControl/, "El menú del alumno no debe mostrar el control de sonido");
+assert.match(appSource, /const resultReviewOpen[\s\S]*?if \(resultReviewOpen\) show\("result-view"\);/, "La renovación de sesión debe conservar abierta la revisión de resultados");
+const lessonTreeSource = appSource.slice(appSource.indexOf("function renderLessonTree"), appSource.indexOf("function completeActiveLesson"));
+assert.doesNotMatch(lessonTreeSource, /activity-sequence|activityIndex|index \+ 1/, "El árbol lateral de lecciones no debe mostrar numeración");
 
 const context = {
   courseProgress: {},

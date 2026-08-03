@@ -506,6 +506,7 @@ function renderApp() {
   document.body.classList.remove("session-loading");
   document.body.classList.remove("auth-galactic-burst");
   const isTeacher = currentUser?.role === "teacher";
+  const resultReviewOpen = !isTeacher && $("#result-view").classList.contains("active");
   document.body.classList.toggle("teacher-shell-mode", isTeacher);
   if (!currentUser) {
     $("#auth-view .auth-layout")?.classList.remove("auth-login-exit");
@@ -519,9 +520,7 @@ function renderApp() {
     <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
     <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
   </nav>` : "";
-  const soundControl = isTeacher ? "" : `<button id="sound-btn" class="btn ghost sound-btn" aria-pressed="${soundEnabled}" title="${soundEnabled ? "Silenciar sonidos" : "Activar sonidos"}">${menuIcon(soundEnabled ? "sound" : "muted")}<span>${soundEnabled ? "Sonido activado" : "Sonido silenciado"}</span></button>`;
-  $("#session-area").innerHTML = `${teacherNavigation}${studentNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions">${soundControl}<button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div></div>`;
-  $("#sound-btn")?.addEventListener("click", toggleSound);
+  $("#session-area").innerHTML = `${teacherNavigation}${studentNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions"><button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div></div>`;
   $("#profile-btn").addEventListener("click", openProfile);
   $("#logout-btn").addEventListener("click", logout);
   $$("#session-area [data-teacher-tab]").forEach(button => button.addEventListener("click", () => {
@@ -542,7 +541,8 @@ function renderApp() {
     }
     switchTab("student", button.dataset.studentTab, button);
   }));
-  if (isTeacher) renderTeacher();
+  if (resultReviewOpen) show("result-view");
+  else if (isTeacher) renderTeacher();
   else if (activeLessonCourseId && activeLessonActivityId) renderLesson();
   else renderStudent();
 }
@@ -1557,9 +1557,9 @@ function renderLesson() {
 function renderLessonTree(course, activeActivityId) {
   const accessibleIds = new Set(accessibleCourseActivities(course).map(activity => activity.id));
   const progress = courseProgress[course.id] || { completed:{} };
-  $("#lesson-module-tree").innerHTML = normalizeModules(course.modules).map((module, index) => {
+  $("#lesson-module-tree").innerHTML = normalizeModules(course.modules).map(module => {
     const moduleAccessible = module.activities.some(activity => accessibleIds.has(activity.id)) || !module.activities.length;
-    return `<details class="lesson-tree-module ${moduleAccessible ? "" : "is-locked"}" ${module.activities.some(activity => activity.id === activeActivityId) ? "open" : ""}><summary><span>${index + 1}</span><strong>${esc(module.title)}</strong><b class="module-expand-control" aria-hidden="true">${moduleAccessible ? "" : "🔒"}</b></summary><div>${moduleAccessible ? module.activities.map((activity, activityIndex) => `<button class="lesson-tree-activity ${activity.id === activeActivityId ? "active" : ""}" data-activity-id="${esc(activity.id)}" type="button" ${accessibleIds.has(activity.id) ? "" : "disabled"}><span class="activity-sequence">${activityIndex + 1}</span><span><strong>${esc(activity.title)}</strong><small>${progress.completed?.[activity.id] ? "Completado" : activity.id === activeActivityId ? "En progreso" : "No iniciado"}</small></span></button>`).join("") : `<p>Completa el requisito anterior para desbloquearlo.</p>`}</div></details>`;
+    return `<details class="lesson-tree-module ${moduleAccessible ? "" : "is-locked"}" ${module.activities.some(activity => activity.id === activeActivityId) ? "open" : ""}><summary><strong>${esc(module.title)}</strong><b class="module-expand-control" aria-hidden="true">${moduleAccessible ? "" : "🔒"}</b></summary><div>${moduleAccessible ? module.activities.map(activity => `<button class="lesson-tree-activity ${activity.id === activeActivityId ? "active" : ""}" data-activity-id="${esc(activity.id)}" type="button" ${accessibleIds.has(activity.id) ? "" : "disabled"}><span class="lesson-tree-activity-copy"><strong>${esc(activity.title)}</strong><small>${progress.completed?.[activity.id] ? "Completado" : activity.id === activeActivityId ? "En progreso" : "No iniciado"}</small></span></button>`).join("") : `<p>Completa el requisito anterior para desbloquearlo.</p>`}</div></details>`;
   }).join("");
   $$(".lesson-tree-activity:not(:disabled)").forEach(button => button.addEventListener("click", () => openLesson(course.id, button.dataset.activityId)));
 }
@@ -1778,14 +1778,11 @@ async function sendResultKeepalive(payload) {
     console.error("keepalive:", error);
   }
 }
-function renderExamResult(grade, includeReview = false, saved = false) {
+function renderExamResult(grade, includeReview = false) {
   resultCourseId = grade.courseId || activeExam?.courseId || activeCourse?.id || activeStudentCourseId || "";
   $("#result-title").textContent = grade.examTitle || "Evaluación completada";
   $("#result-score").textContent = grade.score;
   $("#result-message").textContent = `${grade.correct} de ${grade.total} respuestas correctas · Intento ${grade.attempt || 1}`;
-  $("#result-encouragement").textContent = encouragementFor(grade.score);
-  $("#result-sync-status").textContent = saved ? "Resultado guardado" : "Pendiente de sincronización";
-  $("#result-sync-status").classList.toggle("is-pending", !saved);
   $("#result-review").innerHTML = includeReview ? reviewSectionMarkup([grade]) : "";
   show("result-view");
 }
@@ -1795,17 +1792,12 @@ function returnFromResult() {
   activeQuestions = [];
   finishingExam = false;
   activeStudentCourseId = publishedCourses.some(course => course.id === courseId) ? courseId : null;
-  activeStudentCourseSection = "modules";
+  activeStudentCourseSection = "grades";
   renderStudent();
 }
-function encouragementFor(score) {
-  if (score >= 18) return "¡Excelente trabajo! Tu esfuerzo y preparación se notan.";
-  if (score >= 14) return "¡Muy buen trabajo! Sigue practicando y llegarás todavía más lejos.";
-  if (score >= 11) return "¡Vas por buen camino! Cada intento fortalece lo que estás aprendiendo.";
-  return "No te rindas. Revisar tus respuestas es el primer paso para mejorar.";
-}
 function reviewMarkup(grades) {
-  return `<div class="attempt-review-list">${grades.map(grade => `<section class="attempt-review"><div class="attempt-review-head"><div><span class="eyebrow">INTENTO ${grade.attempt || 1}</span><h3>Revisión de respuestas</h3></div><strong>${grade.score}<small>/20</small></strong></div>${(grade.review || []).map((question, index) => {
+  const multipleAttempts = grades.length > 1;
+  return `<div class="attempt-review-list">${grades.map(grade => `<section class="attempt-review">${multipleAttempts ? `<div class="attempt-review-head"><span>Intento ${grade.attempt || 1}</span><strong>${grade.score}<small>/20</small></strong></div>` : ""}${(grade.review || []).map((question, index) => {
     const answeredCorrectly = question.selected === question.correct;
     const unanswered = question.selected === null || question.selected === undefined;
     return `<article class="review-question ${answeredCorrectly ? "review-correct" : "review-incorrect"}"><div class="review-question-title"><strong>Pregunta ${index + 1}</strong><span>${answeredCorrectly ? "✓ Correcta" : unanswered ? "Sin respuesta" : "✕ Incorrecta"}</span></div><h4>${esc(question.text)}</h4>${questionImageMarkup(question, "review-image")}<div class="review-options">${question.options.map((option, optionIndex) => {
@@ -1818,7 +1810,7 @@ function reviewMarkup(grades) {
   }).join("")}</section>`).join("")}</div>`;
 }
 function reviewSectionMarkup(grades) {
-  return `<header class="result-review-heading"><span class="eyebrow">DETALLE</span><h2>${grades.length > 1 ? "Revisión de intentos" : "Revisión de respuestas"}</h2><p>Consulta cada pregunta y compara tu respuesta con la opción correcta.</p></header>${reviewMarkup(grades)}`;
+  return reviewMarkup(grades);
 }
 function showAttemptReview(gradeId) {
   const grade = results.find(item => item.id === gradeId && item.studentId === currentUser.id);
@@ -1829,7 +1821,6 @@ function showExamReviews(examId) {
   if (!grades.length) return;
   const best = grades.reduce((current, grade) => grade.score > current.score ? grade : current, grades[0]);
   renderExamResult(best, false, true);
-  $("#result-message").textContent = `${grades.length} ${grades.length === 1 ? "intento completado" : "intentos completados"}. Aquí puedes revisar todas tus respuestas.`;
   $("#result-review").innerHTML = reviewSectionMarkup(grades);
 }
 function recoverInterruptedAttempt() {
