@@ -7023,8 +7023,33 @@ body.teacher-course-open .course-workspace-page {
   line-height:1.15;
 }
 .canvas-module-card > summary {
-  grid-template-columns:20px 36px minmax(0,1fr) 34px 36px 36px;
+  grid-template-columns:32px 36px minmax(0,1fr) 36px 36px;
   min-height:72px;
+}
+.module-disclosure {
+  display:grid;
+  width:32px;
+  height:32px;
+  place-items:center;
+  color:#59647c;
+  border-radius:8px;
+  font-size:30px;
+  font-weight:500;
+  line-height:1;
+  transform:rotate(0deg);
+  transition:color .18s ease,background .18s ease,transform .2s ease;
+}
+.canvas-module-card > summary:hover .module-disclosure {
+  color:#3f4797;
+  background:#ebeaf6;
+}
+.canvas-module-card[open] > summary .module-disclosure {
+  transform:rotate(90deg);
+}
+.canvas-module-card > summary:focus-visible .module-disclosure {
+  color:#3f4797;
+  outline:2px solid #aaa8dc;
+  outline-offset:1px;
 }
 .module-sequence,
 .activity-sequence {
@@ -7071,10 +7096,10 @@ details[open] > summary .module-expand-control:empty::before {
   content:"−";
 }
 .canvas-module-heading {
-  grid-template-columns:20px 28px minmax(0,1fr) auto;
+  grid-template-columns:20px minmax(0,1fr) auto;
 }
 .canvas-module-item {
-  grid-template-columns:20px 28px 36px minmax(0,1fr) 38px;
+  grid-template-columns:20px 36px minmax(0,1fr) 38px;
 }
 .student-module summary > .module-expand-control {
   color:#424b82;
@@ -7130,13 +7155,13 @@ details[open] > summary .module-expand-control:empty::before {
     justify-content:center;
   }
   .canvas-module-card > summary {
-    grid-template-columns:16px 32px minmax(0,1fr) 32px 34px;
+    grid-template-columns:28px 32px minmax(0,1fr) 34px;
     min-height:68px;
     gap:8px;
     padding:10px;
   }
   .canvas-module-card > summary > .row-action-menu {
-    grid-column:5;
+    grid-column:4;
   }
   .canvas-module-card > summary > .module-quick-add {
     display:none;
@@ -7146,11 +7171,11 @@ details[open] > summary .module-expand-control:empty::before {
     height:32px;
   }
   .canvas-module-item {
-    grid-template-columns:16px 26px 34px minmax(0,1fr) 34px;
+    grid-template-columns:16px 34px minmax(0,1fr) 34px;
     gap:8px;
   }
   .canvas-module-heading {
-    grid-template-columns:16px 26px minmax(0,1fr) 34px;
+    grid-template-columns:16px minmax(0,1fr) 34px;
   }
   .student-module summary {
     min-height:70px;
