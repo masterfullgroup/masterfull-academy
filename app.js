@@ -642,6 +642,7 @@ function bindStaticEvents() {
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));
   $("#publish-course-form").addEventListener("submit", publishSelectedCourseExams);
   $("#exam-editor-form").addEventListener("submit", saveExamDraft);
+  $("#editor-course").addEventListener("change", () => populateEditorModuleOptions());
   $("#editor-option-count").addEventListener("change", changeOptionCount);
   $("#add-question-btn").addEventListener("click", addBuilderQuestion);
   $("#generate-questions-btn").addEventListener("click", generateQuestions);
@@ -1102,9 +1103,10 @@ function renderTeacherCourseQuestions(course, exams) {
 }
 function renderTeacherExamRow(exam, moduleTitle = "") {
   const isDraft = !publishedExams.some(item => item.id === exam.id);
+  const assignmentAction = `<button class="btn secondary edit-exam exam-assignment-action" data-id="${esc(exam.id)}" data-focus-module="true" type="button">${moduleTitle ? "Cambiar módulo" : "Asignar módulo"}</button>`;
   const actions = isDraft
-    ? `<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Editar</button><button class="btn secondary export-draft" data-id="${esc(exam.id)}" type="button">Exportar JSON</button><button class="icon-btn delete delete-exam" data-id="${esc(exam.id)}" type="button">Eliminar</button>`
-    : `<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Modificar</button>`;
+    ? `${assignmentAction}<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Editar</button><button class="btn secondary export-draft" data-id="${esc(exam.id)}" type="button">Exportar JSON</button><button class="icon-btn delete delete-exam" data-id="${esc(exam.id)}" type="button">Eliminar</button>`
+    : `${assignmentAction}<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Modificar</button>`;
   return `<article class="exam-module-item ${isDraft ? "is-draft" : ""}">
     <span class="exam-module-type-icon">${modernIcon("exams")}</span>
     <div class="exam-module-item-main">
@@ -1124,7 +1126,7 @@ function bindTeacherActions() {
   $$(".delete-course").forEach(button => button.addEventListener("click", () => deleteCourseDraft(button.dataset.id)));
   $$(".edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$(".delete-published-course").forEach(button => button.addEventListener("click", () => deletePublishedCourse(button.dataset.id)));
-  $$(".edit-exam").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id)));
+  $$(".edit-exam").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id, null, button.dataset.focusModule === "true")));
   $$(".delete-exam").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
   $$(".export-draft").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => { openExamModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
   $$(".export-course").forEach(button => button.addEventListener("click", () => exportCourseDraft(button.dataset.id)));
@@ -1225,7 +1227,7 @@ function bindTeacherExamWorkspaceActions() {
     $("#question-bank-filter-empty")?.classList.toggle("hidden", visible > 0 || !cards.length);
   });
   $$("#teacher-course-workspace .create-exam-course").forEach(button => button.addEventListener("click", () => openExamModal(null, button.dataset.id)));
-  $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id)));
+  $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id, null, button.dataset.focusModule === "true")));
   $$("#teacher-course-workspace .delete-exam").forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
   $$("#teacher-course-workspace .export-draft").forEach(button => button.addEventListener("click", () => { openExamModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
   $$("#teacher-course-workspace .add-course-module").forEach(button => button.addEventListener("click", () => openModuleModal(button.dataset.courseId)));
@@ -2451,7 +2453,41 @@ function deleteCourseDraft(id) {
   saveDrafts();
   renderTeacher();
 }
-function openExamModal(id = null, courseId = null) {
+function examAssignedModuleId(course, examId) {
+  return normalizeModules(course?.modules).find(module => module.activities.some(activity => activity.type === "quiz" && activity.examId === examId))?.id || "";
+}
+function populateEditorModuleOptions(preferredModuleId = null) {
+  const select = $("#editor-module");
+  const course = findCourse($("#editor-course").value);
+  const modules = normalizeModules(course?.modules);
+  const assignedModuleId = preferredModuleId ?? examAssignedModuleId(course, $("#editor-exam-id").value);
+  select.innerHTML = `<option value="">Sin asignar a un módulo</option>${modules.map(module => `<option value="${esc(module.id)}">${esc(module.title)}</option>`).join("")}`;
+  select.value = modules.some(module => module.id === assignedModuleId) ? assignedModuleId : "";
+  select.disabled = !modules.length;
+  select.closest("label")?.classList.toggle("has-no-modules", !modules.length);
+  $("#editor-module-help").textContent = modules.length
+    ? "La evaluación aparecerá dentro del módulo seleccionado."
+    : "Este curso aún no tiene módulos. Crea uno desde la sección Módulos para poder asignar la evaluación.";
+}
+function applyExamModuleAssignment(rawModules, exam, targetModuleId) {
+  const modules = normalizeModules(rawModules);
+  const linkedActivity = modules.flatMap(module => module.activities).find(activity => activity.type === "quiz" && activity.examId === exam.id);
+  const cleaned = modules.map(module => ({ ...module, activities: module.activities.filter(activity => !(activity.type === "quiz" && activity.examId === exam.id)) }));
+  if (!targetModuleId || !cleaned.some(module => module.id === targetModuleId)) return cleaned;
+  const activity = {
+    ...(linkedActivity || {}),
+    id: linkedActivity?.id || uid(),
+    title: exam.title,
+    type: "quiz",
+    published: exam.published,
+    examId: exam.id,
+    duration: exam.minutes,
+    attempts: exam.attemptsAllowed,
+    completionRule: "pass"
+  };
+  return cleaned.map(module => module.id === targetModuleId ? { ...module, activities: [...module.activities, activity] } : module);
+}
+function openExamModal(id = null, courseId = null, focusModule = false) {
   const courses = [...publishedCourses, ...drafts.courses];
   if (!courses.length) { alert("Primero crea un curso local o agrega cursos en data/catalog.json."); openCourseModal(); return; }
   const localExam = drafts.exams.find(item => item.id === id);
@@ -2461,6 +2497,7 @@ function openExamModal(id = null, courseId = null) {
   $("#editor-exam-id").value = exam?.id || "";
   $("#editor-course").innerHTML = courses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("");
   $("#editor-course").value = exam?.courseId || courseId || courses[0].id;
+  populateEditorModuleOptions(examAssignedModuleId(findCourse($("#editor-course").value), exam?.id || ""));
   $("#editor-title").value = exam?.title || "";
   $("#editor-minutes").value = exam?.minutes || 20;
   $("#editor-question-count").value = exam?.questionsToShow || 5;
@@ -2474,6 +2511,7 @@ function openExamModal(id = null, courseId = null) {
   $("#exam-editor-error").textContent = "";
   selectExamEditorSection("editor-settings-section");
   $("#exam-modal").classList.remove("hidden");
+  if (focusModule) setTimeout(() => $("#editor-module").focus(), 0);
 }
 function changeOptionCount() {
   collectBuilder();
@@ -2614,6 +2652,7 @@ async function saveExamDraft(event) {
   const id = $("#editor-exam-id").value;
   const publishedExam = publishedExams.find(item => item.id === id);
   const publishedCourse = publishedCourses.find(item => item.id === exam.courseId);
+  const targetModuleId = $("#editor-module").value;
   const shouldPublish = Boolean(publishedExam || (exam.published && publishedCourse));
   if (shouldPublish) {
     const submit = event.submitter || $(".editor-save");
@@ -2626,8 +2665,9 @@ async function saveExamDraft(event) {
     $("#exam-editor-error").className = "muted";
     $("#exam-editor-error").textContent = "Guardando y verificando los cambios...";
     try {
+      const assignedModules = applyExamModuleAssignment(course.modules, { ...exam, published:true }, targetModuleId);
       const payload = {
-        course: { id: course.id, name: course.name, description: course.description || "", teacher_name: course.teacherName || currentUser.name, modules: normalizeModules(course.modules) },
+        course: { id: course.id, name: course.name, description: course.description || "", teacher_name: course.teacherName || currentUser.name, modules: assignedModules },
         exams: [{ ...examToJsonSchema(exam), published: true }]
       };
       const { data, error } = await sb.rpc("publish_academy_course", { payload });
@@ -2638,6 +2678,8 @@ async function saveExamDraft(event) {
       if (!verified || verified.title !== exam.title || verified.minutes !== exam.minutes || verified.questions.length !== exam.questions.length) {
         throw new Error("No se pudo verificar el examen publicado completo.");
       }
+      const verifiedModuleId = examAssignedModuleId(findCourse(exam.courseId), exam.id);
+      if (verifiedModuleId !== targetModuleId) throw new Error("No se pudo verificar la asignación del examen al módulo.");
       drafts.exams = drafts.exams.filter(item => item.id !== exam.id);
       saveDrafts();
       closeModal("exam-modal");
@@ -2649,6 +2691,12 @@ async function saveExamDraft(event) {
     } finally {
       if (submit) submit.disabled = false;
     }
+    return;
+  }
+  const assignmentSaved = await updateCourseModules(exam.courseId, modules => applyExamModuleAssignment(modules, exam, targetModuleId));
+  if (!assignmentSaved) {
+    $("#exam-editor-error").className = "error";
+    $("#exam-editor-error").textContent = "No se pudo guardar la asignación del módulo.";
     return;
   }
   const draftIndex = drafts.exams.findIndex(item => item.id === exam.id);

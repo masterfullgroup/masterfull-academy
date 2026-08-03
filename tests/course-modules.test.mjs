@@ -144,6 +144,7 @@ const context = {
 vm.createContext(context);
 vm.runInContext([
   extractFunction("normalizeModules"),
+  extractFunction("applyExamModuleAssignment"),
   extractFunction("activityCompleted"),
   extractFunction("accessibleCourseActivities")
 ].join("\n"), context);
@@ -183,6 +184,19 @@ assert.deepEqual([...accessible.map(item => item.id)], ["visible"], "El alumno s
 context.results = [{ studentId: "student-1", examId: "exam-1", score: 14 }];
 assert.equal(context.activityCompleted(normalized[0].activities[2], { completed:{} }, context.results), true, "Aprobar una evaluación debe completar el requisito");
 
+context.uid = () => "quiz-link-new";
+const assignedModules = context.applyExamModuleAssignment([
+  { id:"module-a", title:"A", activities:[{ id:"quiz-link", title:"Nombre anterior", type:"quiz", examId:"exam-2" }] },
+  { id:"module-b", title:"B", activities:[] }
+], { id:"exam-2", title:"Examen actualizado", published:true, minutes:30, attemptsAllowed:2 }, "module-b");
+assert.equal(assignedModules[0].activities.length, 0, "Mover una evaluación debe retirarla del módulo anterior");
+assert.equal(assignedModules[1].activities.length, 1, "La evaluación debe aparecer una sola vez en el módulo elegido");
+assert.equal(assignedModules[1].activities[0].id, "quiz-link", "Mover una evaluación debe conservar la identidad de su actividad");
+assert.equal(assignedModules[1].activities[0].title, "Examen actualizado", "La actividad vinculada debe reflejar el nombre actual del examen");
+assert.equal(assignedModules[1].activities[0].completionRule, "pass", "La evaluación asignada debe completarse al aprobarse");
+const unassignedModules = context.applyExamModuleAssignment(assignedModules, { id:"exam-2", title:"Examen actualizado", published:true, minutes:30, attemptsAllowed:2 }, "");
+assert.equal(unassignedModules.flatMap(module => module.activities).length, 0, "Sin asignar debe retirar el vínculo del recorrido del curso");
+
 for (const type of ["page","file","video","link","practice","task","quiz","discussion","live","heading"]) {
   assert.match(htmlSource, new RegExp(`value="${type}"`), `Falta el tipo ${type} en el selector`);
 }
@@ -190,6 +204,8 @@ for (const field of ["activity-published","activity-completion-rule","activity-e
   assert.match(htmlSource, new RegExp(`id="${field}"`), `Falta el campo ${field}`);
 }
 assert.match(appSource, /Sin asignar a un módulo/, "Las evaluaciones históricas sin módulo deben identificarse");
+assert.match(htmlSource, /id="editor-module"/, "El editor de evaluaciones debe permitir elegir un módulo");
+assert.match(appSource, /Asignar módulo/, "Las evaluaciones sin ubicación deben mostrar una acción de asignación");
 assert.match(appSource, /Filtro de las tareas ya ubicadas en los módulos/, "La vista global de tareas debe ser un filtro");
 assert.doesNotMatch(appSource, /student-todo-panel/, "El panel del alumno no debe mostrar el bloque de evaluaciones pendientes");
 assert.doesNotMatch(htmlSource, /<div class="tabs">\s*<button class="tab active" data-student-tab/, "El panel del alumno no debe duplicar la navegación en una barra horizontal");

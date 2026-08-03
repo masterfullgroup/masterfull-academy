@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260803-2">
+  <link rel="stylesheet" href="styles.css?v=20260803-3">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -325,6 +325,7 @@
           <div class="form-grid">
             <label>Curso<select id="editor-course" required></select></label>
             <label class="field-span-2">Nombre del examen<input id="editor-title" required maxlength="80" placeholder="Ej. Examen parcial"></label>
+            <label class="field-span-2 exam-module-assignment-field">Módulo<select id="editor-module"><option value="">Sin asignar a un módulo</option></select><small id="editor-module-help">La evaluación aparecerá dentro del módulo seleccionado.</small></label>
             <label>Tiempo (minutos)<input id="editor-minutes" type="number" min="1" max="180" value="20" required></label>
             <label>Preguntas del examen<input id="editor-question-count" type="number" min="1" max="500" value="5" required></label>
             <label>Intentos permitidos<input id="editor-attempts" type="number" min="1" max="20" value="1" required></label>
@@ -398,6 +399,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260803-2"></script>
+  <script src="app.js?v=20260803-3"></script>
 </body>
 </html>
