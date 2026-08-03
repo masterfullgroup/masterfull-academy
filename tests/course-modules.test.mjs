@@ -119,19 +119,20 @@ assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
   assert.notEqual(start, -1, `No se encontró ${name}`);
+  const declarationStart = appSource.slice(Math.max(0, start - 6), start) === "async " ? start - 6 : start;
   const bodyStart = appSource.indexOf("{", start);
   let depth = 0;
   for (let index = bodyStart; index < appSource.length; index += 1) {
     if (appSource[index] === "{") depth += 1;
     if (appSource[index] === "}") depth -= 1;
-    if (depth === 0) return appSource.slice(start, index + 1);
+    if (depth === 0) return appSource.slice(declarationStart, index + 1);
   }
   throw new Error(`La función ${name} está incompleta`);
 }
 
 const saveExamSource = extractFunction("saveExamDraft");
 assert.match(htmlSource, /class="editor-sticky-bar"[\s\S]*?class="exam-editor-header-actions"[\s\S]*?class="modal-close"/, "Cerrar debe permanecer dentro de la cabecera fija del editor");
-assert.match(saveExamSource, /cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "El guardado confirmado debe cerrar el editor y actualizar la vista inmediatamente");
+assert.match(saveExamSource, /persistPublishedCourseModules[\s\S]*?cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "La asignación debe persistirse antes de cerrar el editor y actualizar la vista");
 
 const context = {
   courseProgress: {},
@@ -150,6 +151,7 @@ vm.runInContext([
   extractFunction("normalizeModules"),
   extractFunction("applyExamModuleAssignment"),
   extractFunction("cachePublishedExamAssignment"),
+  extractFunction("persistPublishedCourseModules"),
   extractFunction("activityCompleted"),
   extractFunction("accessibleCourseActivities")
 ].join("\n"), context);
@@ -206,6 +208,35 @@ context.publishedExams = [{ id:"exam-2", courseId:"course-1", title:"Nombre ante
 context.cachePublishedExamAssignment(context.publishedCourses[0], { id:"exam-2", courseId:"course-1", title:"Examen actualizado", questions:[], published:true }, assignedModules);
 assert.equal(context.publishedCourses[0].modules[1].activities[0].examId, "exam-2", "La vista local debe reflejar inmediatamente la evaluación dentro del módulo");
 assert.equal(context.publishedExams[0].title, "Examen actualizado", "La vista local debe reflejar inmediatamente los cambios del examen");
+context.currentUser = { id:"teacher-1" };
+context.isMissingModulesColumn = () => false;
+context.removeLegacyCourseModules = async () => {};
+context.saveLegacyCourseModules = async () => ({ error:null });
+context.sb = { from:() => ({ upsert:row => ({ select:() => ({ single:async () => ({ data:{ course_id:row.course_id, modules:row.modules }, error:null }) }) }) }) };
+const persistedModules = await context.persistPublishedCourseModules({ id:"course-1", name:"Curso", description:"" }, assignedModules);
+assert.equal(persistedModules.error, null, "La persistencia explícita de módulos debe completarse sin errores");
+assert.equal(persistedModules.modules[1].activities[0].examId, "exam-2", "La confirmación persistida debe conservar el vínculo de la evaluación");
+context.catalogCourses = [];
+context.dynamicCourses = [{ id:"course-1", name:"Curso", description:"", modules:[] }];
+context.courseChanges = [{ course_id:"course-1", name:"Curso", description:"", modules:persistedModules.modules, deleted:false }];
+context.legacyCourseModules = new Map();
+context.catalogExams = [];
+context.dynamicExams = [{ id:"exam-2", courseId:"course-1", title:"Examen actualizado", published:true, questions:[] }];
+vm.runInContext(extractFunction("applyCourseChanges"), context);
+context.applyCourseChanges();
+assert.equal(context.publishedCourses[0].modules[1].activities[0].examId, "exam-2", "Una sincronización posterior no debe eliminar la asignación persistida");
+context.currentUser = { id:"student-1" };
+context.courseProgress = {};
+context.results = [];
+const studentAssignedActivities = context.accessibleCourseActivities(context.publishedCourses[0]);
+assert.equal(studentAssignedActivities.some(activity => activity.examId === "exam-2" && activity.type === "quiz"), true, "La evaluación persistida debe formar parte del recorrido accesible del alumno");
+context.publishedExams = [{ id:"exam-2", courseId:"course-1", title:"Examen actualizado" }];
+context.esc = value => String(value);
+context.modernIcon = () => "";
+context.unlockRuleLabel = () => "Disponible inmediatamente";
+vm.runInContext(extractFunction("renderStudentCourseModules"), context);
+const studentModuleMarkup = context.renderStudentCourseModules(context.publishedCourses[0], []);
+assert.match(studentModuleMarkup, /class="start-exam" data-id="exam-2"/, "La plataforma del alumno debe mostrar la evaluación asignada como botón para iniciar");
 
 for (const type of ["page","file","video","link","practice","task","quiz","discussion","live","heading"]) {
   assert.match(htmlSource, new RegExp(`value="${type}"`), `Falta el tipo ${type} en el selector`);
@@ -216,6 +247,8 @@ for (const field of ["activity-published","activity-completion-rule","activity-e
 assert.match(appSource, /Sin asignar a un módulo/, "Las evaluaciones históricas sin módulo deben identificarse");
 assert.match(htmlSource, /id="editor-module"/, "El editor de evaluaciones debe permitir elegir un módulo");
 assert.doesNotMatch(appSource, /exam-assignment-action|data-focus-module/, "La asignación debe administrarse dentro de Modificar, sin un botón independiente");
+assert.match(appSource, /persistPublishedCourseModules[\s\S]*?\.select\("course_id, modules"\)\.single\(\)/, "La asignación publicada debe confirmarse directamente desde course_changes");
+assert.match(appSource, /const exam = activity\.examId \? publishedExams\.find[\s\S]*?"start-exam"/, "La evaluación asignada debe mostrarse como acción disponible para el alumno");
 assert.match(appSource, /Filtro de las tareas ya ubicadas en los módulos/, "La vista global de tareas debe ser un filtro");
 assert.doesNotMatch(appSource, /student-todo-panel/, "El panel del alumno no debe mostrar el bloque de evaluaciones pendientes");
 assert.doesNotMatch(htmlSource, /<div class="tabs">\s*<button class="tab active" data-student-tab/, "El panel del alumno no debe duplicar la navegación en una barra horizontal");

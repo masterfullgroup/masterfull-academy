@@ -1894,6 +1894,17 @@ function showCourseContentError(error) {
   const target = !$("#module-modal")?.classList.contains("hidden") ? $("#module-error") : $("#activity-error");
   if (target) target.textContent = error?.message || translateError(error);
 }
+async function persistPublishedCourseModules(course, rawModules) {
+  const modules = normalizeModules(rawModules);
+  const response = await sb.from("course_changes").upsert({ course_id:course.id, name:course.name, description:course.description || "", modules, deleted:false, updated_by:currentUser.id }, { onConflict:"course_id" }).select("course_id, modules").single();
+  if (response.error && isMissingModulesColumn(response.error)) {
+    const compatibleSave = await saveLegacyCourseModules(course.id, modules);
+    return compatibleSave.error ? { error:compatibleSave.error, modules:[] } : { error:null, modules };
+  }
+  if (response.error) return { error:response.error, modules:[] };
+  await removeLegacyCourseModules(course.id);
+  return { error:null, modules:normalizeModules(response.data?.modules) };
+}
 async function updateCourseModules(courseId, transform) {
   const localIndex = drafts.courses.findIndex(course => course.id === courseId);
   const course = findCourse(courseId);
@@ -1903,14 +1914,8 @@ async function updateCourseModules(courseId, transform) {
     drafts.courses[localIndex] = { ...drafts.courses[localIndex], modules, updatedAt: nowIso() };
     saveDrafts();
   } else {
-    const { error } = await sb.from("course_changes").upsert({ course_id: courseId, name: course.name, description: course.description || "", modules, deleted: false, updated_by: currentUser.id }, { onConflict: "course_id" });
-    if (error && isMissingModulesColumn(error)) {
-      const compatibleSave = await saveLegacyCourseModules(courseId, modules);
-      if (compatibleSave.error) { showCourseContentError(compatibleSave.error); return false; }
-    } else if (error) {
-      showCourseContentError(error);
-      return false;
-    } else await removeLegacyCourseModules(courseId);
+    const persisted = await persistPublishedCourseModules(course, modules);
+    if (persisted.error) { showCourseContentError(persisted.error); return false; }
     await loadCourseChanges();
   }
   refreshActiveCourseWorkspace();
@@ -2679,7 +2684,11 @@ async function saveExamDraft(event) {
       const { data, error } = await sb.rpc("publish_academy_course", { payload });
       if (error) throw error;
       if (!data || data.course_id !== course.id || Number(data.exam_count) !== 1) throw new Error("Supabase no confirmó la publicación del examen.");
-      cachePublishedExamAssignment(course, exam, assignedModules);
+      const persistedAssignment = await persistPublishedCourseModules(course, assignedModules);
+      if (persistedAssignment.error) throw persistedAssignment.error;
+      const storedModuleId = examAssignedModuleId({ modules:persistedAssignment.modules }, exam.id);
+      if (storedModuleId !== targetModuleId) throw new Error("Supabase no confirmó la asignación de la evaluación al módulo.");
+      cachePublishedExamAssignment(course, exam, persistedAssignment.modules);
       drafts.exams = drafts.exams.filter(item => item.id !== exam.id);
       saveDrafts();
       closeModal("exam-modal");
@@ -2689,7 +2698,7 @@ async function saveExamDraft(event) {
       } catch (syncError) {
         console.warn("El examen se guardó, pero la recarga de datos se completará en la próxima actualización:", syncError);
       }
-      cachePublishedExamAssignment(course, exam, assignedModules);
+      cachePublishedExamAssignment(course, exam, persistedAssignment.modules);
       renderTeacher();
     } catch (error) {
       console.error("Publicar examen:", error);
