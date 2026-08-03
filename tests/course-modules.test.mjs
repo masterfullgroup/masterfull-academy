@@ -138,6 +138,10 @@ assert.doesNotMatch(appSource, /Abrir recurso/, "El video integrado no debe repe
 assert.match(appSource, /const externalResource = url && !\["video", "pdf"\]\.includes\(activity\.type\);/, "Los videos y PDF deben permanecer integrados en la página");
 assert.match(cssSource, /\.lesson-tree-module > div\s*\{[\s\S]*?gap:6px;/, "Las opciones laterales deben tener separación visual suficiente");
 assert.match(cssSource, /\.course-workspace-sidebar\s*\{[\s\S]*?position:sticky;[\s\S]*?height:100vh;[\s\S]*?overflow-y:auto;/, "La navegación lateral del profesor debe permanecer fija al desplazar el contenido");
+assert.match(cssSource, /body\.teacher-course-open\s*\{[\s\S]*?overflow:hidden;/, "La página del curso no debe desplazar la cabecera ni la navegación");
+assert.match(cssSource, /body\.teacher-course-open \.course-workspace-page\s*\{[\s\S]*?grid-template-rows:auto minmax\(0,1fr\);[\s\S]*?overflow:hidden;/, "La cabecera debe ocupar una fila fija sobre el espacio del curso");
+assert.match(cssSource, /body\.teacher-course-open \.course-context-bar\s*\{[\s\S]*?position:sticky;[\s\S]*?top:0;/, "La cabecera azul debe permanecer visible");
+assert.match(cssSource, /body\.teacher-course-open \.course-workspace-content\s*\{[\s\S]*?overflow-y:auto;/, "Solo el contenido principal debe desplazarse verticalmente");
 assert.match(appSource, /function openTeacherActivityPreview[\s\S]*?teacherLessonPreview = true;[\s\S]*?renderLesson\(\);/, "La lectura docente debe reutilizar la página de contenido sin modificarlo");
 assert.match(appSource, /if \(teacherLessonPreview\) return;/, "La vista docente no debe alterar el progreso del alumno");
 assert.match(appSource, /link: `<path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"\/>`/, "El enlace debe usar el icono convencional de cadena");
