@@ -129,6 +129,10 @@ function extractFunction(name) {
   throw new Error(`La función ${name} está incompleta`);
 }
 
+const saveExamSource = extractFunction("saveExamDraft");
+assert.match(htmlSource, /class="editor-sticky-bar"[\s\S]*?class="exam-editor-header-actions"[\s\S]*?class="modal-close"/, "Cerrar debe permanecer dentro de la cabecera fija del editor");
+assert.match(saveExamSource, /cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "El guardado confirmado debe cerrar el editor y actualizar la vista inmediatamente");
+
 const context = {
   courseProgress: {},
   results: [],
@@ -145,6 +149,7 @@ vm.createContext(context);
 vm.runInContext([
   extractFunction("normalizeModules"),
   extractFunction("applyExamModuleAssignment"),
+  extractFunction("cachePublishedExamAssignment"),
   extractFunction("activityCompleted"),
   extractFunction("accessibleCourseActivities")
 ].join("\n"), context);
@@ -196,6 +201,11 @@ assert.equal(assignedModules[1].activities[0].title, "Examen actualizado", "La a
 assert.equal(assignedModules[1].activities[0].completionRule, "pass", "La evaluación asignada debe completarse al aprobarse");
 const unassignedModules = context.applyExamModuleAssignment(assignedModules, { id:"exam-2", title:"Examen actualizado", published:true, minutes:30, attemptsAllowed:2 }, "");
 assert.equal(unassignedModules.flatMap(module => module.activities).length, 0, "Sin asignar debe retirar el vínculo del recorrido del curso");
+context.publishedCourses = [{ id:"course-1", name:"Curso", modules:[] }];
+context.publishedExams = [{ id:"exam-2", courseId:"course-1", title:"Nombre anterior", questions:[] }];
+context.cachePublishedExamAssignment(context.publishedCourses[0], { id:"exam-2", courseId:"course-1", title:"Examen actualizado", questions:[], published:true }, assignedModules);
+assert.equal(context.publishedCourses[0].modules[1].activities[0].examId, "exam-2", "La vista local debe reflejar inmediatamente la evaluación dentro del módulo");
+assert.equal(context.publishedExams[0].title, "Examen actualizado", "La vista local debe reflejar inmediatamente los cambios del examen");
 
 for (const type of ["page","file","video","link","practice","task","quiz","discussion","live","heading"]) {
   assert.match(htmlSource, new RegExp(`value="${type}"`), `Falta el tipo ${type} en el selector`);
@@ -205,7 +215,7 @@ for (const field of ["activity-published","activity-completion-rule","activity-e
 }
 assert.match(appSource, /Sin asignar a un módulo/, "Las evaluaciones históricas sin módulo deben identificarse");
 assert.match(htmlSource, /id="editor-module"/, "El editor de evaluaciones debe permitir elegir un módulo");
-assert.match(appSource, /Asignar módulo/, "Las evaluaciones sin ubicación deben mostrar una acción de asignación");
+assert.doesNotMatch(appSource, /exam-assignment-action|data-focus-module/, "La asignación debe administrarse dentro de Modificar, sin un botón independiente");
 assert.match(appSource, /Filtro de las tareas ya ubicadas en los módulos/, "La vista global de tareas debe ser un filtro");
 assert.doesNotMatch(appSource, /student-todo-panel/, "El panel del alumno no debe mostrar el bloque de evaluaciones pendientes");
 assert.doesNotMatch(htmlSource, /<div class="tabs">\s*<button class="tab active" data-student-tab/, "El panel del alumno no debe duplicar la navegación en una barra horizontal");

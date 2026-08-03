@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260803-3">
+  <link rel="stylesheet" href="styles.css?v=20260803-4">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -310,10 +310,10 @@
   </div>
 
   <div id="exam-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exam-modal-title">
-    <div class="modal-card panel large exam-editor-card"><button class="modal-close" data-close="exam-modal" type="button" aria-label="Cerrar">×</button>
+    <div class="modal-card panel large exam-editor-card">
       <div class="editor-sticky-bar">
         <div><span class="eyebrow">EDITOR DE EXÁMENES</span><h2 id="exam-modal-title">Crear examen</h2></div>
-        <button class="btn primary editor-save" type="submit" form="exam-editor-form">Guardar examen</button>
+        <div class="exam-editor-header-actions"><button class="btn primary editor-save" type="submit" form="exam-editor-form">Guardar examen</button><button class="modal-close" data-close="exam-modal" type="button" aria-label="Cerrar">×</button></div>
       </div>
       <nav class="exam-editor-nav" aria-label="Secciones del editor">
         <button class="exam-editor-tab active" data-editor-section="editor-settings-section" type="button">Detalles</button>
@@ -399,6 +399,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260803-3"></script>
+  <script src="app.js?v=20260803-4"></script>
 </body>
 </html>

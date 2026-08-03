@@ -1918,18 +1918,6 @@ body.app-shell-mode:has(.shell-teacher-nav) .user-actions .logout-btn { display:
 .exam-module-assignment-field.has-no-modules small {
   color:#9a5a12;
 }
-.exam-assignment-action {
-  color:#4b42bd !important;
-  border-color:#c9c5f0 !important;
-  background:#f3f1ff !important;
-  font-weight:700 !important;
-}
-.exam-assignment-action:hover,
-.exam-assignment-action:focus-visible {
-  color:#fff !important;
-  border-color:#554bd1 !important;
-  background:#554bd1 !important;
-}
 .editor-questions-section .question-builder-head { margin: 0 0 16px; }
 .editor-questions-section .question-builder-head .badge { margin-left: 5px; color: #0d7187; background: #e8f4f7; font-size: 10px; }
 .exam-editor-card .question-mode-tabs { gap: 4px; margin: 0 0 16px; padding: 4px; border: 0; border-radius: 11px; background: #eef2f5; }
@@ -5727,9 +5715,38 @@ body.student-course-open .student-course-content-head {
 .exam-editor-card .editor-sticky-bar {
   top:0;
   margin:0 -30px;
-  padding:18px 66px 16px 30px;
+  padding:18px 30px 16px;
   border-bottom:1px solid #d9ddea;
   background:#fffefef7;
+}
+.exam-editor-header-actions {
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  gap:12px;
+}
+.exam-editor-card .exam-editor-header-actions .modal-close {
+  position:static;
+  display:grid;
+  width:42px;
+  height:42px;
+  margin:0;
+  padding:0;
+  place-items:center;
+  color:#65758a;
+  border:1px solid #d7dce7;
+  border-radius:10px;
+  background:#fff;
+  font-size:23px;
+  line-height:1;
+  cursor:pointer;
+}
+.exam-editor-card .exam-editor-header-actions .modal-close:hover,
+.exam-editor-card .exam-editor-header-actions .modal-close:focus-visible {
+  color:#4338b8;
+  border-color:#aaa8dc;
+  outline:0;
+  background:#f1f0fa;
 }
 .exam-editor-card .editor-sticky-bar h2 {
   color:var(--mf-ink);
@@ -5845,9 +5862,15 @@ body.student-course-open .student-course-content-head {
   .canvas-module-item > .publish-check { display:none; }
   .course-settings-grid { grid-template-columns:1fr; }
   .exam-editor-card { width:100vw; max-height:100vh; padding:0 16px 25px; border-radius:0; }
-  .exam-editor-card .editor-sticky-bar { margin:0 -16px; padding:15px 50px 13px 16px; }
+  .exam-editor-card .editor-sticky-bar { margin:0 -16px; padding:15px 16px 13px; }
+  .exam-editor-header-actions { gap:8px; }
+  .exam-editor-card .exam-editor-header-actions .modal-close { width:40px; height:40px; }
   .exam-editor-nav { top:74px; margin:0 -16px 18px; padding:0 16px; }
   .exam-editor-card .editor-section { padding:18px 15px; }
+}
+@media (max-width:480px) {
+  .exam-editor-header-actions { width:100%; }
+  .exam-editor-nav { top:137px; }
 }
 
 /* Canvas-like module content editor */
