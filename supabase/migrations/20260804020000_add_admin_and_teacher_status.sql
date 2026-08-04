@@ -6,6 +6,9 @@ alter table public.profiles
   add column if not exists institution text,
   add column if not exists avatar_url text,
   add column if not exists last_login timestamptz;
+  -- Elimina primero la restricción antigua, que solo admite student y teacher.
+alter table public.profiles
+  drop constraint if exists profiles_role_check;
 
 -- Los profesores existentes se consideran activos.
 update public.profiles
