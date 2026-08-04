@@ -1544,7 +1544,7 @@ function renderStudentOverview(courses, summaries) {
 }
 function renderStudentCourseModules(course, myGrades) {
   const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published) }));
-  if (!modules.length) return "";
+  if (!modules.length) return `<div class="student-course-empty"><span>${modernIcon("modules")}</span><strong>Este curso aún no tiene módulos publicados</strong><p>El contenido aparecerá aquí cuando el profesor publique la estructura del curso.</p></div>`;
   const progress = courseProgress[course.id] || { completed: {}, lastActivityId:"" };
   let previousComplete = true;
   return `<section class="student-module-space"><div class="student-module-list">${modules.map((module, index) => {

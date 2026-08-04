@@ -6,6 +6,7 @@ const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8")
 const htmlSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const cssSource = fs.readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 const enrollmentMigrationSource = fs.readFileSync(new URL("../supabase/migrations/20260803000000_add_course_enrollments.sql", import.meta.url), "utf8");
+const moduleBackfillMigrationSource = fs.readFileSync(new URL("../supabase/migrations/20260803010000_backfill_legacy_course_modules.sql", import.meta.url), "utf8");
 const teacherCanvasSource = appSource.slice(appSource.indexOf("function renderTeacherCourseModulesCanvas"), appSource.indexOf("function renderTeacherCourseOverview"));
 assert.doesNotMatch(appSource, /course-context-mark/, "La cabecera no debe repetir el curso con una inicial decorativa");
 assert.doesNotMatch(appSource, /<span>CURSO<\/span><h1>/, "La cabecera no debe repetir la etiqueta Curso");
@@ -160,6 +161,10 @@ assert.match(enrollmentMigrationSource, /alter table public\.course_enrollments 
 assert.match(enrollmentMigrationSource, /published = true and public\.is_enrolled\(course_id\)/, "Los cursos publicados deben exigir matrícula al alumno");
 assert.match(enrollmentMigrationSource, /student_id = auth\.uid\(\) and public\.is_enrolled\(course_id\)/, "Un alumno no debe registrar resultados en cursos no autorizados");
 assert.match(enrollmentMigrationSource, /grant_course_access[\s\S]*?role = 'student'/, "La autorización debe aceptar únicamente cuentas de alumno registradas");
+
+assert.match(moduleBackfillMigrationSource, /__mfmod__:d83dc278ef605b64:%/, "La migración debe recuperar los módulos fragmentados de Física");
+assert.match(moduleBackfillMigrationSource, /update public\.academy_courses[\s\S]*?set modules = recovered_modules/, "Los módulos recuperados deben guardarse en el curso publicado");
+assert.match(appSource, /Este curso aún no tiene módulos publicados/, "La vista del alumno no debe quedar en blanco si un curso no tiene módulos visibles");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
