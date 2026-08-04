@@ -19,6 +19,9 @@ let dynamicCourses = [];
 let dynamicExams = [];
 let courseChanges = [];
 let legacyCourseModules = new Map();
+let courseEnrollments = [];
+let studentProfiles = [];
+let courseAccessError = "";
 let publishedCourses = [];
 let publishedExams = [];
 let results = [];
@@ -237,7 +240,6 @@ async function initApp() {
     $("#login-error").textContent = message;
     $("#register-error").textContent = message;
     setSessionMessage(message, "error");
-    await loadCatalogSafe();
     appReady = true;
     renderApp();
     return;
@@ -254,15 +256,18 @@ async function initApp() {
     if (!appReady) return;
     if (authTransitionPending && event === "SIGNED_IN") return;
     await setSessionFromSupabase(session, false);
-    if (currentUser) await loadCourseChanges();
+    if (currentUser) {
+      if (!catalog) await loadCatalogSafe();
+      await loadCourseChanges();
+    }
     renderApp();
   });
-  const [{ data: sessionData }, _catalog] = await Promise.all([
-    sb.auth.getSession(),
-    loadCatalogSafe()
-  ]);
+  const { data: sessionData } = await sb.auth.getSession();
   await setSessionFromSupabase(sessionData.session, false);
-  if (currentUser) await loadCourseChanges();
+  if (currentUser) {
+    await loadCatalogSafe();
+    await loadCourseChanges();
+  }
   appReady = true;
   await syncPendingResults();
   await refreshResults();
@@ -323,12 +328,16 @@ function applyCourseChanges() {
   const changes = new Map(courseChanges.map(change => [change.course_id, change]));
   const coursesById = new Map(catalogCourses.map(course => [course.id, course]));
   dynamicCourses.forEach(course => coursesById.set(course.id, course));
-  publishedCourses = [...coursesById.values()].filter(course => !changes.get(course.id)?.deleted).map(course => {
+  const mergedCourses = [...coursesById.values()].filter(course => !changes.get(course.id)?.deleted).map(course => {
     const change = changes.get(course.id);
     const compatibleModules = legacyCourseModules.get(course.id);
     const changedModules = change?.modules === null || change?.modules === undefined ? compatibleModules : normalizeModules(change.modules);
     return change || compatibleModules ? { ...course, name: change?.name || course.name, description: change?.description ?? course.description, modules: changedModules ?? course.modules } : course;
   });
+  const enrolledCourseIds = new Set(courseEnrollments
+    .filter(enrollment => enrollment.status === "active" && enrollment.student_id === currentUser?.id)
+    .map(enrollment => enrollment.course_id));
+  publishedCourses = currentUser?.role === "teacher" ? mergedCourses : currentUser?.role === "student" ? mergedCourses.filter(course => enrolledCourseIds.has(course.id)) : [];
   const visibleCourseIds = new Set(publishedCourses.map(course => course.id));
   const examsById = new Map(catalogExams.map(exam => [exam.id, exam]));
   dynamicExams.forEach(exam => examsById.set(exam.id, exam));
@@ -348,6 +357,7 @@ function menuIcon(name) {
 
 async function loadCourseChanges() {
   if (!sb || !currentUser) return;
+  await loadCourseAccess();
   await loadDynamicCourses();
   let { data, error } = await sb.from("course_changes").select("course_id, name, description, modules, deleted, updated_at");
   if (error?.code === "42703") ({ data, error } = await sb.from("course_changes").select("course_id, name, description, deleted, updated_at"));
@@ -361,6 +371,34 @@ async function loadCourseChanges() {
     courseChanges = rows.filter(row => !isLegacyModuleRow(row));
   }
   applyCourseChanges();
+}
+async function loadCourseAccess() {
+  courseAccessError = "";
+  if (!sb || !currentUser) {
+    courseEnrollments = [];
+    studentProfiles = [];
+    return;
+  }
+  const enrollmentQuery = sb.from("course_enrollments").select("course_id, student_id, status, granted_by, created_at, updated_at");
+  const [enrollmentResponse, profileResponse] = await Promise.all([
+    enrollmentQuery,
+    currentUser.role === "teacher" ? sb.from("profiles").select("id, full_name, email, role").eq("role", "student").order("full_name", { ascending:true }) : Promise.resolve({ data:[], error:null })
+  ]);
+  if (enrollmentResponse.error) {
+    courseEnrollments = [];
+    studentProfiles = [];
+    courseAccessError = enrollmentResponse.error.code === "42P01" ? "Aplica la migración de matrículas en Supabase para administrar accesos." : "No se pudieron cargar los alumnos autorizados.";
+    console.error("Matrículas:", enrollmentResponse.error);
+    return;
+  }
+  if (profileResponse.error) {
+    studentProfiles = [];
+    courseAccessError = "No se pudo cargar el directorio de alumnos.";
+    console.error("Perfiles de alumnos:", profileResponse.error);
+  } else {
+    studentProfiles = profileResponse.data || [];
+  }
+  courseEnrollments = enrollmentResponse.data || [];
 }
 async function loadDynamicCourses() {
   let courseQuery = await sb.from("academy_courses").select("course_id, name, description, teacher_name, modules, updated_at").eq("published", true);
@@ -711,7 +749,10 @@ async function registerUser(event) {
       $("#register-error").textContent = "Cuenta creada. Revisa tu correo para confirmar el registro.";
       return;
     }
-    await setSessionFromSupabase(data.session);
+    await setSessionFromSupabase(data.session, false);
+    await loadCatalogSafe();
+    await loadCourseChanges();
+    renderApp();
   } catch (error) {
     console.error("Registro:", error);
     $("#register-error").textContent = translateError(error);
@@ -735,6 +776,8 @@ async function loginUser(event) {
     $("#login-error").textContent = "";
     await setSessionFromSupabase(data.session, false);
     if (!currentUser) throw new Error("No se pudo cargar el perfil de esta cuenta.");
+    await loadCatalogSafe();
+    await loadCourseChanges();
     const exitAnimation = playAuthLoginExit();
     await syncPendingResults(false);
     await refreshResults();
@@ -763,6 +806,9 @@ async function logout() {
   activeLessonCourseId = null;
   activeLessonActivityId = null;
   teacherLessonPreview = false;
+  courseEnrollments = [];
+  studentProfiles = [];
+  courseAccessError = "";
   saveActiveLesson();
   if (sb) await sb.auth.signOut({ scope: "local" });
   currentUser = null;
@@ -979,8 +1025,15 @@ function renderTeacherCourseGrades(course) {
   return `<div class="course-subpage-head"><div><span class="eyebrow">SEGUIMIENTO</span><h2>Calificaciones</h2><p>Resultados registrados para las evaluaciones de este curso.</p></div></div><div class="course-data-list">${courseResults.length ? courseResults.map(result => `<article><span class="activity-type-icon">${modernIcon("results")}</span><div><strong>${esc(result.studentName || "Alumno")}</strong><small>${esc(result.examTitle)} · Intento ${result.attempt || 1}</small></div><b>${Number(result.score || 0).toFixed(1)} / 20</b></article>`).join("") : `<div class="course-workspace-empty"><strong>Aún no hay calificaciones</strong><p>Los resultados aparecerán cuando los alumnos entreguen evaluaciones.</p></div>`}</div>`;
 }
 function renderTeacherCoursePeople(course) {
-  const people = [...new Map(results.filter(result => result.courseId === course.id).map(result => [result.studentId || result.studentEmail, result])).values()];
-  return `<div class="course-subpage-head"><div><span class="eyebrow">PARTICIPANTES</span><h2>Personas</h2><p>Alumnos con actividad registrada en este curso.</p></div></div><div class="course-data-list">${people.length ? people.map(person => `<article><span class="course-person-avatar">${esc((person.studentName || "A").charAt(0).toUpperCase())}</span><div><strong>${esc(person.studentName || "Alumno")}</strong><small>${esc(person.studentEmail || "Sin correo disponible")}</small></div><span class="status published">Alumno</span></article>`).join("") : `<div class="course-workspace-empty"><strong>Aún no hay alumnos con actividad</strong><p>Las personas aparecerán cuando registren una entrega o evaluación.</p></div>`}</div>`;
+  const profilesById = new Map(studentProfiles.map(profile => [profile.id, profile]));
+  const authorized = courseEnrollments.filter(enrollment => enrollment.course_id === course.id && enrollment.status === "active");
+  return `<div class="course-subpage-head"><div><span class="eyebrow">CONTROL DE ACCESO</span><h2>Alumnos autorizados</h2><p>Solo estos alumnos pueden ver los módulos, evaluaciones y recursos del curso.</p></div></div>
+    <form class="course-access-form" data-course-id="${esc(course.id)}"><label for="course-access-email">Correo del alumno</label><div><input id="course-access-email" name="student-email" type="email" autocomplete="email" placeholder="alumno@correo.com" required><button class="btn primary" type="submit">Autorizar alumno</button></div><p class="course-access-status ${courseAccessError ? "error" : ""}" aria-live="polite">${esc(courseAccessError)}</p></form>
+    <div class="course-access-list">${authorized.length ? authorized.map(enrollment => {
+      const profile = profilesById.get(enrollment.student_id);
+      const name = profile?.full_name || "Alumno";
+      return `<article><span class="course-person-avatar">${esc(name.charAt(0).toUpperCase())}</span><div><strong>${esc(name)}</strong><small>${esc(profile?.email || "Cuenta registrada")}</small></div><span class="status published">Autorizado</span><button class="btn secondary revoke-course-access" data-course-id="${esc(course.id)}" data-student-id="${esc(enrollment.student_id)}" type="button">Retirar acceso</button></article>`;
+    }).join("") : `<div class="course-workspace-empty"><strong>Ningún alumno autorizado</strong><p>Agrega el correo de un alumno registrado para permitirle acceder al curso.</p></div>`}</div>`;
 }
 function renderTeacherCourseResources(course, types, title, icon) {
   const resources = normalizeModules(course.modules).flatMap(module => module.activities.filter(activity => types.includes(activity.type)).map(activity => ({ activity, module })));
@@ -1241,6 +1294,8 @@ function bindTeacherExamWorkspaceActions() {
     $$("#teacher-course-workspace .canvas-module-card").forEach(module => { module.open = true; });
   }));
   $$("#teacher-course-workspace .preview-activity").forEach(button => button.addEventListener("click", () => openTeacherActivityPreview(button.dataset.courseId, button.dataset.activityId)));
+  $$("#teacher-course-workspace .course-access-form").forEach(form => form.addEventListener("submit", authorizeCourseStudent));
+  $$("#teacher-course-workspace .revoke-course-access").forEach(button => button.addEventListener("click", () => revokeCourseStudent(button.dataset.courseId, button.dataset.studentId)));
   $$("#teacher-course-workspace .edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$("#teacher-course-workspace .edit-module").forEach(button => button.addEventListener("click", () => openModuleModal(button.dataset.courseId, button.dataset.moduleId)));
   $$("#teacher-course-workspace .add-module-activity").forEach(button => button.addEventListener("click", () => openActivityModal(button.dataset.courseId, button.dataset.moduleId)));
@@ -1250,6 +1305,45 @@ function bindTeacherExamWorkspaceActions() {
   $$("#teacher-course-workspace .move-module").forEach(button => button.addEventListener("click", () => moveModule(button.dataset.courseId, button.dataset.moduleId, button.dataset.direction)));
   $$("#teacher-course-workspace .move-activity").forEach(button => button.addEventListener("click", () => moveActivity(button.dataset.courseId, button.dataset.moduleId, button.dataset.activityId, button.dataset.direction)));
   bindModuleDragAndDrop();
+}
+async function authorizeCourseStudent(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const status = form.querySelector(".course-access-status");
+  const button = event.submitter;
+  const email = new FormData(form).get("student-email")?.toString().trim().toLowerCase() || "";
+  if (!sb || !email) return;
+  button.disabled = true;
+  status.className = "course-access-status";
+  status.textContent = "Autorizando alumno...";
+  try {
+    const { error } = await sb.rpc("grant_course_access", { target_course_id:form.dataset.courseId, target_student_email:email });
+    if (error) throw error;
+    await loadCourseAccess();
+    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
+    bindTeacherExamWorkspaceActions();
+  } catch (error) {
+    console.error("Autorizar alumno:", error);
+    status.className = "course-access-status error";
+    status.textContent = String(error?.message || "").includes("No existe un alumno") ? "No existe un alumno registrado con ese correo." : translateError(error);
+  } finally {
+    button.disabled = false;
+  }
+}
+async function revokeCourseStudent(courseId, studentId) {
+  if (!sb || !confirm("¿Retirar el acceso de este alumno al curso?")) return;
+  const button = $(`.revoke-course-access[data-course-id="${CSS.escape(courseId)}"][data-student-id="${CSS.escape(studentId)}"]`);
+  if (button) button.disabled = true;
+  try {
+    const { error } = await sb.rpc("revoke_course_access", { target_course_id:courseId, target_student_id:studentId });
+    if (error) throw error;
+    await loadCourseAccess();
+    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
+    bindTeacherExamWorkspaceActions();
+  } catch (error) {
+    console.error("Retirar acceso:", error);
+    if (button) { button.disabled = false; button.textContent = "No se pudo retirar"; }
+  }
 }
 async function publishSelectedCourseExams(event) {
   event.preventDefault();
@@ -1380,8 +1474,9 @@ function exportGrades() {
 function renderStudent() {
   show("student-view");
   $("#student-welcome").textContent = `Hola, ${currentUser.name}`;
-  const myGrades = results.filter(grade => grade.studentId === currentUser.id);
   const courses = publishedCourses.filter(course => publishedExams.some(exam => exam.courseId === course.id) || normalizeModules(course.modules).length);
+  const visibleCourseIds = new Set(courses.map(course => course.id));
+  const myGrades = results.filter(grade => grade.studentId === currentUser.id && visibleCourseIds.has(grade.courseId));
   const summaries = courses.map(courseStudentSummary);
   $("#student-stats").innerHTML = "";
   renderStudentOverview(courses, summaries);
@@ -1408,7 +1503,7 @@ function renderStudent() {
   $$(".student-course-nav-button").forEach(button => button.addEventListener("click", () => { activeStudentCourseSection = button.dataset.section; renderStudent(); }));
 }
 function renderStudentCourseDirectory(courses, summaries) {
-  if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Todavía no tienes cursos disponibles</strong><p>Los cursos publicados por el profesor aparecerán aquí.</p></div>`;
+  if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Aún no tienes cursos autorizados</strong><p>Cuando un profesor te conceda acceso, el curso aparecerá aquí.</p></div>`;
   return `<div class="canvas-dashboard-grid student-course-gallery">${courses.map(course => {
     return `<article class="canvas-dashboard-card student-dashboard-course-card"><div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div><div class="canvas-dashboard-card-body"><strong class="canvas-course-title">${esc(course.name)}</strong><div class="canvas-dashboard-actions student-dashboard-actions"><button class="manage-course-content open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></div></div></article>`;
   }).join("")}</div>`;

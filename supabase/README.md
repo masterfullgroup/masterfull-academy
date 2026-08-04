@@ -20,3 +20,7 @@ No uses `service_role`, contraseña de PostgreSQL ni claves secretas en el front
 ## Permitir que el profesor elimine resultados
 
 La migración `supabase/migrations/20260713000000_enable_teacher_result_delete.sql` habilita el borrado únicamente para usuarios cuyo perfil tenga el rol `teacher`. Al publicar cambios en `main`, GitHub Actions la aplica con Supabase CLI.
+
+## Autorizar alumnos por curso
+
+La migración `supabase/migrations/20260803000000_add_course_enrollments.sql` crea las matrículas privadas. Un alumno nuevo no puede consultar cursos, evaluaciones ni preguntas hasta que el profesor lo autorice desde la sección **Personas** del curso. Las políticas RLS de Supabase aplican la restricción aunque se intente consultar las tablas directamente.

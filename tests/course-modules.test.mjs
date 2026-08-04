@@ -5,6 +5,7 @@ import vm from "node:vm";
 const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
 const htmlSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const cssSource = fs.readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+const enrollmentMigrationSource = fs.readFileSync(new URL("../supabase/migrations/20260803000000_add_course_enrollments.sql", import.meta.url), "utf8");
 const teacherCanvasSource = appSource.slice(appSource.indexOf("function renderTeacherCourseModulesCanvas"), appSource.indexOf("function renderTeacherCourseOverview"));
 assert.doesNotMatch(appSource, /course-context-mark/, "La cabecera no debe repetir el curso con una inicial decorativa");
 assert.doesNotMatch(appSource, /<span>CURSO<\/span><h1>/, "La cabecera no debe repetir la etiqueta Curso");
@@ -147,6 +148,18 @@ assert.match(appSource, /if \(teacherLessonPreview\) return;/, "La vista docente
 assert.match(appSource, /link: `<path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"\/>`/, "El enlace debe usar el icono convencional de cadena");
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
+assert.match(appSource, /await loadCourseAccess\(\);[\s\S]*?await loadDynamicCourses\(\);/, "Las matrículas deben cargarse antes que el contenido publicado");
+assert.match(appSource, /enrollment\.status === "active" && enrollment\.student_id === currentUser\?\.id/, "Las matrículas visibles deben pertenecer al alumno autenticado");
+assert.match(appSource, /currentUser\?\.role === "student" \? mergedCourses\.filter\(course => enrolledCourseIds\.has\(course\.id\)\)/, "El alumno solo debe conservar cursos con matrícula activa");
+assert.match(appSource, /Aún no tienes cursos autorizados/, "El estado vacío debe explicar que el profesor concede el acceso");
+assert.match(appSource, /function renderTeacherCoursePeople[\s\S]*?course-access-form[\s\S]*?Autorizar alumno/, "Personas debe administrar alumnos autorizados por correo");
+assert.match(appSource, /sb\.rpc\("grant_course_access"/, "La autorización debe usar la función segura de Supabase");
+assert.match(appSource, /sb\.rpc\("revoke_course_access"/, "El profesor debe poder retirar el acceso");
+assert.match(enrollmentMigrationSource, /create table if not exists public\.course_enrollments/, "La migración debe crear la tabla de matrículas");
+assert.match(enrollmentMigrationSource, /alter table public\.course_enrollments enable row level security;/, "Las matrículas deben tener RLS habilitado");
+assert.match(enrollmentMigrationSource, /published = true and public\.is_enrolled\(course_id\)/, "Los cursos publicados deben exigir matrícula al alumno");
+assert.match(enrollmentMigrationSource, /student_id = auth\.uid\(\) and public\.is_enrolled\(course_id\)/, "Un alumno no debe registrar resultados en cursos no autorizados");
+assert.match(enrollmentMigrationSource, /grant_course_access[\s\S]*?role = 'student'/, "La autorización debe aceptar únicamente cuentas de alumno registradas");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
@@ -183,6 +196,7 @@ assert.doesNotMatch(lessonTreeSource, /activity-sequence|activityIndex|index \+ 
 
 const context = {
   courseProgress: {},
+  courseEnrollments: [{ course_id:"course-1", student_id:"student-1", status:"active" }],
   results: [],
   currentUser: { id: "student-1" },
   Date,
@@ -255,7 +269,7 @@ context.publishedExams = [{ id:"exam-2", courseId:"course-1", title:"Nombre ante
 context.cachePublishedExamAssignment(context.publishedCourses[0], { id:"exam-2", courseId:"course-1", title:"Examen actualizado", questions:[], published:true }, assignedModules);
 assert.equal(context.publishedCourses[0].modules[1].activities[0].examId, "exam-2", "La vista local debe reflejar inmediatamente la evaluación dentro del módulo");
 assert.equal(context.publishedExams[0].title, "Examen actualizado", "La vista local debe reflejar inmediatamente los cambios del examen");
-context.currentUser = { id:"teacher-1" };
+context.currentUser = { id:"teacher-1", role:"teacher" };
 context.isMissingModulesColumn = () => false;
 context.removeLegacyCourseModules = async () => {};
 context.saveLegacyCourseModules = async () => ({ error:null });
@@ -272,7 +286,7 @@ context.dynamicExams = [{ id:"exam-2", courseId:"course-1", title:"Examen actual
 vm.runInContext(extractFunction("applyCourseChanges"), context);
 context.applyCourseChanges();
 assert.equal(context.publishedCourses[0].modules[1].activities[0].examId, "exam-2", "Una sincronización posterior no debe eliminar la asignación persistida");
-context.currentUser = { id:"student-1" };
+context.currentUser = { id:"student-1", role:"student" };
 context.courseProgress = {};
 context.results = [];
 const studentAssignedActivities = context.accessibleCourseActivities(context.publishedCourses[0]);
