@@ -50,24 +50,133 @@
           <form id="login-form" class="auth-form">
             <h2>Bienvenido</h2>
             <p class="muted">Ingresa con tu correo y contraseña.</p>
-            <label>Correo electrónico<input id="login-email" type="email" required autocomplete="email" placeholder="nombre@correo.com"></label>
+            <label>Correo electrónico
+    <div class="input-group-icon">
+        <div class="input-icon">
+            @
+        </div>
+
+        <input
+            id="login-email"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder="nombre@correo.com">
+    </div>
+</label>
             <label>Contraseña
-              <span class="password-field"><input id="login-password" type="password" required autocomplete="current-password" placeholder="Tu contraseña"><button class="password-toggle" type="button" data-password="login-password" aria-label="Mostrar contraseña" title="Mostrar contraseña"></button></span>
-            </label>
+  <div class="input-group-icon password-field">
+    <div class="input-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+      </svg>
+    </div>
+
+    <input
+      id="login-password"
+      type="password"
+      required
+      autocomplete="current-password"
+      placeholder="Tu contraseña">
+
+    <button
+      class="password-toggle"
+      type="button"
+      data-password="login-password"
+      aria-label="Mostrar contraseña"
+      title="Mostrar contraseña">
+    </button>
+  </div>
+</label>
             <button class="btn primary full" type="submit">Ingresar</button>
             <p id="login-error" class="error"></p>
           </form>
 
           <form id="register-form" class="auth-form hidden">
             <h2>Crea tu cuenta</h2>
-            <label>Nombre completo<input id="register-name" required maxlength="80" placeholder="Nombres y apellidos"></label>
-            <label>Correo electrónico<input id="register-email" type="email" required autocomplete="email" placeholder="nombre@correo.com"></label>
+            <label>Nombre completo
+  <div class="input-group-icon">
+    <div class="input-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"></circle>
+        <path d="M4 21a8 8 0 0 1 16 0"></path>
+      </svg>
+    </div>
+
+    <input
+      id="register-name"
+      required
+      maxlength="80"
+      placeholder="Nombres y apellidos">
+  </div>
+</label>
+            <label>Correo electrónico
+  <div class="input-group-icon">
+    <div class="input-icon" aria-hidden="true">
+      @
+    </div>
+
+    <input
+      id="register-email"
+      type="email"
+      required
+      autocomplete="email"
+      placeholder="nombre@correo.com">
+  </div>
+</label>
             <label>Contraseña
-              <span class="password-field"><input id="register-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres"><button class="password-toggle" type="button" data-password="register-password" aria-label="Mostrar contraseña" title="Mostrar contraseña"></button></span>
-            </label>
+  <div class="input-group-icon password-field">
+    <div class="input-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+      </svg>
+    </div>
+
+    <input
+      id="register-password"
+      type="password"
+      required
+      minlength="8"
+      autocomplete="new-password"
+      placeholder="Mínimo 8 caracteres">
+
+    <button
+      class="password-toggle"
+      type="button"
+      data-password="register-password"
+      aria-label="Mostrar contraseña"
+      title="Mostrar contraseña">
+    </button>
+  </div>
+</label>
             <label>Confirmar contraseña
-              <span class="password-field"><input id="register-password-confirm" type="password" required minlength="8" autocomplete="new-password" placeholder="Escribe la contraseña otra vez"><button class="password-toggle" type="button" data-password="register-password-confirm" aria-label="Mostrar contraseña" title="Mostrar contraseña"></button></span>
-            </label>
+  <div class="input-group-icon password-field">
+    <div class="input-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+      </svg>
+    </div>
+
+    <input
+      id="register-password-confirm"
+      type="password"
+      required
+      minlength="8"
+      autocomplete="new-password"
+      placeholder="Escribe la contraseña otra vez">
+
+    <button
+      class="password-toggle"
+      type="button"
+      data-password="register-password-confirm"
+      aria-label="Mostrar contraseña"
+      title="Mostrar contraseña">
+    </button>
+  </div>
+</label>
             <p class="notice compact">El registro público crea cuentas de alumno. Para convertir una cuenta en profesor, cambia su rol desde Supabase siguiendo el README.</p>
             <button class="btn primary full" type="submit">Crear cuenta</button>
             <p id="register-error" class="error"></p>
