@@ -6,6 +6,7 @@
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
   <link rel="stylesheet" href="styles.css?v=20260803-14">
+  <link rel="stylesheet" href="admin-dashboard.css?v=20260804-1">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -184,6 +185,224 @@
         </div>
       </div>
     </section>
+    <section id="admin-view" class="view admin-panel">
+  <div class="admin-shell">
+
+    <aside class="admin-sidebar" aria-label="Navegación del administrador">
+      <div class="admin-brand">
+        
+
+        <div>
+          <strong>Masterfull Academy</strong>
+          <small>Administración</small>
+        </div>
+      </div>
+
+      <nav class="admin-navigation">
+        <button
+          class="admin-nav-item active"
+          type="button"
+          data-admin-section="dashboard">
+          <span aria-hidden="true">⌂</span>
+          Dashboard
+        </button>
+
+        <button
+          class="admin-nav-item"
+          type="button"
+          data-admin-section="teachers">
+          <span aria-hidden="true">♙</span>
+          Profesores
+        </button>
+
+        <button
+          class="admin-nav-item"
+          type="button"
+          data-admin-section="students">
+          <span aria-hidden="true">♙</span>
+          Alumnos
+        </button>
+
+        <button
+          class="admin-nav-item"
+          type="button"
+          data-admin-section="courses">
+          <span aria-hidden="true">▤</span>
+          Cursos
+        </button>
+
+        <button
+          class="admin-nav-item"
+          type="button"
+          data-admin-section="payments">
+          <span aria-hidden="true">▣</span>
+          Pagos
+        </button>
+
+        <button
+          class="admin-nav-item"
+          type="button"
+          data-admin-section="settings">
+          <span aria-hidden="true">⚙</span>
+          Configuración
+        </button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <span class="eyebrow">PANEL DEL ADMINISTRADOR</span>
+          <h2 id="admin-welcome">Bienvenido, administrador</h2>
+          <p>Supervisa profesores, alumnos, cursos y el estado general de la plataforma.</p>
+        </div>
+
+       
+      </header>
+
+      <section
+        id="admin-dashboard"
+        class="admin-section active"
+        data-admin-page="dashboard">
+
+        <div class="admin-stat-grid">
+          <article class="admin-stat-card">
+            <span>Profesores totales</span>
+            <strong id="admin-total-teachers">0</strong>
+            <small>Registrados en la plataforma</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span>Profesores activos</span>
+            <strong id="admin-active-teachers">0</strong>
+            <small>Con acceso habilitado</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span>Profesores pendientes</span>
+            <strong id="admin-pending-teachers">0</strong>
+            <small>Esperando aprobación</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span>Alumnos</span>
+            <strong id="admin-total-students">0</strong>
+            <small>Usuarios registrados</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span>Cursos</span>
+            <strong id="admin-total-courses">0</strong>
+            <small>Cursos creados</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span>Matrículas</span>
+            <strong id="admin-total-enrollments">0</strong>
+            <small>Accesos a cursos</small>
+          </article>
+        </div>
+
+        <section class="admin-content-card">
+          <header class="admin-card-header">
+            <div>
+              <h3>Profesores pendientes</h3>
+              <p>Solicitudes que necesitan revisión.</p>
+            </div>
+
+            <button
+              class="btn secondary"
+              id="admin-view-all-teachers"
+              type="button">
+              Ver profesores
+            </button>
+          </header>
+
+          <div
+            id="admin-pending-teachers-list"
+            class="admin-teacher-list">
+            <p class="empty">Todavía no se cargaron los profesores.</p>
+          </div>
+        </section>
+      </section>
+
+      <section
+        id="admin-teachers"
+        class="admin-section"
+        data-admin-page="teachers">
+
+        <header class="admin-section-header">
+          <div>
+            <span class="eyebrow">GESTIÓN DE USUARIOS</span>
+            <h2>Profesores</h2>
+            <p>Aprueba, suspende, reactiva o archiva cuentas docentes.</p>
+          </div>
+
+          <button
+            class="btn primary"
+            id="admin-new-teacher"
+            type="button">
+            + Agregar profesor
+          </button>
+        </header>
+
+        <div class="admin-teacher-tools">
+          <input
+            id="admin-teacher-search"
+            type="search"
+            placeholder="Buscar por nombre o correo">
+
+          <select id="admin-teacher-status-filter">
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="active">Activos</option>
+            <option value="suspended">Suspendidos</option>
+            <option value="archived">Archivados</option>
+          </select>
+        </div>
+
+        <div
+          id="admin-teachers-table"
+          class="admin-table-container">
+          <p class="empty">Todavía no se cargaron los profesores.</p>
+        </div>
+      </section>
+
+      <section
+        id="admin-students"
+        class="admin-section"
+        data-admin-page="students">
+        <h2>Alumnos</h2>
+        <p>Este módulo se implementará después de completar Profesores.</p>
+      </section>
+
+      <section
+        id="admin-courses"
+        class="admin-section"
+        data-admin-page="courses">
+        <h2>Cursos</h2>
+        <p>Este módulo mostrará los cursos sin modificar su estructura actual.</p>
+      </section>
+
+      <section
+        id="admin-payments"
+        class="admin-section"
+        data-admin-page="payments">
+        <h2>Pagos</h2>
+        <p>Este módulo se incorporará en la fase de suscripciones.</p>
+      </section>
+
+      <section
+        id="admin-settings"
+        class="admin-section"
+        data-admin-page="settings">
+        <h2>Configuración</h2>
+        <p>Configuraciones generales de la plataforma.</p>
+      </section>
+    </main>
+
+  </div>
+</section>
 
     <section id="teacher-view" class="view teacher-lms">
       <div class="teacher-lms-shell">

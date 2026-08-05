@@ -21,6 +21,8 @@ let courseChanges = [];
 let legacyCourseModules = new Map();
 let courseEnrollments = [];
 let studentProfiles = [];
+let adminProfiles = [];
+let activeAdminSection = "dashboard";
 let courseAccessError = "";
 let publishedCourses = [];
 let publishedExams = [];
@@ -288,7 +290,9 @@ async function setSessionFromSupabase(session, shouldRender = true) {
       id: session.user.id,
       name: profile.full_name || session.user.user_metadata?.full_name || session.user.email,
       email: profile.email || session.user.email,
-      role: profile.role === "teacher" ? "teacher" : "student"
+      role: ["admin", "teacher", "student"].includes(profile.role)
+  ? profile.role
+  : "student"
     };
   } catch (error) {
     console.error("No se pudo recuperar el perfil:", error);
@@ -545,8 +549,10 @@ function renderApp() {
   document.body.classList.remove("session-loading");
   document.body.classList.remove("auth-galactic-burst");
   const isTeacher = currentUser?.role === "teacher";
+  const isAdmin = currentUser?.role === "admin";
   const resultReviewOpen = !isTeacher && $("#result-view").classList.contains("active");
   document.body.classList.toggle("teacher-shell-mode", isTeacher);
+  document.body.classList.toggle("admin-shell-mode", isAdmin);
   if (!currentUser) {
     $("#auth-view .auth-layout")?.classList.remove("auth-login-exit");
     $("#session-area").innerHTML = "";
@@ -580,11 +586,12 @@ function renderApp() {
     }
     switchTab("student", button.dataset.studentTab, button);
   }));
-  if (resultReviewOpen) show("result-view");
-  else if (isTeacher && teacherLessonPreview && activeLessonCourseId && activeLessonActivityId) renderLesson();
-  else if (isTeacher) renderTeacher();
-  else if (activeLessonCourseId && activeLessonActivityId) renderLesson();
-  else renderStudent();
+  if (isAdmin) renderAdmin();
+else if (resultReviewOpen) show("result-view");
+else if (isTeacher && teacherLessonPreview && activeLessonCourseId && activeLessonActivityId) renderLesson();
+else if (isTeacher) renderTeacher();
+else if (activeLessonCourseId && activeLessonActivityId) renderLesson();
+else renderStudent();
 }
 
 function bindStaticEvents() {
@@ -712,6 +719,224 @@ function bindStaticEvents() {
   });
   window.addEventListener("beforeunload", saveActiveAttempt);
   window.addEventListener("online", syncPendingResults);
+  bindAdminNavigation();
+}
+/* =========================================================
+   NAVEGACIÓN DEL PANEL ADMINISTRADOR
+   ========================================================= */
+
+function bindAdminNavigation() {
+  $$(".admin-nav-item").forEach(button => {
+    if (button.dataset.adminBound === "true") return;
+
+    button.dataset.adminBound = "true";
+
+    button.addEventListener("click", () => {
+      const section = button.dataset.adminSection || "dashboard";
+      openAdminSection(section);
+    });
+  });
+
+  const viewTeachersButton = $("#admin-view-all-teachers");
+
+  if (
+    viewTeachersButton &&
+    viewTeachersButton.dataset.adminBound !== "true"
+  ) {
+    viewTeachersButton.dataset.adminBound = "true";
+
+    viewTeachersButton.addEventListener("click", () => {
+      openAdminSection("teachers");
+    });
+  }
+
+  const teacherSearch = $("#admin-teacher-search");
+
+  if (
+    teacherSearch &&
+    teacherSearch.dataset.adminBound !== "true"
+  ) {
+    teacherSearch.dataset.adminBound = "true";
+
+    teacherSearch.addEventListener("input", () => {
+      renderAdminTeachers();
+    });
+  }
+
+  const teacherStatusFilter = $("#admin-teacher-status-filter");
+
+  if (
+    teacherStatusFilter &&
+    teacherStatusFilter.dataset.adminBound !== "true"
+  ) {
+    teacherStatusFilter.dataset.adminBound = "true";
+
+    teacherStatusFilter.addEventListener("change", () => {
+      renderAdminTeachers();
+    });
+  }
+}
+
+function openAdminSection(section = "dashboard") {
+  const validSections = [
+    "dashboard",
+    "teachers",
+    "students",
+    "courses",
+    "payments",
+    "settings"
+  ];
+
+  activeAdminSection = validSections.includes(section)
+    ? section
+    : "dashboard";
+
+  $$(".admin-nav-item").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.adminSection === activeAdminSection
+    );
+  });
+
+  $$(".admin-section").forEach(page => {
+    page.classList.toggle(
+      "active",
+      page.dataset.adminPage === activeAdminSection
+    );
+  });
+
+  if (activeAdminSection === "teachers") {
+    renderAdminTeachers();
+  }
+}
+
+function renderAdminTeachers() {
+  const container = $("#admin-teachers-table");
+
+  if (!container) return;
+
+  const searchValue = (
+    $("#admin-teacher-search")?.value || ""
+  )
+    .trim()
+    .toLocaleLowerCase("es");
+
+  const statusValue =
+    $("#admin-teacher-status-filter")?.value || "";
+
+  const teachers = adminProfiles
+    .filter(profile => profile.role === "teacher")
+    .filter(profile => {
+      const searchableText = `
+        ${profile.full_name || ""}
+        ${profile.email || ""}
+        ${profile.institution || ""}
+        ${profile.phone || ""}
+      `.toLocaleLowerCase("es");
+
+      const matchesSearch =
+        !searchValue || searchableText.includes(searchValue);
+
+      const matchesStatus =
+        !statusValue ||
+        profile.teacher_status === statusValue;
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((left, right) => {
+      return String(left.full_name || left.email || "")
+        .localeCompare(
+          String(right.full_name || right.email || ""),
+          "es"
+        );
+    });
+
+  if (!teachers.length) {
+    container.innerHTML = `
+      <div class="empty">
+        No se encontraron profesores con los filtros seleccionados.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-teachers-table">
+        <thead>
+          <tr>
+            <th>Profesor</th>
+            <th>Institución</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Registro</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${teachers.map(profile => {
+            const name =
+              profile.full_name ||
+              profile.email ||
+              "Profesor sin nombre";
+
+            const initial = name
+              .charAt(0)
+              .toLocaleUpperCase("es");
+
+            const status =
+              profile.teacher_status || "pending";
+
+            return `
+              <tr>
+                <td>
+                  <div class="admin-teacher-identity">
+                    <span class="admin-teacher-avatar">
+                      ${esc(initial)}
+                    </span>
+
+                    <span>
+                      <strong>${esc(name)}</strong>
+                      <small>${esc(profile.email || "")}</small>
+                    </span>
+                  </div>
+                </td>
+
+                <td>
+                  ${esc(profile.institution || "No registrada")}
+                </td>
+
+                <td>
+                  ${esc(profile.phone || "No registrado")}
+                </td>
+
+                <td>
+                  <span class="admin-status admin-status-${esc(status)}">
+                    ${esc(adminTeacherStatusLabel(status))}
+                  </span>
+                </td>
+
+                <td>
+                  ${esc(formatDateOnly(profile.created_at))}
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function adminTeacherStatusLabel(status) {
+  const labels = {
+    pending: "Pendiente",
+    active: "Activo",
+    suspended: "Suspendido",
+    archived: "Archivado"
+  };
+
+  return labels[status] || "Pendiente";
 }
 function bindPasswordToggles(container = document) {
   container.querySelectorAll(".password-toggle").forEach(button => {
@@ -855,6 +1080,172 @@ function rowToGrade(row) {
     completionReason: row.completion_reason,
     review: row.answers?.review || []
   };
+}
+async function loadAdminDashboardData() {
+  if (!sb || currentUser?.role !== "admin") return;
+
+  const [
+    profilesResponse,
+    coursesResponse,
+    enrollmentsResponse
+  ] = await Promise.all([
+    sb
+      .from("profiles")
+      .select(`
+        id,
+        full_name,
+        email,
+        role,
+        teacher_status,
+        phone,
+        institution,
+        created_at
+      `)
+      .order("created_at", { ascending: false }),
+
+    sb
+      .from("academy_courses")
+      .select("course_id"),
+
+    sb
+      .from("course_enrollments")
+      .select("course_id, student_id")
+  ]);
+
+  if (profilesResponse.error) {
+    console.error(
+      "No se pudieron cargar los perfiles:",
+      profilesResponse.error
+    );
+  }
+
+  if (coursesResponse.error) {
+    console.error(
+      "No se pudieron cargar los cursos:",
+      coursesResponse.error
+    );
+  }
+
+  if (enrollmentsResponse.error) {
+    console.error(
+      "No se pudieron cargar las matrículas:",
+      enrollmentsResponse.error
+    );
+  }
+
+  adminProfiles = profilesResponse.data || [];
+
+  const teachers = adminProfiles.filter(
+    profile => profile.role === "teacher"
+  );
+
+  const students = adminProfiles.filter(
+    profile => profile.role === "student"
+  );
+
+  const activeTeachers = teachers.filter(
+    profile => profile.teacher_status === "active"
+  );
+
+  const pendingTeachers = teachers.filter(
+    profile => profile.teacher_status === "pending"
+  );
+
+  const courses = coursesResponse.data || [];
+  const enrollments = enrollmentsResponse.data || [];
+
+  const counters = {
+    "#admin-total-teachers": teachers.length,
+    "#admin-active-teachers": activeTeachers.length,
+    "#admin-pending-teachers": pendingTeachers.length,
+    "#admin-total-students": students.length,
+    "#admin-total-courses": courses.length,
+    "#admin-total-enrollments": enrollments.length
+  };
+
+  Object.entries(counters).forEach(([selector, value]) => {
+    const element = $(selector);
+
+    if (element) {
+      element.textContent = String(value);
+    }
+  });
+
+  renderAdminPendingTeachers(pendingTeachers);
+  renderAdminTeachers();
+}
+
+function renderAdminPendingTeachers(pendingTeachers) {
+  const container = $("#admin-pending-teachers-list");
+
+  if (!container) return;
+
+  if (!pendingTeachers.length) {
+    container.innerHTML = `
+      <div class="empty">
+        No existen profesores pendientes de aprobación.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = pendingTeachers
+    .slice(0, 5)
+    .map(profile => {
+      const name =
+        profile.full_name ||
+        profile.email ||
+        "Profesor sin nombre";
+
+      const initial = name
+        .charAt(0)
+        .toLocaleUpperCase("es");
+
+      return `
+        <article class="admin-pending-teacher">
+          <div class="admin-teacher-identity">
+            <span class="admin-teacher-avatar">
+              ${esc(initial)}
+            </span>
+
+            <span>
+              <strong>${esc(name)}</strong>
+              <small>${esc(profile.email || "")}</small>
+            </span>
+          </div>
+
+          <div class="admin-pending-meta">
+            <span>
+              ${esc(profile.institution || "Sin institución")}
+            </span>
+
+            <small>
+              Registrado el ${esc(formatDateOnly(profile.created_at))}
+            </small>
+          </div>
+
+          <span class="admin-status admin-status-pending">
+            Pendiente
+          </span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderAdmin() {
+  show("admin-view");
+
+  const welcome = $("#admin-welcome");
+
+  if (welcome) {
+    welcome.textContent =
+      `Bienvenido, ${currentUser?.name || "administrador"}`;
+  }
+
+  bindAdminNavigation();
+  openAdminSection(activeAdminSection);
+  loadAdminDashboardData();
 }
 
 function renderTeacher() {
