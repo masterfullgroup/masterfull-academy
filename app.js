@@ -1820,6 +1820,31 @@ async function loadAdminDashboardData() {
   renderAdminPendingTeachers(pendingTeachers);
   renderAdminTeachers();
 }
+function bindAdminTeacherActions() {
+  $$("[data-admin-teacher-action]").forEach(button => {
+    if (button.dataset.teacherActionBound === "true") return;
+
+    button.dataset.teacherActionBound = "true";
+
+    button.addEventListener("click", async () => {
+      const teacherId = button.dataset.teacherId;
+      const action = button.dataset.adminTeacherAction;
+
+      if (!teacherId || !action) return;
+
+      if (action === "view") {
+        openAdminTeacherModal(teacherId);
+        return;
+      }
+
+      await updateAdminTeacherStatus(
+        teacherId,
+        action,
+        button
+      );
+    });
+  });
+}
 
 function renderAdminPendingTeachers(
   pendingTeachers
