@@ -26,7 +26,7 @@ let activeAdminSection = "dashboard";
 let adminTeacherPage = 1;
 
 const ADMIN_TEACHERS_PER_PAGE = 10;
-let activeAdminSection = "dashboard";
+
 let courseAccessError = "";
 let publishedCourses = [];
 let publishedExams = [];
@@ -1901,20 +1901,7 @@ function renderAdminPendingTeachers(
 
   bindAdminTeacherActions();
 }
-function renderAdmin() {
-  show("admin-view");
 
-  const welcome = $("#admin-welcome");
-
-  if (welcome) {
-    welcome.textContent =
-      `Bienvenido, ${currentUser?.name || "administrador"}`;
-  }
-
-  bindAdminNavigation();
-  openAdminSection(activeAdminSection);
-  loadAdminDashboardData();
-}
 
 function renderTeacher() {
   show("teacher-view");
