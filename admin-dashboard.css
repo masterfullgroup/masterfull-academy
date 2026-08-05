@@ -478,3 +478,108 @@ body.admin-shell-mode .admin-pending-meta small {
     width: fit-content;
   }
 }
+/* =========================================================
+   ACCIONES DE PROFESORES
+   ========================================================= */
+
+body.admin-shell-mode .admin-teacher-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+body.admin-shell-mode .admin-action-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+body.admin-shell-mode
+.admin-action-button.approve {
+  color: #087657;
+  border-color: #a7e6cf;
+  background: #ecfdf5;
+}
+
+body.admin-shell-mode
+.admin-action-button.approve:hover {
+  color: #ffffff;
+  border-color: #087657;
+  background: #087657;
+}
+
+body.admin-shell-mode
+.admin-action-button.suspend {
+  color: #b42318;
+  border-color: #fecaca;
+  background: #fff1f2;
+}
+
+body.admin-shell-mode
+.admin-action-button.suspend:hover {
+  color: #ffffff;
+  border-color: #b42318;
+  background: #b42318;
+}
+
+body.admin-shell-mode
+.admin-action-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+@media (max-width: 760px) {
+  body.admin-shell-mode
+  .admin-teacher-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.admin-shell-mode
+  .admin-action-button {
+    width: 100%;
+  }
+}
+.register-role-field {
+  margin: 17px 0;
+}
+
+.register-role-label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.register-role-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.register-role-options label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #d8dde7;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.register-role-options input {
+  width: auto;
+  margin: 0;
+}

@@ -23,6 +23,10 @@ let courseEnrollments = [];
 let studentProfiles = [];
 let adminProfiles = [];
 let activeAdminSection = "dashboard";
+let adminTeacherPage = 1;
+
+const ADMIN_TEACHERS_PER_PAGE = 10;
+let activeAdminSection = "dashboard";
 let courseAccessError = "";
 let publishedCourses = [];
 let publishedExams = [];
@@ -722,59 +726,87 @@ function bindStaticEvents() {
   bindAdminNavigation();
 }
 /* =========================================================
-   NAVEGACIÓN DEL PANEL ADMINISTRADOR
+   PANEL ADMINISTRADOR
    ========================================================= */
 
 function bindAdminNavigation() {
-  $$(".admin-nav-item").forEach(button => {
-    if (button.dataset.adminBound === "true") return;
+  if (document.body.dataset.adminEventsBound === "true") return;
 
-    button.dataset.adminBound = "true";
+  document.body.dataset.adminEventsBound = "true";
 
-    button.addEventListener("click", () => {
-      const section = button.dataset.adminSection || "dashboard";
-      openAdminSection(section);
-    });
+  document.addEventListener("click", event => {
+    const navButton = event.target.closest(".admin-nav-item");
+
+    if (navButton) {
+      openAdminSection(
+        navButton.dataset.adminSection || "dashboard"
+      );
+
+      return;
+    }
+
+    if (event.target.closest("#admin-view-all-teachers")) {
+      openAdminSection("teachers");
+      return;
+    }
+
+    const pageButton = event.target.closest(
+      "[data-admin-teacher-page]"
+    );
+
+    if (pageButton) {
+      adminTeacherPage = Number(
+        pageButton.dataset.adminTeacherPage
+      );
+
+      renderAdminTeachers();
+      return;
+    }
+
+    const actionButton = event.target.closest(
+      "[data-admin-teacher-action]"
+    );
+
+    if (actionButton) {
+      handleAdminTeacherAction(actionButton);
+      return;
+    }
+
+    if (
+      event.target.closest("#admin-teacher-modal-close") ||
+      event.target.closest("#admin-teacher-cancel")
+    ) {
+      closeAdminTeacherModal();
+      return;
+    }
+
+    if (
+      event.target.id === "admin-teacher-modal"
+    ) {
+      closeAdminTeacherModal();
+    }
   });
 
-  const viewTeachersButton = $("#admin-view-all-teachers");
-
-  if (
-    viewTeachersButton &&
-    viewTeachersButton.dataset.adminBound !== "true"
-  ) {
-    viewTeachersButton.dataset.adminBound = "true";
-
-    viewTeachersButton.addEventListener("click", () => {
-      openAdminSection("teachers");
-    });
-  }
-
-  const teacherSearch = $("#admin-teacher-search");
-
-  if (
-    teacherSearch &&
-    teacherSearch.dataset.adminBound !== "true"
-  ) {
-    teacherSearch.dataset.adminBound = "true";
-
-    teacherSearch.addEventListener("input", () => {
+  $("#admin-teacher-search")?.addEventListener(
+    "input",
+    () => {
+      adminTeacherPage = 1;
       renderAdminTeachers();
-    });
-  }
+    }
+  );
 
-  const teacherStatusFilter = $("#admin-teacher-status-filter");
-
-  if (
-    teacherStatusFilter &&
-    teacherStatusFilter.dataset.adminBound !== "true"
-  ) {
-    teacherStatusFilter.dataset.adminBound = "true";
-
-    teacherStatusFilter.addEventListener("change", () => {
+  $("#admin-teacher-status-filter")?.addEventListener(
+    "change",
+    () => {
+      adminTeacherPage = 1;
       renderAdminTeachers();
-    });
-  }
+    }
+  );
+
+  $("#admin-teacher-form")?.addEventListener(
+    "submit",
+    saveAdminTeacherProfile
+  );
 }
 
 function openAdminSection(section = "dashboard") {
@@ -810,23 +842,184 @@ function openAdminSection(section = "dashboard") {
   }
 }
 
-function renderAdminTeachers() {
-  const container = $("#admin-teachers-table");
+async function loadAdminDashboardData() {
+  if (!sb || currentUser?.role !== "admin") return;
+
+  const [
+    profilesResponse,
+    coursesResponse,
+    enrollmentsResponse
+  ] = await Promise.all([
+    sb
+      .from("profiles")
+      .select(`
+        id,
+        full_name,
+        email,
+        role,
+        teacher_status,
+        phone,
+        institution,
+        created_at,
+        updated_at
+      `)
+      .order("created_at", { ascending: false }),
+
+    sb
+      .from("academy_courses")
+      .select("course_id"),
+
+    sb
+      .from("course_enrollments")
+      .select("course_id, student_id")
+  ]);
+
+  if (profilesResponse.error) {
+    console.error(
+      "Perfiles del administrador:",
+      profilesResponse.error
+    );
+  }
+
+  if (coursesResponse.error) {
+    console.error(
+      "Cursos del administrador:",
+      coursesResponse.error
+    );
+  }
+
+  if (enrollmentsResponse.error) {
+    console.error(
+      "Matrículas del administrador:",
+      enrollmentsResponse.error
+    );
+  }
+
+  adminProfiles = profilesResponse.data || [];
+
+  const teachers = adminProfiles.filter(
+    profile => profile.role === "teacher"
+  );
+
+  const students = adminProfiles.filter(
+    profile => profile.role === "student"
+  );
+
+  const activeTeachers = teachers.filter(
+    profile =>
+      (profile.teacher_status || "pending") === "active"
+  );
+
+  const pendingTeachers = teachers.filter(
+    profile =>
+      (profile.teacher_status || "pending") === "pending"
+  );
+
+  const counters = {
+    "#admin-total-teachers": teachers.length,
+    "#admin-active-teachers": activeTeachers.length,
+    "#admin-pending-teachers": pendingTeachers.length,
+    "#admin-total-students": students.length,
+    "#admin-total-courses":
+      coursesResponse.data?.length || 0,
+    "#admin-total-enrollments":
+      enrollmentsResponse.data?.length || 0
+  };
+
+  Object.entries(counters).forEach(
+    ([selector, value]) => {
+      const element = $(selector);
+
+      if (element) {
+        element.textContent = String(value);
+      }
+    }
+  );
+
+  renderAdminPendingTeachers(pendingTeachers);
+  renderAdminTeachers();
+}
+
+function renderAdminPendingTeachers(pendingTeachers) {
+  const container = $("#admin-pending-teachers-list");
 
   if (!container) return;
 
-  const searchValue = (
+  if (!pendingTeachers.length) {
+    container.innerHTML = `
+      <div class="empty">
+        No existen profesores pendientes de aprobación.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML = pendingTeachers
+    .slice(0, 5)
+    .map(profile => {
+      const name =
+        profile.full_name ||
+        profile.email ||
+        "Profesor sin nombre";
+
+      return `
+        <article class="admin-pending-teacher">
+          ${adminTeacherIdentityMarkup(profile)}
+
+          <div class="admin-pending-meta">
+            <span>
+              ${esc(
+                profile.institution ||
+                "Sin institución"
+              )}
+            </span>
+
+            <small>
+              Registrado el
+              ${esc(formatDateOnly(profile.created_at))}
+            </small>
+          </div>
+
+          <div class="admin-teacher-actions">
+            <button
+              class="admin-action-button approve"
+              type="button"
+              data-admin-teacher-action="active"
+              data-teacher-id="${esc(profile.id)}">
+              Aprobar
+            </button>
+
+            <button
+              class="admin-action-button view"
+              type="button"
+              data-admin-teacher-action="view"
+              data-teacher-id="${esc(profile.id)}">
+              Ver perfil
+            </button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function getFilteredAdminTeachers() {
+  const search = (
     $("#admin-teacher-search")?.value || ""
   )
     .trim()
     .toLocaleLowerCase("es");
 
-  const statusValue =
+  const status =
     $("#admin-teacher-status-filter")?.value || "";
 
-  const teachers = adminProfiles
+  return adminProfiles
     .filter(profile => profile.role === "teacher")
     .filter(profile => {
+      const currentStatus =
+        profile.teacher_status || "pending";
+
       const searchableText = `
         ${profile.full_name || ""}
         ${profile.email || ""}
@@ -834,29 +1027,57 @@ function renderAdminTeachers() {
         ${profile.phone || ""}
       `.toLocaleLowerCase("es");
 
-      const matchesSearch =
-        !searchValue || searchableText.includes(searchValue);
-
-      const matchesStatus =
-        !statusValue ||
-        profile.teacher_status === statusValue;
-
-      return matchesSearch && matchesStatus;
+      return (
+        (!search || searchableText.includes(search)) &&
+        (!status || currentStatus === status)
+      );
     })
     .sort((left, right) => {
-      return String(left.full_name || left.email || "")
-        .localeCompare(
-          String(right.full_name || right.email || ""),
-          "es"
-        );
+      const leftName =
+        left.full_name || left.email || "";
+
+      const rightName =
+        right.full_name || right.email || "";
+
+      return leftName.localeCompare(rightName, "es");
     });
+}
+
+function renderAdminTeachers() {
+  const container = $("#admin-teachers-table");
+
+  if (!container) return;
+
+  const teachers = getFilteredAdminTeachers();
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(
+      teachers.length / ADMIN_TEACHERS_PER_PAGE
+    )
+  );
+
+  if (adminTeacherPage > totalPages) {
+    adminTeacherPage = totalPages;
+  }
+
+  const start =
+    (adminTeacherPage - 1) *
+    ADMIN_TEACHERS_PER_PAGE;
+
+  const visibleTeachers = teachers.slice(
+    start,
+    start + ADMIN_TEACHERS_PER_PAGE
+  );
 
   if (!teachers.length) {
     container.innerHTML = `
       <div class="empty">
-        No se encontraron profesores con los filtros seleccionados.
+        No se encontraron profesores.
       </div>
     `;
+
+    renderAdminTeacherPagination(0, 1);
     return;
   }
 
@@ -870,62 +1091,472 @@ function renderAdminTeachers() {
             <th>Teléfono</th>
             <th>Estado</th>
             <th>Registro</th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
         <tbody>
-          ${teachers.map(profile => {
-            const name =
-              profile.full_name ||
-              profile.email ||
-              "Profesor sin nombre";
+          ${visibleTeachers
+            .map(profile => {
+              const status =
+                profile.teacher_status || "pending";
 
-            const initial = name
-              .charAt(0)
-              .toLocaleUpperCase("es");
+              return `
+                <tr>
+                  <td>
+                    ${adminTeacherIdentityMarkup(profile)}
+                  </td>
 
-            const status =
-              profile.teacher_status || "pending";
+                  <td>
+                    ${esc(
+                      profile.institution ||
+                      "No registrada"
+                    )}
+                  </td>
 
-            return `
-              <tr>
-                <td>
-                  <div class="admin-teacher-identity">
-                    <span class="admin-teacher-avatar">
-                      ${esc(initial)}
+                  <td>
+                    ${esc(
+                      profile.phone ||
+                      "No registrado"
+                    )}
+                  </td>
+
+                  <td>
+                    <span
+                      class="admin-status
+                      admin-status-${esc(status)}">
+                      ${esc(
+                        adminTeacherStatusLabel(status)
+                      )}
                     </span>
+                  </td>
 
-                    <span>
-                      <strong>${esc(name)}</strong>
-                      <small>${esc(profile.email || "")}</small>
-                    </span>
-                  </div>
-                </td>
+                  <td>
+                    ${esc(
+                      formatDateOnly(profile.created_at)
+                    )}
+                  </td>
 
-                <td>
-                  ${esc(profile.institution || "No registrada")}
-                </td>
-
-                <td>
-                  ${esc(profile.phone || "No registrado")}
-                </td>
-
-                <td>
-                  <span class="admin-status admin-status-${esc(status)}">
-                    ${esc(adminTeacherStatusLabel(status))}
-                  </span>
-                </td>
-
-                <td>
-                  ${esc(formatDateOnly(profile.created_at))}
-                </td>
-              </tr>
-            `;
-          }).join("")}
+                  <td>
+                    <div class="admin-teacher-actions">
+                      ${renderAdminTeacherActions(profile)}
+                    </div>
+                  </td>
+                </tr>
+              `;
+            })
+            .join("")}
         </tbody>
       </table>
     </div>
   `;
+
+  renderAdminTeacherPagination(
+    teachers.length,
+    totalPages
+  );
+}
+
+function adminTeacherIdentityMarkup(profile) {
+  const name =
+    profile.full_name ||
+    profile.email ||
+    "Profesor sin nombre";
+
+  const initial = name
+    .charAt(0)
+    .toLocaleUpperCase("es");
+
+  return `
+    <div class="admin-teacher-identity">
+      <span class="admin-teacher-avatar">
+        ${esc(initial)}
+      </span>
+
+      <span>
+        <strong>${esc(name)}</strong>
+        <small>${esc(profile.email || "")}</small>
+      </span>
+    </div>
+  `;
+}
+
+function renderAdminTeacherActions(profile) {
+  const status =
+    profile.teacher_status || "pending";
+
+  const viewButton = `
+    <button
+      class="admin-action-button view"
+      type="button"
+      data-admin-teacher-action="view"
+      data-teacher-id="${esc(profile.id)}">
+      Ver
+    </button>
+  `;
+
+  if (status === "pending") {
+    return `
+      ${viewButton}
+
+      <button
+        class="admin-action-button approve"
+        type="button"
+        data-admin-teacher-action="active"
+        data-teacher-id="${esc(profile.id)}">
+        Aprobar
+      </button>
+
+      <button
+        class="admin-action-button suspend"
+        type="button"
+        data-admin-teacher-action="suspended"
+        data-teacher-id="${esc(profile.id)}">
+        Suspender
+      </button>
+    `;
+  }
+
+  if (status === "active") {
+    return `
+      ${viewButton}
+
+      <button
+        class="admin-action-button suspend"
+        type="button"
+        data-admin-teacher-action="suspended"
+        data-teacher-id="${esc(profile.id)}">
+        Suspender
+      </button>
+    `;
+  }
+
+  if (status === "suspended") {
+    return `
+      ${viewButton}
+
+      <button
+        class="admin-action-button approve"
+        type="button"
+        data-admin-teacher-action="active"
+        data-teacher-id="${esc(profile.id)}">
+        Reactivar
+      </button>
+
+      <button
+        class="admin-action-button archive"
+        type="button"
+        data-admin-teacher-action="archived"
+        data-teacher-id="${esc(profile.id)}">
+        Archivar
+      </button>
+    `;
+  }
+
+  return `
+    ${viewButton}
+
+    <button
+      class="admin-action-button approve"
+      type="button"
+      data-admin-teacher-action="active"
+      data-teacher-id="${esc(profile.id)}">
+      Reactivar
+    </button>
+  `;
+}
+
+function renderAdminTeacherPagination(
+  totalTeachers,
+  totalPages
+) {
+  const container =
+    $("#admin-teacher-pagination");
+
+  if (!container) return;
+
+  if (totalTeachers <= ADMIN_TEACHERS_PER_PAGE) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = `
+    <span>
+      Página ${adminTeacherPage} de ${totalPages}
+    </span>
+
+    <div>
+      <button
+        class="btn ghost"
+        type="button"
+        data-admin-teacher-page="${
+          adminTeacherPage - 1
+        }"
+        ${adminTeacherPage === 1 ? "disabled" : ""}>
+        Anterior
+      </button>
+
+      <button
+        class="btn ghost"
+        type="button"
+        data-admin-teacher-page="${
+          adminTeacherPage + 1
+        }"
+        ${
+          adminTeacherPage === totalPages
+            ? "disabled"
+            : ""
+        }>
+        Siguiente
+      </button>
+    </div>
+  `;
+}
+
+async function handleAdminTeacherAction(button) {
+  const teacherId = button.dataset.teacherId;
+  const action = button.dataset.adminTeacherAction;
+
+  if (!teacherId || !action) return;
+
+  if (action === "view") {
+    openAdminTeacherModal(teacherId);
+    return;
+  }
+
+  await updateAdminTeacherStatus(
+    teacherId,
+    action,
+    button
+  );
+}
+
+async function updateAdminTeacherStatus(
+  teacherId,
+  newStatus,
+  button
+) {
+  if (!sb || currentUser?.role !== "admin") return;
+
+  const teacher = adminProfiles.find(
+    profile => profile.id === teacherId
+  );
+
+  if (!teacher) {
+    alert("No se encontró el profesor.");
+    return;
+  }
+
+  const actionLabels = {
+    active: "activar",
+    suspended: "suspender",
+    archived: "archivar"
+  };
+
+  const confirmed = confirm(
+    `¿Deseas ${
+      actionLabels[newStatus] || "actualizar"
+    } a ${
+      teacher.full_name ||
+      teacher.email ||
+      "este profesor"
+    }?`
+  );
+
+  if (!confirmed) return;
+
+  const originalText = button.textContent;
+
+  button.disabled = true;
+  button.textContent = "Guardando...";
+
+  try {
+    const { data, error } = await sb
+      .from("profiles")
+      .update({
+        teacher_status: newStatus,
+        updated_at: nowIso()
+      })
+      .eq("id", teacherId)
+      .eq("role", "teacher")
+      .select(`
+        id,
+        full_name,
+        email,
+        role,
+        teacher_status,
+        phone,
+        institution,
+        created_at,
+        updated_at
+      `)
+      .single();
+
+    if (error) throw error;
+
+    adminProfiles = adminProfiles.map(profile =>
+      profile.id === teacherId
+        ? { ...profile, ...data }
+        : profile
+    );
+
+    await loadAdminDashboardData();
+  } catch (error) {
+    console.error(
+      "Estado del profesor:",
+      error
+    );
+
+    alert(translateError(error));
+
+    button.disabled = false;
+    button.textContent = originalText;
+  }
+}
+
+function openAdminTeacherModal(teacherId) {
+  const teacher = adminProfiles.find(
+    profile => profile.id === teacherId
+  );
+
+  if (!teacher) return;
+
+  $("#admin-teacher-id").value = teacher.id;
+  $("#admin-teacher-name").value =
+    teacher.full_name || "";
+
+  $("#admin-teacher-institution").value =
+    teacher.institution || "";
+
+  $("#admin-teacher-phone").value =
+    teacher.phone || "";
+
+  $("#admin-teacher-modal-status").value =
+    teacher.teacher_status || "pending";
+
+  $("#admin-teacher-modal-title").textContent =
+    teacher.full_name ||
+    teacher.email ||
+    "Profesor";
+
+  $("#admin-teacher-modal-email").textContent =
+    teacher.email || "";
+
+  $("#admin-teacher-form-message").textContent = "";
+
+  const modal = $("#admin-teacher-modal");
+
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeAdminTeacherModal() {
+  const modal = $("#admin-teacher-modal");
+
+  modal?.classList.add("hidden");
+  modal?.setAttribute("aria-hidden", "true");
+}
+
+async function saveAdminTeacherProfile(event) {
+  event.preventDefault();
+
+  if (!sb || currentUser?.role !== "admin") return;
+
+  const teacherId =
+    $("#admin-teacher-id").value;
+
+  const submitButton = event.submitter;
+  const message =
+    $("#admin-teacher-form-message");
+
+  message.textContent = "";
+  submitButton.disabled = true;
+  submitButton.textContent = "Guardando...";
+
+  try {
+    const payload = {
+      full_name:
+        $("#admin-teacher-name").value.trim(),
+
+      institution:
+        $("#admin-teacher-institution").value.trim() ||
+        null,
+
+      phone:
+        $("#admin-teacher-phone").value.trim() ||
+        null,
+
+      teacher_status:
+        $("#admin-teacher-modal-status").value,
+
+      updated_at: nowIso()
+    };
+
+    const { data, error } = await sb
+      .from("profiles")
+      .update(payload)
+      .eq("id", teacherId)
+      .eq("role", "teacher")
+      .select(`
+        id,
+        full_name,
+        email,
+        role,
+        teacher_status,
+        phone,
+        institution,
+        created_at,
+        updated_at
+      `)
+      .single();
+
+    if (error) throw error;
+
+    adminProfiles = adminProfiles.map(profile =>
+      profile.id === teacherId
+        ? { ...profile, ...data }
+        : profile
+    );
+
+    closeAdminTeacherModal();
+    await loadAdminDashboardData();
+  } catch (error) {
+    console.error(
+      "Editar profesor:",
+      error
+    );
+
+    message.textContent = translateError(error);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Guardar cambios";
+  }
+}
+
+function adminTeacherStatusLabel(status) {
+  return {
+    pending: "Pendiente",
+    active: "Activo",
+    suspended: "Suspendido",
+    archived: "Archivado"
+  }[status] || "Pendiente";
+}
+
+function renderAdmin() {
+  show("admin-view");
+
+  const welcome = $("#admin-welcome");
+
+  if (welcome) {
+    welcome.textContent =
+      `Bienvenido, ${
+        currentUser?.name || "administrador"
+      }`;
+  }
+
+  bindAdminNavigation();
+  openAdminSection(activeAdminSection);
+  loadAdminDashboardData();
 }
 
 function adminTeacherStatusLabel(status) {
@@ -961,13 +1592,28 @@ async function registerUser(event) {
   const name = $("#register-name").value.trim();
   const email = $("#register-email").value.trim().toLowerCase();
   const password = $("#register-password").value;
+  const requestedRole =
+  document.querySelector(
+    'input[name="register-role"]:checked'
+  )?.value === "teacher"
+    ? "teacher"
+    : "student";
   const confirmation = $("#register-password-confirm").value;
   $("#register-error").className = "error";
   $("#register-error").textContent = "";
   try {
     if (password.length < 8) throw new Error("password");
     if (password !== confirmation) { $("#register-error").textContent = "Las contraseñas no coinciden."; return; }
-    const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name } } });
+    const { data, error } = await sb.auth.signUp({
+  email,
+  password,
+  options: {
+    data: {
+      full_name: name,
+      requested_role: requestedRole
+    }
+  }
+});
     if (error) throw error;
     if (!data.session) {
       $("#register-error").className = "success";
@@ -1175,8 +1821,11 @@ async function loadAdminDashboardData() {
   renderAdminTeachers();
 }
 
-function renderAdminPendingTeachers(pendingTeachers) {
-  const container = $("#admin-pending-teachers-list");
+function renderAdminPendingTeachers(
+  pendingTeachers
+) {
+  const container =
+    $("#admin-pending-teachers-list");
 
   if (!container) return;
 
@@ -1216,23 +1865,42 @@ function renderAdminPendingTeachers(pendingTeachers) {
 
           <div class="admin-pending-meta">
             <span>
-              ${esc(profile.institution || "Sin institución")}
+              ${esc(
+                profile.institution ||
+                "Sin institución"
+              )}
             </span>
 
             <small>
-              Registrado el ${esc(formatDateOnly(profile.created_at))}
+              Registrado el
+              ${esc(formatDateOnly(profile.created_at))}
             </small>
           </div>
 
-          <span class="admin-status admin-status-pending">
-            Pendiente
-          </span>
+          <div class="admin-teacher-actions">
+            <button
+              class="admin-action-button approve"
+              type="button"
+              data-teacher-action="active"
+              data-teacher-id="${esc(profile.id)}">
+              Aprobar
+            </button>
+
+            <button
+              class="admin-action-button suspend"
+              type="button"
+              data-teacher-action="suspended"
+              data-teacher-id="${esc(profile.id)}">
+              Suspender
+            </button>
+          </div>
         </article>
       `;
     })
     .join("");
-}
 
+  bindAdminTeacherActions();
+}
 function renderAdmin() {
   show("admin-view");
 
