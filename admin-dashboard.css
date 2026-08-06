@@ -139,8 +139,10 @@ body.admin-shell-mode .admin-nav-item > span {
 }
 
 body.admin-shell-mode .admin-sidebar-footer {
-  margin-top: auto;
-  padding: 24px 8px 0;
+  position: absolute;
+  right: 18px;
+  bottom: 24px;
+  left: 18px;
 }
 
 body.admin-shell-mode .admin-logout-button {
@@ -355,8 +357,8 @@ body.admin-shell-mode #admin-view .empty {
   }
 
   body.admin-shell-mode .admin-sidebar-footer {
+    position: static;
     margin-top: 16px;
-    padding: 0;
   }
 
   body.admin-shell-mode .admin-main {
