@@ -1559,16 +1559,6 @@ function renderAdmin() {
   loadAdminDashboardData();
 }
 
-function adminTeacherStatusLabel(status) {
-  const labels = {
-    pending: "Pendiente",
-    active: "Activo",
-    suspended: "Suspendido",
-    archived: "Archivado"
-  };
-
-  return labels[status] || "Pendiente";
-}
 function bindPasswordToggles(container = document) {
   container.querySelectorAll(".password-toggle").forEach(button => {
     button.innerHTML = `<svg class="password-eye eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/><path class="eye-slash" d="m4 4 16 16"/></svg><svg class="password-eye eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>`;
@@ -1726,99 +1716,6 @@ function rowToGrade(row) {
     completionReason: row.completion_reason,
     review: row.answers?.review || []
   };
-}
-async function loadAdminDashboardData() {
-  if (!sb || currentUser?.role !== "admin") return;
-
-  const [
-    profilesResponse,
-    coursesResponse,
-    enrollmentsResponse
-  ] = await Promise.all([
-    sb
-      .from("profiles")
-      .select(`
-        id,
-        full_name,
-        email,
-        role,
-        teacher_status,
-        phone,
-        institution,
-        created_at
-      `)
-      .order("created_at", { ascending: false }),
-
-    sb
-      .from("academy_courses")
-      .select("course_id"),
-
-    sb
-      .from("course_enrollments")
-      .select("course_id, student_id")
-  ]);
-
-  if (profilesResponse.error) {
-    console.error(
-      "No se pudieron cargar los perfiles:",
-      profilesResponse.error
-    );
-  }
-
-  if (coursesResponse.error) {
-    console.error(
-      "No se pudieron cargar los cursos:",
-      coursesResponse.error
-    );
-  }
-
-  if (enrollmentsResponse.error) {
-    console.error(
-      "No se pudieron cargar las matrículas:",
-      enrollmentsResponse.error
-    );
-  }
-
-  adminProfiles = profilesResponse.data || [];
-
-  const teachers = adminProfiles.filter(
-    profile => profile.role === "teacher"
-  );
-
-  const students = adminProfiles.filter(
-    profile => profile.role === "student"
-  );
-
-  const activeTeachers = teachers.filter(
-    profile => profile.teacher_status === "active"
-  );
-
-  const pendingTeachers = teachers.filter(
-    profile => profile.teacher_status === "pending"
-  );
-
-  const courses = coursesResponse.data || [];
-  const enrollments = enrollmentsResponse.data || [];
-
-  const counters = {
-    "#admin-total-teachers": teachers.length,
-    "#admin-active-teachers": activeTeachers.length,
-    "#admin-pending-teachers": pendingTeachers.length,
-    "#admin-total-students": students.length,
-    "#admin-total-courses": courses.length,
-    "#admin-total-enrollments": enrollments.length
-  };
-
-  Object.entries(counters).forEach(([selector, value]) => {
-    const element = $(selector);
-
-    if (element) {
-      element.textContent = String(value);
-    }
-  });
-
-  renderAdminPendingTeachers(pendingTeachers);
-  renderAdminTeachers();
 }
 function bindAdminTeacherActions() {
   $$("[data-admin-teacher-action]").forEach(button => {
