@@ -745,6 +745,11 @@ function bindAdminNavigation() {
       return;
     }
 
+    if (event.target.closest("#admin-logout")) {
+      logout();
+      return;
+    }
+
     if (event.target.closest("#admin-view-all-teachers")) {
       openAdminSection("teachers");
       return;

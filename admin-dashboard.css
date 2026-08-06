@@ -138,6 +138,45 @@ body.admin-shell-mode .admin-nav-item > span {
   width: 20px;
 }
 
+body.admin-shell-mode .admin-sidebar-footer {
+  margin-top: auto;
+  padding: 24px 8px 0;
+}
+
+body.admin-shell-mode .admin-logout-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: 9px;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.18);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+body.admin-shell-mode .admin-logout-button > span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  font-size: 17px;
+}
+
+body.admin-shell-mode .admin-logout-button:hover,
+body.admin-shell-mode .admin-logout-button:focus-visible {
+  border-color: rgba(252, 165, 165, 0.5);
+  color: #ffffff;
+  background: rgba(185, 28, 28, 0.42);
+  outline: none;
+}
+
 /* Contenido principal */
 
 body.admin-shell-mode .admin-main {
@@ -313,6 +352,11 @@ body.admin-shell-mode #admin-view .empty {
 
   body.admin-shell-mode .admin-navigation {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.admin-shell-mode .admin-sidebar-footer {
+    margin-top: 16px;
+    padding: 0;
   }
 
   body.admin-shell-mode .admin-main {
