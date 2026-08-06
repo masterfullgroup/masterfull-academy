@@ -706,9 +706,9 @@ function bindStaticEvents() {
   $("#return-student").addEventListener("click", returnFromResult);
   $("#export-grades").addEventListener("click", exportGrades);
   $("#refresh-results").addEventListener("click", async () => { await refreshResults(true); renderTeacher(); });
-  ["teacher-search","teacher-course-filter","teacher-exam-filter"].forEach(id => {
+  [{ id: "teacher-search", event: "input" }, { id: "teacher-course-filter", event: "change" }, { id: "teacher-exam-filter", event: "change" }].forEach(({ id, event }) => {
     const el = $(`#${id}`);
-    if (el) el.addEventListener("input", () => renderTeacherGrades(filteredTeacherResults()));
+    if (el) el.addEventListener(event, () => renderTeacherGrades(filteredTeacherResults()));
   });
   $$("[data-teacher-tab]").forEach(button => button.addEventListener("click", () => switchTab("teacher", button.dataset.teacherTab, button)));
   $$("[data-student-tab]").forEach(button => button.addEventListener("click", () => switchTab("student", button.dataset.studentTab, button)));
