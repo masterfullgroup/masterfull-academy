@@ -1030,7 +1030,70 @@ body.auth-game-mode .register-role-options input {
 }
 
 body.auth-game-mode .register-role-options label {
-  min-height: 92px !important;
+  min-height: 64px !important;
+  padding: 12px 15px;
   color: #101c2d !important;
   font-weight: 750 !important;
+}
+
+@media (min-width: 901px) {
+  html:has(body.auth-game-mode) {
+    overflow: hidden !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) {
+    height: 100vh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) main {
+    display: grid !important;
+    height: 100vh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    place-items: center !important;
+    padding: 14px clamp(18px, 4vw, 64px) !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-layout {
+    height: calc(100vh - 28px) !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - 28px) !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-copy,
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-card {
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-copy {
+    padding: 30px clamp(28px, 4vw, 52px) !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-card {
+    overflow: hidden !important;
+    justify-content: flex-start !important;
+    padding: 24px clamp(28px, 3vw, 42px) !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-form h2 {
+    margin-bottom: 3px;
+    font-size: clamp(25px, 2.4vw, 31px);
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-form label {
+    margin: 7px 0;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .register-role-field {
+    margin: 10px 0 12px;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-card .primary {
+    min-height: 42px;
+  }
 }
