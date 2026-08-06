@@ -912,39 +912,65 @@
           <p id="option-count-message" class="sr-only" aria-live="polite"></p>
         </section>
         <section class="editor-section editor-questions-section" aria-labelledby="editor-questions-title">
-          <div class="question-builder-head">
-            <div><span class="eyebrow">CONTENIDO</span><h3 id="editor-questions-title">Preguntas <span id="builder-count" class="badge">0</span></h3><p>Elige una forma de agregar preguntas al examen.</p></div>
+          <div class="question-builder-head modern-head">
+            <div><span class="eyebrow">CONTENIDO</span><h3 id="editor-questions-title">Preguntas <span id="builder-count" class="badge">0</span></h3><p class="muted">Elige cómo agregar preguntas al examen: escribe, genera o importa.</p></div>
+            <div class="question-builder-tools">
+              <div class="qb-search">
+                <label class="sr-only" for="qb-search-input">Buscar preguntas</label>
+                <div class="input-group-icon">
+                  <div class="input-icon" aria-hidden="true">🔎</div>
+                  <input id="qb-search-input" type="search" placeholder="Buscar en el banco de preguntas…" aria-label="Buscar preguntas">
+                  <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
+                </div>
+              </div>
+              <div class="qb-actions">
+                <button class="btn ghost" id="import-questions-btn" type="button" aria-controls="import-questions">Importar</button>
+                <label class="btn secondary file-label small">Importar JSON<input id="import-questions" type="file" accept=".json,application/json" hidden></label>
+                <button class="btn secondary" id="export-questions-btn" type="button">Exportar</button>
+              </div>
+            </div>
           </div>
-          <div class="question-mode-tabs" role="tablist" aria-label="Forma de agregar preguntas">
+
+          <div class="question-mode-tabs modern-tabs" role="tablist" aria-label="Forma de agregar preguntas">
             <button class="question-mode active" data-question-mode="manual-panel" type="button">Escribir manualmente</button>
             <button class="question-mode" data-question-mode="generator-panel" type="button">Generar preguntas</button>
             <button class="question-mode" data-question-mode="import-panel" type="button">Importar archivo</button>
           </div>
-          <div id="manual-panel" class="question-tool-panel active">
-            <div><strong>Nueva pregunta</strong><p>Crea el enunciado, las alternativas y selecciona la respuesta correcta.</p></div>
-            <button class="btn primary" id="add-question-btn" type="button">Agregar pregunta</button>
+
+          <div id="manual-panel" class="question-tool-panel modern-panel active">
+            <div class="manual-head"><strong>Nueva pregunta</strong><p class="muted">Crea enunciado, alternativas y marca la respuesta correcta.</p></div>
+            <div class="manual-controls"><button class="btn primary" id="add-question-btn" type="button">Agregar pregunta</button><button class="btn ghost" id="duplicate-question-btn" type="button">Duplicar</button></div>
           </div>
-          <div id="generator-panel" class="question-tool-panel generator-box">
-          <div class="generator-heading"><div><span class="eyebrow">GENERADOR AUTOMÁTICO</span><h3>Crear desde apuntes</h3></div></div>
-          <p class="muted">Escribe una idea por línea usando <strong>concepto: definición</strong>. Ejemplo: <em>Triángulo: figura de tres lados</em>.</p>
-          <label>Apuntes o contenido<textarea id="generator-content" rows="6" placeholder="Triángulo: figura geométrica de tres lados&#10;Cuadrado: figura de cuatro lados iguales&#10;Círculo: figura redonda sin lados&#10;Rectángulo: figura de cuatro lados y ángulos rectos"></textarea></label>
-          <div class="generator-controls">
-            <label>Cantidad<input id="generator-count" type="number" min="1" max="20" value="5"></label>
-            <button class="btn primary" id="generate-questions-btn" type="button">Generar preguntas</button>
+
+          <div id="generator-panel" class="question-tool-panel generator-box modern-panel">
+            <div class="generator-heading"><div><span class="eyebrow">GENERADOR AUTOMÁTICO</span><h3>Crear desde apuntes</h3></div></div>
+            <p class="muted">Escribe una idea por línea usando <strong>concepto: definición</strong>. Ejemplo: <em>Triángulo: figura de tres lados</em>.</p>
+            <label class="modern-label">Apuntes o contenido<textarea id="generator-content" rows="6" placeholder="Triángulo: figura geométrica de tres lados&#10;Cuadrado: figura de cuatro lados iguales&#10;Círculo: figura redonda sin lados&#10;Rectángulo: figura de cuatro lados y ángulos rectos"></textarea></label>
+            <div class="generator-controls modern-controls">
+              <label>Cantidad<input id="generator-count" type="number" min="1" max="20" value="5"></label>
+              <button class="btn primary" id="generate-questions-btn" type="button">Generar preguntas</button>
+            </div>
+            <p id="generator-message" class="error"></p>
           </div>
-          <p id="generator-message" class="error"></p>
-        </div>
-          <div id="import-panel" class="question-tool-panel">
-          <div class="import-info">
-            <strong>Importar desde un archivo</strong>
-            <p>Acepta campos en español o inglés: <code>pregunta</code>, <code>opciones</code> y <code>respuesta_correcta</code>.</p>
-            <p>La respuesta puede ser una letra (A–H), un número (1–8) o el texto de la alternativa.</p>
-            <p id="import-message" aria-live="polite"></p>
+
+          <div id="import-panel" class="question-tool-panel modern-panel">
+            <div class="import-info modern-import">
+              <strong>Importar desde un archivo</strong>
+              <p class="muted">Acepta campos en español o inglés: <code>pregunta</code>, <code>opciones</code> y <code>respuesta_correcta</code>. La respuesta puede ser letra (A–H), número (1–8) o texto de la alternativa.</p>
+              <p id="import-message" aria-live="polite"></p>
+            </div>
+            <label class="btn primary file-label">Seleccionar archivo JSON<input id="import-questions" type="file" accept=".json,application/json"></label>
           </div>
-          <label class="btn primary file-label">Seleccionar archivo JSON<input id="import-questions" type="file" accept=".json,application/json"></label>
+
+          <div id="question-builder" class="question-bank-grid">
+            <!-- Las preguntas se renderizan aquí por el JS existente; cada pregunta mantiene sus clases y atributos. -->
+            <div class="question-bank-empty">
+              <p class="muted">No hay preguntas aún. Añade preguntas manualmente, genera o importa un banco.</p>
+            </div>
           </div>
-          <div id="question-builder"></div>
+
           <p id="exam-editor-error" class="error"></p>
+        </section>
         </section>
       </form>
     </div>
