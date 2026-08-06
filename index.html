@@ -670,13 +670,39 @@
     </section>
 
     <section id="student-view" class="view">
-      <div class="dashboard-head">
-        <div><span class="eyebrow">PANEL DEL ALUMNO</span><h2 id="student-welcome">Hola, alumno</h2><p class="muted">Revisa tu avance, continúa aprendiendo y consulta tus próximos objetivos.</p></div>
-      </div>
-      <div id="student-stats" class="stats"></div>
-      <div id="student-courses" class="tab-content active"><div id="student-overview" class="student-dashboard-overview" aria-live="polite"></div><div id="student-course-list"></div><div id="student-course-workspace" class="hidden" aria-live="polite"></div></div>
-      <div id="student-grades" class="tab-content">
-        <div class="table-wrap"><table><thead><tr><th>Curso</th><th>Examen</th><th>Intento</th><th>Nota</th><th>Aciertos</th><th>Fecha</th><th>Revisión</th></tr></thead><tbody id="student-grades-body"></tbody></table></div>
+      <div class="student-dashboard modern-dashboard">
+        <header class="student-dashboard-head dashboard-head">
+          <div><span class="eyebrow">PANEL DEL ALUMNO</span><h2 id="student-welcome">Hola, alumno</h2><p class="muted">Revisa tu avance, continúa aprendiendo y consulta tus próximos objetivos.</p></div>
+          <div class="student-head-actions"><button class="btn ghost" id="student-certificates-btn" type="button">Certificados</button></div>
+        </header>
+
+        <div id="student-stats" class="stats student-stats-modern"></div>
+
+        <main class="student-main-grid">
+          <aside class="student-courses-panel">
+            <div class="student-section-title"><div><span class="eyebrow">MIS CURSOS</span><h3>Biblioteca</h3><p class="muted">Accede a tus cursos y continúa donde lo dejaste.</p></div></div>
+
+            <div id="student-courses" class="tab-content active">
+              <div id="student-overview" class="student-dashboard-overview modern-overview" aria-live="polite"></div>
+              <div id="student-course-list" class="student-course-grid"></div>
+            </div>
+          </aside>
+
+          <section class="student-workspace">
+            <div id="student-course-workspace" class="hidden student-course-workspace modern-workspace" aria-live="polite">
+              <!-- Workspace content (course details, modules, player) rendered by existing JS inside this element -->
+              <div class="workspace-topbar"><div class="workspace-title"><h3 id="workspace-course-title">Curso</h3><small id="workspace-course-status" class="muted">Progreso</small></div><div class="workspace-actions"><button class="btn secondary" id="workspace-back" type="button">Volver</button></div></div>
+              <div class="workspace-content">
+                <aside class="workspace-modules" id="lesson-module-tree-container"><div id="lesson-module-tree" class="lesson-module-tree"></div></aside>
+                <div class="workspace-media"><div id="lesson-media" class="lesson-media modern-media"></div><div id="lesson-description" class="lesson-rich-content modern-rich"></div></div>
+              </div>
+            </div>
+
+            <div id="student-grades" class="tab-content modern-grades">
+              <div class="table-wrap modern-table-wrap"><table><thead><tr><th>Curso</th><th>Examen</th><th>Intento</th><th>Nota</th><th>Aciertos</th><th>Fecha</th><th>Revisión</th></tr></thead><tbody id="student-grades-body"></tbody></table></div>
+            </div>
+          </section>
+        </main>
       </div>
     </section>
 
