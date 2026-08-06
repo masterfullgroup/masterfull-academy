@@ -2339,23 +2339,9 @@ async function publishSelectedCourseExams(event) {
 
 function playAuthLoginExit() {
   const layout = $("#auth-view .auth-layout");
-  if (!layout || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
-  layout.classList.add("auth-login-exit");
-  return new Promise(resolve => {
-    let burstStarted = false;
-    const startBurst = () => {
-      if (burstStarted) return;
-      burstStarted = true;
-      layout.removeEventListener("transitionend", onTransitionEnd);
-      document.body.classList.add("auth-galactic-burst");
-      window.setTimeout(resolve, 980);
-    };
-    const onTransitionEnd = event => {
-      if (event.propertyName === "transform" && event.target.classList.contains("auth-card")) startBurst();
-    };
-    layout.addEventListener("transitionend", onTransitionEnd);
-    window.setTimeout(startBurst, 860);
-  });
+  layout?.classList.remove("auth-login-exit");
+  document.body.classList.remove("auth-galactic-burst");
+  return Promise.resolve();
 }
 function fillTeacherFilters() {
   $("#teacher-course-filter").innerHTML = `<option value="">Todos los cursos</option>${publishedCourses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("")}`;

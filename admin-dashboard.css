@@ -1036,6 +1036,36 @@ body.auth-game-mode .register-role-options label {
   font-weight: 750 !important;
 }
 
+body.auth-game-mode .cosmos-supernova,
+body.auth-game-mode .cosmos-supernova::before,
+body.auth-game-mode .cosmos-supernova::after {
+  display: none !important;
+  animation: none !important;
+}
+
+body.auth-game-mode .auth-layout::before {
+  animation: none !important;
+}
+
+body.auth-game-mode .portal-message {
+  min-width: 0;
+}
+
+body.auth-game-mode .portal-message > span {
+  min-width: 0;
+}
+
+body.auth-game-mode .portal-button {
+  flex: 0 0 132px;
+  min-width: 0;
+  max-width: 132px;
+  padding-right: 10px;
+  padding-left: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (min-width: 901px) {
   html:has(body.auth-game-mode) {
     overflow: hidden !important;
