@@ -1,4 +1,4 @@
-﻿const DRAFT_KEY = "aulaquiz_local_drafts_v1";
+const DRAFT_KEY = "aulaquiz_local_drafts_v1";
 const ACTIVE_ATTEMPT_KEY = "aulaquiz_active_attempt_v2";
 const PENDING_RESULTS_KEY = "aulaquiz_pending_results_v1";
 const SOUND_KEY = "aulaquiz_sound_enabled_v1";
@@ -82,7 +82,7 @@ function normalizeModules(value) {
   const supportedTypes = ["page","lesson","file","video","pdf","download","practice","task","quiz","discussion","live","heading","link"];
   return value.map((module, moduleIndex) => ({
     id: String(module.id || `module-${moduleIndex + 1}`),
-    title: String(module.title || module.name || `MÃ³dulo ${moduleIndex + 1}`).trim(),
+    title: String(module.title || module.name || `Módulo ${moduleIndex + 1}`).trim(),
     unlockRule: ["immediate","previous","evaluation","date"].includes(module.unlockRule || module.unlock_rule) ? (module.unlockRule || module.unlock_rule) : "immediate",
     unlockDetail: String(module.unlockDetail || module.unlock_detail || "").trim(),
     published: module.published !== false,
@@ -100,8 +100,8 @@ function normalizeModules(value) {
       attempts: Math.max(0, Number(activity.attempts) || 0),
       completionRule: ["none","view","manual","submit","pass"].includes(activity.completionRule || activity.completion_rule) ? (activity.completionRule || activity.completion_rule) : (activity.type === "heading" ? "none" : "manual"),
       submissionTypes: Array.isArray(activity.submissionTypes || activity.submission_types) ? [...new Set(activity.submissionTypes || activity.submission_types)].filter(type => ["file","text","url","questions","none"].includes(type)) : []
-    }
-  });
+    }))
+  }));
 }
 function legacyModuleHash(value) {
   let first = 2166136261;
@@ -123,7 +123,7 @@ function decodeLegacyModuleRows(rows, courses) {
     const chunks = available.filter(row => row.course_id.startsWith(prefix)).sort((left, right) => left.course_id.localeCompare(right.course_id));
     if (!chunks.length) return;
     try { decoded.set(course.id, normalizeModules(JSON.parse(chunks.map(row => row.description || "").join("")))); }
-    catch (error) { console.error(`MÃ³dulos compatibles daÃ±ados para ${course.id}:`, error); }
+    catch (error) { console.error(`Módulos compatibles dañados para ${course.id}:`, error); }
   });
   return decoded;
 }
@@ -174,7 +174,7 @@ function modernIcon(name) {
     ,edit: `<path d="M4 20h4l11-11a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>`
     ,settings: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/>`
   };
-  const aliases = { "â–¦": "courses", "â–¤": "exams", "âœ“": "results", "â—‡": "course" };
+  const aliases = { "▦": "courses", "▤": "exams", "✓": "results", "◇": "course" };
   const key = aliases[name] || name;
   return `<svg class="modern-icon icon-${esc(key)}" data-icon="${esc(key)}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${paths[key] || paths.course}</svg>`;
 }
@@ -225,24 +225,24 @@ function initSupabase() {
 }
 function translateError(error) {
   const msg = String(error?.message || error || "").toLowerCase();
-  if (!msg) return "OcurriÃ³ un problema. IntÃ©ntalo nuevamente.";
-  if (msg.includes("invalid login credentials")) return "Correo o contraseÃ±a incorrectos.";
+  if (!msg) return "Ocurrió un problema. Inténtalo nuevamente.";
+  if (msg.includes("invalid login credentials")) return "Correo o contraseña incorrectos.";
   if (msg.includes("email not confirmed")) return "Debes confirmar tu correo antes de ingresar.";
-  if (msg.includes("already registered") || msg.includes("user already")) return "Este correo ya estÃ¡ registrado.";
-  if (msg.includes("password")) return "La contraseÃ±a no cumple los requisitos. Usa mÃ­nimo 8 caracteres.";
-  if (msg.includes("duplicate key")) return "Ese registro ya existe. No se duplicÃ³.";
-  if (msg.includes("row-level security") || msg.includes("permission denied")) return "No tienes permisos para realizar esta acciÃ³n.";
-  if (msg.includes("failed to fetch") || msg.includes("network")) return "No hay conexiÃ³n o Supabase no respondiÃ³.";
-  return "No se pudo completar la operaciÃ³n. Revisa los datos e intÃ©ntalo otra vez.";
+  if (msg.includes("already registered") || msg.includes("user already")) return "Este correo ya está registrado.";
+  if (msg.includes("password")) return "La contraseña no cumple los requisitos. Usa mínimo 8 caracteres.";
+  if (msg.includes("duplicate key")) return "Ese registro ya existe. No se duplicó.";
+  if (msg.includes("row-level security") || msg.includes("permission denied")) return "No tienes permisos para realizar esta acción.";
+  if (msg.includes("failed to fetch") || msg.includes("network")) return "No hay conexión o Supabase no respondió.";
+  return "No se pudo completar la operación. Revisa los datos e inténtalo otra vez.";
 }
 
 async function initApp() {
   bindStaticEvents();
-  setSessionMessage("Cargando sesiÃ³n...");
+  setSessionMessage("Cargando sesión...");
   $("#login-error").textContent = "";
   $("#register-error").textContent = "";
   if (!isSupabaseConfigured()) {
-    const message = "No se configurÃ³ la conexiÃ³n con Supabase. Revisa config.js.";
+    const message = "No se configuró la conexión con Supabase. Revisa config.js.";
     $("#login-error").textContent = message;
     $("#register-error").textContent = message;
     setSessionMessage(message, "error");
@@ -253,7 +253,7 @@ async function initApp() {
   sb = initSupabase();
   if (!sb) {
     $("#login-error").textContent = "No se pudo cargar la biblioteca de Supabase.";
-    setSessionMessage("Supabase no estÃ¡ disponible.", "error");
+    setSessionMessage("Supabase no está disponible.", "error");
     appReady = true;
     renderApp();
     return;
@@ -301,7 +301,7 @@ async function setSessionFromSupabase(session, shouldRender = true) {
   } catch (error) {
     console.error("No se pudo recuperar el perfil:", error);
     currentUser = null;
-    $("#login-error").textContent = "No se pudo cargar tu perfil. Revisa la configuraciÃ³n de Supabase.";
+    $("#login-error").textContent = "No se pudo cargar tu perfil. Revisa la configuración de Supabase.";
   }
   if (shouldRender) renderApp();
 }
@@ -323,7 +323,7 @@ async function loadCatalogSafe() {
     catalogExams = loaded.exams;
     applyCourseChanges();
   } catch (error) {
-    console.error("Error cargando catÃ¡logo:", error);
+    console.error("Error cargando catálogo:", error);
     catalog = null;
     catalogCourses = [];
     catalogExams = [];
@@ -391,12 +391,12 @@ async function loadCourseAccess() {
   const [enrollmentResponse, profileResponse] = await Promise.all([
     enrollmentQuery,
     currentUser.role === "teacher" ? sb.from("profiles").select("id, full_name, email, role").eq("role", "student").order("full_name", { ascending:true }) : Promise.resolve({ data:[], error:null })
-  );
+  ]);
   if (enrollmentResponse.error) {
     courseEnrollments = [];
     studentProfiles = [];
-    courseAccessError = enrollmentResponse.error.code === "42P01" ? "Aplica la migraciÃ³n de matrÃ­culas en Supabase para administrar accesos." : "No se pudieron cargar los alumnos autorizados.";
-    console.error("MatrÃ­culas:", enrollmentResponse.error);
+    courseAccessError = enrollmentResponse.error.code === "42P01" ? "Aplica la migración de matrículas en Supabase para administrar accesos." : "No se pudieron cargar los alumnos autorizados.";
+    console.error("Matrículas:", enrollmentResponse.error);
     return;
   }
   if (profileResponse.error) {
@@ -415,7 +415,7 @@ async function loadDynamicCourses() {
     Promise.resolve(courseQuery),
     sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count").eq("published", true),
     sb.from("academy_questions").select("exam_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true })
-  );
+  ]);
   const error = courseResponse.error || examResponse.error || questionResponse.error;
   if (error) {
     if (String(error.code) !== "42P01") console.error("No se pudieron cargar los cursos normalizados desde Supabase:", error);
@@ -467,7 +467,7 @@ async function normalizeCatalog(raw) {
         if (exam.published) exams.push(exam);
       } catch (error) {
         console.error(`Error en ${path}:`, error);
-        throw new Error(`Archivo problemÃ¡tico: ${path}. ${error.message}`);
+        throw new Error(`Archivo problemático: ${path}. ${error.message}`);
       }
     }
   }
@@ -480,12 +480,12 @@ function normalizeQuestionImage(value, questionNumber = "") {
   const dataImage = image.match(/^data:\s*(image\/[a-z0-9.+-]+)(?:\s*;\s*(?!base64\s*,)[^;,]+)*\s*;\s*base64\s*,([\s\S]+)$/i);
   if (!dataImage) throw new Error(`la imagen${questionNumber ? ` de la pregunta ${questionNumber}` : ""} debe comenzar con data:image/png;base64,`);
   let payload = dataImage[2].replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
-  if (!/^[a-z0-9+/]+={0,2}$/i.test(payload)) throw new Error(`los datos Base64 de la imagen${questionNumber ? ` de la pregunta ${questionNumber}` : ""} no son vÃ¡lidos.`);
+  if (!/^[a-z0-9+/]+={0,2}$/i.test(payload)) throw new Error(`los datos Base64 de la imagen${questionNumber ? ` de la pregunta ${questionNumber}` : ""} no son válidos.`);
   while (payload.length % 4) payload += "=";
   return `data:${dataImage[1].toLowerCase()};base64,${payload}`;
 }
 function questionImageMarkup(question, className = "question-image") {
-  return question?.image ? `<img class="${className}" src="${esc(question.image)}" alt="GrÃ¡fico de la pregunta" loading="lazy">` : "";
+  return question?.image ? `<img class="${className}" src="${esc(question.image)}" alt="Gráfico de la pregunta" loading="lazy">` : "";
 }
 function normalizeExam(raw, source = "JSON", fallbackCourseId = "") {
   const sourceLabel = source || "JSON";
@@ -493,7 +493,7 @@ function normalizeExam(raw, source = "JSON", fallbackCourseId = "") {
   if (!Array.isArray(list)) throw new Error(`${sourceLabel}: no contiene un arreglo de preguntas.`);
   const id = String(raw.id || slug(raw.title || raw.nombre || raw.nombre_examen || "examen")).trim();
   const courseId = String(raw.course_id || raw.courseId || fallbackCourseId || "").trim();
-  const title = String(raw.title || raw.nombre || raw.nombre_examen || "Examen sin tÃ­tulo").trim();
+  const title = String(raw.title || raw.nombre || raw.nombre_examen || "Examen sin título").trim();
   const minutes = Number(raw.minutes ?? raw.minutos ?? raw.tiempo ?? 20);
   const questionsToShow = Number(raw.questions_to_show ?? raw.questionsToShow ?? raw.preguntas_a_mostrar ?? Math.min(5, list.length));
   const attemptsAllowed = Number(raw.attempts_allowed ?? raw.attemptsAllowed ?? raw.intentos_permitidos ?? 1);
@@ -504,7 +504,7 @@ function normalizeExam(raw, source = "JSON", fallbackCourseId = "") {
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > 300) throw new Error(`${sourceLabel}: minutes debe estar entre 1 y 300.`);
   if (!Number.isInteger(attemptsAllowed) || attemptsAllowed < 1 || attemptsAllowed > 20) throw new Error(`${sourceLabel}: attempts_allowed debe estar entre 1 y 20.`);
   if (!Number.isInteger(optionCount) || optionCount < 2 || optionCount > 8) throw new Error(`${sourceLabel}: option_count debe estar entre 2 y 8.`);
-  if (!Number.isInteger(questionsToShow) || questionsToShow < 1 || questionsToShow > list.length) throw new Error(`${sourceLabel}: questions_to_show debe ser vÃ¡lido y no superar el banco.`);
+  if (!Number.isInteger(questionsToShow) || questionsToShow < 1 || questionsToShow > list.length) throw new Error(`${sourceLabel}: questions_to_show debe ser válido y no superar el banco.`);
   const questionIds = new Set();
   const questions = list.map((item, index) => {
     const q = normalizeImportedQuestion(item, index, optionCount);
@@ -525,7 +525,7 @@ function normalizeImportedQuestion(item, index, forcedOptionCount = null) {
   const optionCount = forcedOptionCount || options.length;
   if (!String(text || "").trim()) throw new Error(`la pregunta ${index + 1} no tiene enunciado.`);
   if (options.length !== optionCount) throw new Error(`la pregunta ${index + 1} debe tener ${optionCount} opciones.`);
-  if (options.some(option => !option)) throw new Error(`la pregunta ${index + 1} tiene opciones vacÃ­as.`);
+  if (options.some(option => !option)) throw new Error(`la pregunta ${index + 1} tiene opciones vacías.`);
   const usesZeroBasedCorrect = Object.prototype.hasOwnProperty.call(item, "correct");
   const answer = item.correct ?? item.respuesta_correcta ?? item.correcta ?? item.answer;
   const correct = normalizeAnswer(answer, options, index, usesZeroBasedCorrect);
@@ -569,7 +569,7 @@ function renderApp() {
     <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
     <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
   </nav>` : "";
-  $("#session-area").innerHTML = `${teacherNavigation}${studentNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions"><button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesiÃ³n</span></button></div></div>`;
+  $("#session-area").innerHTML = `${teacherNavigation}${studentNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions"><button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div></div>`;
   $("#profile-btn").addEventListener("click", openProfile);
   $("#logout-btn").addEventListener("click", logout);
   $$("#session-area [data-teacher-tab]").forEach(button => button.addEventListener("click", () => {
@@ -602,7 +602,7 @@ function bindStaticEvents() {
   $("#sidebar-toggle").addEventListener("click", toggleSidebar);
   $("#brand-link").addEventListener("click", event => {
     event.preventDefault();
-    if (activeExam && timerInterval) { alert("No puedes salir mientras el examen estÃ¡ activo. EntrÃ©galo para continuar."); return; }
+    if (activeExam && timerInterval) { alert("No puedes salir mientras el examen está activo. Entrégalo para continuar."); return; }
     if (currentUser) renderApp();
   });
   $$(".auth-tab").forEach(button => button.addEventListener("click", () => {
@@ -701,7 +701,7 @@ function bindStaticEvents() {
   $("#import-questions").addEventListener("change", importQuestions);
   $("#take-exam-form").addEventListener("submit", event => {
     event.preventDefault();
-    if (confirm("Â¿Deseas entregar el examen con tus respuestas actuales?")) finishExam(false);
+    if (confirm("¿Deseas entregar el examen con tus respuestas actuales?")) finishExam(false);
   });
   $("#return-student").addEventListener("click", returnFromResult);
   $("#export-grades").addEventListener("click", exportGrades);
@@ -716,10 +716,10 @@ function bindStaticEvents() {
   $$(".exam-editor-tab").forEach(button => button.addEventListener("click", () => selectExamEditorSection(button.dataset.editorSection)));
   $$('[data-close]').forEach(button => button.addEventListener("click", () => closeModal(button.dataset.close)));
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden && activeExam && timerInterval) finishExam(false, "El examen se entregÃ³ al cambiar de pestaÃ±a o minimizar la ventana.", true);
+    if (document.hidden && activeExam && timerInterval) finishExam(false, "El examen se entregó al cambiar de pestaña o minimizar la ventana.", true);
   });
   window.addEventListener("pagehide", () => {
-    if (activeExam && timerInterval) finishExam(false, "El examen se entregÃ³ al cerrar, recargar o abandonar la pÃ¡gina.", true);
+    if (activeExam && timerInterval) finishExam(false, "El examen se entregó al cerrar, recargar o abandonar la página.", true);
   });
   window.addEventListener("beforeunload", saveActiveAttempt);
   window.addEventListener("online", syncPendingResults);
@@ -747,6 +747,24 @@ function bindAdminNavigation() {
 
     if (event.target.closest("#admin-view-all-teachers")) {
       openAdminSection("teachers");
+      return;
+    }
+
+    if (event.target.closest(".search-clear")) {
+      const searchInput = $("#admin-teacher-search");
+
+      if (searchInput) {
+        searchInput.value = "";
+        adminTeacherPage = 1;
+        renderAdminTeachers();
+        searchInput.focus();
+      }
+
+      return;
+    }
+
+    if (event.target.closest("#admin-export-teachers")) {
+      exportAdminTeachers();
       return;
     }
 
@@ -809,6 +827,38 @@ function bindAdminNavigation() {
   );
 }
 
+function exportAdminTeachers() {
+  const teachers = getFilteredAdminTeachers();
+
+  if (!teachers.length) return;
+
+  const rows = [
+    ["Profesor", "Correo", "Institución", "Teléfono", "Estado", "Registro"],
+    ...teachers.map(profile => [
+      profile.full_name || profile.email || "Profesor sin nombre",
+      profile.email || "",
+      profile.institution || "",
+      profile.phone || "",
+      adminTeacherStatusLabel(profile.teacher_status || "pending"),
+      formatDateOnly(profile.created_at)
+    ])
+  ];
+
+  const csv = rows
+    .map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `profesores-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function openAdminSection(section = "dashboard") {
   const validSections = [
     "dashboard",
@@ -817,7 +867,7 @@ function openAdminSection(section = "dashboard") {
     "courses",
     "payments",
     "settings"
-  ;
+  ];
 
   activeAdminSection = validSections.includes(section)
     ? section
@@ -890,7 +940,7 @@ async function loadAdminDashboardData() {
 
   if (enrollmentsResponse.error) {
     console.error(
-      "MatrÃ­culas del administrador:",
+      "Matrículas del administrador:",
       enrollmentsResponse.error
     );
   }
@@ -948,7 +998,7 @@ function renderAdminPendingTeachers(pendingTeachers) {
   if (!pendingTeachers.length) {
     container.innerHTML = `
       <div class="empty">
-        No existen profesores pendientes de aprobaciÃ³n.
+        No existen profesores pendientes de aprobación.
       </div>
     `;
 
@@ -971,7 +1021,7 @@ function renderAdminPendingTeachers(pendingTeachers) {
             <span>
               ${esc(
                 profile.institution ||
-                "Sin instituciÃ³n"
+                "Sin institución"
               )}
             </span>
 
@@ -1087,8 +1137,8 @@ function renderAdminTeachers() {
         <thead>
           <tr>
             <th>Profesor</th>
-            <th>InstituciÃ³n</th>
-            <th>TelÃ©fono</th>
+            <th>Institución</th>
+            <th>Teléfono</th>
             <th>Estado</th>
             <th>Registro</th>
             <th>Acciones</th>
@@ -1282,7 +1332,7 @@ function renderAdminTeacherPagination(
 
   container.innerHTML = `
     <span>
-      PÃ¡gina ${adminTeacherPage} de ${totalPages}
+      Página ${adminTeacherPage} de ${totalPages}
     </span>
 
     <div>
@@ -1343,7 +1393,7 @@ async function updateAdminTeacherStatus(
   );
 
   if (!teacher) {
-    alert("No se encontrÃ³ el profesor.");
+    alert("No se encontró el profesor.");
     return;
   }
 
@@ -1354,7 +1404,7 @@ async function updateAdminTeacherStatus(
   };
 
   const confirmed = confirm(
-    `Â¿Deseas ${
+    `¿Deseas ${
       actionLabels[newStatus] || "actualizar"
     } a ${
       teacher.full_name ||
@@ -1569,14 +1619,14 @@ function bindPasswordToggles(container = document) {
       const showing = input.type === "text";
       input.type = showing ? "password" : "text";
       button.classList.toggle("is-visible", !showing);
-      button.setAttribute("aria-label", showing ? "Mostrar contraseÃ±a" : "Ocultar contraseÃ±a");
-      button.title = showing ? "Mostrar contraseÃ±a" : "Ocultar contraseÃ±a";
+      button.setAttribute("aria-label", showing ? "Mostrar contraseña" : "Ocultar contraseña");
+      button.title = showing ? "Mostrar contraseña" : "Ocultar contraseña";
     });
   });
 }
 async function registerUser(event) {
   event.preventDefault();
-  if (!sb) { $("#register-error").textContent = "No se configurÃ³ la conexiÃ³n con Supabase. Revisa config.js."; return; }
+  if (!sb) { $("#register-error").textContent = "No se configuró la conexión con Supabase. Revisa config.js."; return; }
   const button = event.submitter;
   button.disabled = true;
   const name = $("#register-name").value.trim();
@@ -1593,7 +1643,7 @@ async function registerUser(event) {
   $("#register-error").textContent = "";
   try {
     if (password.length < 8) throw new Error("password");
-    if (password !== confirmation) { $("#register-error").textContent = "Las contraseÃ±as no coinciden."; return; }
+    if (password !== confirmation) { $("#register-error").textContent = "Las contraseñas no coinciden."; return; }
     const { data, error } = await sb.auth.signUp({
   email,
   password,
@@ -1623,7 +1673,7 @@ async function registerUser(event) {
 }
 async function loginUser(event) {
   event.preventDefault();
-  if (!sb) { $("#login-error").textContent = "No se configurÃ³ la conexiÃ³n con Supabase. Revisa config.js."; return; }
+  if (!sb) { $("#login-error").textContent = "No se configuró la conexión con Supabase. Revisa config.js."; return; }
   const button = event.submitter;
   button.disabled = true;
   $("#login-error").textContent = "Ingresando...";
@@ -1656,8 +1706,8 @@ async function loginUser(event) {
   }
 }
 async function logout() {
-  if (timerInterval && !confirm("Hay un examen en curso. Si cierras sesiÃ³n, se entregarÃ¡ con las respuestas actuales. Â¿Deseas continuar?")) return;
-  if (timerInterval) await finishExam(false, "Cerraste sesiÃ³n durante el examen.", true);
+  if (timerInterval && !confirm("Hay un examen en curso. Si cierras sesión, se entregará con las respuestas actuales. ¿Deseas continuar?")) return;
+  if (timerInterval) await finishExam(false, "Cerraste sesión durante el examen.", true);
   clearInterval(timerInterval);
   timerInterval = null;
   activeExam = null;
@@ -1777,7 +1827,7 @@ function renderTeacherOverview() {
         </div>
       </div>
     </article>`;
-  }).join("") : `<div class="canvas-dashboard-empty">${modernIcon("course")}<strong>AÃºn no hay cursos</strong><p>Crea tu primer curso para comenzar.</p><button class="btn primary overview-new-course-dynamic" type="button">Crear curso</button></div>`;
+  }).join("") : `<div class="canvas-dashboard-empty">${modernIcon("course")}<strong>Aún no hay cursos</strong><p>Crea tu primer curso para comenzar.</p><button class="btn primary overview-new-course-dynamic" type="button">Crear curso</button></div>`;
   $("#teacher-overview").innerHTML = `<section class="canvas-dashboard-courses" aria-label="Cursos creados"><div class="canvas-dashboard-grid">${courseCards}</div></section>`;
 }
 function renderTeacherCourseList(bind = true) {
@@ -1800,7 +1850,7 @@ function renderTeacherCourses() {
 }
 
 function renderCanvasCourseGroup(title, courses, isDraft) {
-  const emptyMessage = isDraft ? "No tienes cursos pendientes de publicaciÃ³n." : "TodavÃ­a no hay cursos publicados.";
+  const emptyMessage = isDraft ? "No tienes cursos pendientes de publicación." : "Todavía no hay cursos publicados.";
   return `<section class="canvas-course-group ${isDraft ? "drafts" : "published"}"><header><h4>${title} <span>${courses.length}</span></h4></header>${courses.length ? `<div class="canvas-course-grid">${courses.map((course, index) => renderCanvasCourseCard(course, isDraft, index)).join("")}</div>` : `<p class="canvas-course-group-empty">${emptyMessage}</p>`}</section>`;
 }
 
@@ -1811,8 +1861,8 @@ function renderCanvasCourseCard(course, isDraft, index) {
   const editClass = isDraft ? "edit-course" : "edit-published-course";
   const deleteClass = isDraft ? "delete-course" : "delete-published-course";
   return `<article class="canvas-course-card tone-${index % 5} ${isDraft ? "draft" : ""}">
-    <div class="canvas-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><details class="canvas-course-menu"><summary aria-label="MÃ¡s acciones para ${esc(course.name)}">â‹®</summary><div>${isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar curso</button>` : ""}<button class="create-exam-course" data-id="${esc(course.id)}" type="button">Crear evaluaciÃ³n</button><button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar curso</button><button class="${deleteClass} danger" data-id="${esc(course.id)}" type="button">Eliminar curso</button></div></details></div>
-    <div class="canvas-course-body"><strong class="canvas-course-title">${esc(course.name)}</strong><small>${isDraft ? "No publicado" : "Publicado"}</small><footer><span title="MÃ³dulos">${modernIcon("page")} ${modules.length}</span><span title="Recursos">${modernIcon("folder")} ${activities}</span><span title="Evaluaciones">${modernIcon("quiz")} ${exams}</span><button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></footer></div>
+    <div class="canvas-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><details class="canvas-course-menu"><summary aria-label="Más acciones para ${esc(course.name)}">⋮</summary><div>${isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar curso</button>` : ""}<button class="create-exam-course" data-id="${esc(course.id)}" type="button">Crear evaluación</button><button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar curso</button><button class="${deleteClass} danger" data-id="${esc(course.id)}" type="button">Eliminar curso</button></div></details></div>
+    <div class="canvas-course-body"><strong class="canvas-course-title">${esc(course.name)}</strong><small>${isDraft ? "No publicado" : "Publicado"}</small><footer><span title="Módulos">${modernIcon("page")} ${modules.length}</span><span title="Recursos">${modernIcon("folder")} ${activities}</span><span title="Evaluaciones">${modernIcon("quiz")} ${exams}</span><button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></footer></div>
   </article>`;
 }
 function renderTeacherQuickCourses() {
@@ -1827,7 +1877,7 @@ function renderTeacherQuickCourses() {
 function renderTeacherExamWorkspace(courses, exams) {
   const coursesById = new Map(courses.map(course => [course.id, course]));
   exams.forEach(exam => {
-    if (!coursesById.has(exam.courseId)) coursesById.set(exam.courseId, { id: exam.courseId, name: "Curso no encontrado", description: "Revisa la asignaciÃ³n de estas evaluaciones." });
+    if (!coursesById.has(exam.courseId)) coursesById.set(exam.courseId, { id: exam.courseId, name: "Curso no encontrado", description: "Revisa la asignación de estas evaluaciones." });
   });
   const directory = $("#teacher-exam-directory");
   const courseDirectory = $("#teacher-course-directory");
@@ -1842,7 +1892,7 @@ function renderTeacherExamWorkspace(courses, exams) {
     workspace.classList.add("hidden");
     $("#teacher-exam-course-list").innerHTML = coursesById.size
       ? [...coursesById.values()].map(course => renderTeacherExamCourseLink(course, exams)).join("")
-      : emptyCard("TodavÃ­a no hay cursos. Crea uno para agregar evaluaciones.");
+      : emptyCard("Todavía no hay cursos. Crea uno para agregar evaluaciones.");
     return;
   }
   directory.classList.add("hidden");
@@ -1856,10 +1906,10 @@ function renderTeacherExamCourseLink(course, exams) {
   const isDraftCourse = drafts.courses.some(item => item.id === course.id);
   return `<button class="exam-course-link open-course-workspace" data-course-id="${esc(course.id)}" type="button">
     <span class="exam-course-link-icon">${modernIcon("course")}</span>
-    <span class="exam-course-link-copy"><small>CURSO</small><strong>${esc(course.name)}</strong><span>${esc(course.description || "Sin descripciÃ³n registrada")}</span></span>
-    <span class="exam-course-link-stats"><span><strong>${courseExams.length}</strong> ${courseExams.length === 1 ? "examen" : "exÃ¡menes"}</span><span><strong>${questionCount}</strong> preguntas en bancos</span></span>
+    <span class="exam-course-link-copy"><small>CURSO</small><strong>${esc(course.name)}</strong><span>${esc(course.description || "Sin descripción registrada")}</span></span>
+    <span class="exam-course-link-stats"><span><strong>${courseExams.length}</strong> ${courseExams.length === 1 ? "examen" : "exámenes"}</span><span><strong>${questionCount}</strong> preguntas en bancos</span></span>
     <span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Curso local" : "Publicado"}</span>
-    <span class="exam-course-link-arrow" aria-hidden="true">â†’</span>
+    <span class="exam-course-link-arrow" aria-hidden="true">→</span>
   </button>`;
 }
 function renderTeacherCourseWorkspace(course, exams) {
@@ -1869,15 +1919,15 @@ function renderTeacherCourseWorkspace(course, exams) {
   const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
   const sections = [
     ["overview", "Inicio", "home"],
-    ["modules", "MÃ³dulos", "modules"],
+    ["modules", "Módulos", "modules"],
     ["tasks", "Tareas", "clipboard"],
     ["exams", "Evaluaciones", "quiz"],
     ["grades", "Calificaciones", "grade"],
     ["people", "Personas", "users"],
-    ["pages", "PÃ¡ginas", "page"],
+    ["pages", "Páginas", "page"],
     ["files", "Archivos", "folder"],
     ["questions", "Banco de preguntas", "library"],
-    ["settings", "ConfiguraciÃ³n", "settings"]
+    ["settings", "Configuración", "settings"]
   ];
   let content = "";
   if (isStudentPreview) content = renderTeacherStudentPreview(course, exams);
@@ -1886,19 +1936,19 @@ function renderTeacherCourseWorkspace(course, exams) {
   else if (activeTeacherCourseSection === "exams") content = renderTeacherCourseExams(course, exams);
   else if (activeTeacherCourseSection === "grades") content = renderTeacherCourseGrades(course);
   else if (activeTeacherCourseSection === "people") content = renderTeacherCoursePeople(course);
-  else if (activeTeacherCourseSection === "pages") content = renderTeacherCourseResources(course, ["page","lesson"], "PÃ¡ginas", "page");
+  else if (activeTeacherCourseSection === "pages") content = renderTeacherCourseResources(course, ["page","lesson"], "Páginas", "page");
   else if (activeTeacherCourseSection === "files") content = renderTeacherCourseResources(course, ["file","pdf","download","video","link"], "Archivos y recursos", "file");
   else if (activeTeacherCourseSection === "questions") content = renderTeacherCourseQuestions(course, exams);
   else if (activeTeacherCourseSection === "settings") content = renderTeacherCourseSettings(course);
   else content = renderTeacherCourseOverview(course, exams, publishedCount, questionCount);
   return `<div class="course-workspace-page">
     <header class="course-context-bar">
-      <div class="course-context-title"><button class="course-workspace-back contextual-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">â†</span> Cursos</button><span class="course-context-divider" aria-hidden="true"></span><div class="course-context-copy"><span>CURSO ACTUAL</span><h1>${esc(course.name)}</h1></div></div>
+      <div class="course-context-title"><button class="course-workspace-back contextual-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Cursos</button><span class="course-context-divider" aria-hidden="true"></span><div class="course-context-copy"><span>CURSO ACTUAL</span><h1>${esc(course.name)}</h1></div></div>
       <div class="course-context-actions"><span class="status ${isDraftCourse ? "draft" : "published"}">${isDraftCourse ? "Borrador" : "Publicado"}</span><button class="btn secondary student-preview-toggle ${isStudentPreview ? "active" : ""}" id="toggle-student-preview" type="button">${modernIcon(isStudentPreview ? "edit" : "eye")} ${isStudentPreview ? "Volver a editar" : "Vista del alumno"}</button></div>
     </header>
     <div class="course-workspace-layout ${isStudentPreview ? "student-preview-active" : ""}">
       <aside class="course-workspace-sidebar">
-        <div class="course-sidebar-heading"><strong>NavegaciÃ³n del curso</strong></div>
+        <div class="course-sidebar-heading"><strong>Navegación del curso</strong></div>
         <nav class="course-workspace-nav" aria-label="Secciones de ${esc(course.name)}">${sections.map(([id, label, icon]) => `<button class="course-subpage ${activeTeacherCourseSection === id ? "active" : ""}" data-course-section="${id}" type="button">${modernIcon(icon)}<span>${label}</span></button>`).join("")}</nav>
       </aside>
       <main class="course-workspace-content">${content}</main>
@@ -1908,49 +1958,49 @@ function renderTeacherCourseWorkspace(course, exams) {
 
 function renderTeacherCourseGrades(course) {
   const courseResults = results.filter(result => result.courseId === course.id);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">SEGUIMIENTO</span><h2>Calificaciones</h2><p>Resultados registrados para las evaluaciones de este curso.</p></div></div><div class="course-data-list">${courseResults.length ? courseResults.map(result => `<article><span class="activity-type-icon">${modernIcon("results")}</span><div><strong>${esc(result.studentName || "Alumno")}</strong><small>${esc(result.examTitle)} Â· Intento ${result.attempt || 1}</small></div><b>${Number(result.score || 0).toFixed(1)} / 20</b></article>`).join("") : `<div class="course-workspace-empty"><strong>AÃºn no hay calificaciones</strong><p>Los resultados aparecerÃ¡n cuando los alumnos entreguen evaluaciones.</p></div>`}</div>`;
+  return `<div class="course-subpage-head"><div><span class="eyebrow">SEGUIMIENTO</span><h2>Calificaciones</h2><p>Resultados registrados para las evaluaciones de este curso.</p></div></div><div class="course-data-list">${courseResults.length ? courseResults.map(result => `<article><span class="activity-type-icon">${modernIcon("results")}</span><div><strong>${esc(result.studentName || "Alumno")}</strong><small>${esc(result.examTitle)} · Intento ${result.attempt || 1}</small></div><b>${Number(result.score || 0).toFixed(1)} / 20</b></article>`).join("") : `<div class="course-workspace-empty"><strong>Aún no hay calificaciones</strong><p>Los resultados aparecerán cuando los alumnos entreguen evaluaciones.</p></div>`}</div>`;
 }
 function renderTeacherCoursePeople(course) {
   const profilesById = new Map(studentProfiles.map(profile => [profile.id, profile]));
   const authorized = courseEnrollments.filter(enrollment => enrollment.course_id === course.id && enrollment.status === "active");
-  return `<div class="course-subpage-head"><div><span class="eyebrow">CONTROL DE ACCESO</span><h2>Alumnos autorizados</h2><p>Solo estos alumnos pueden ver los mÃ³dulos, evaluaciones y recursos del curso.</p></div></div>
+  return `<div class="course-subpage-head"><div><span class="eyebrow">CONTROL DE ACCESO</span><h2>Alumnos autorizados</h2><p>Solo estos alumnos pueden ver los módulos, evaluaciones y recursos del curso.</p></div></div>
     <form class="course-access-form" data-course-id="${esc(course.id)}"><label for="course-access-email">Correo del alumno</label><div><input id="course-access-email" name="student-email" type="email" autocomplete="email" placeholder="alumno@correo.com" required><button class="btn primary" type="submit">Autorizar alumno</button></div><p class="course-access-status ${courseAccessError ? "error" : ""}" aria-live="polite">${esc(courseAccessError)}</p></form>
     <div class="course-access-list">${authorized.length ? authorized.map(enrollment => {
       const profile = profilesById.get(enrollment.student_id);
       const name = profile?.full_name || "Alumno";
       return `<article><span class="course-person-avatar">${esc(name.charAt(0).toUpperCase())}</span><div><strong>${esc(name)}</strong><small>${esc(profile?.email || "Cuenta registrada")}</small></div><span class="status published">Autorizado</span><button class="btn secondary revoke-course-access" data-course-id="${esc(course.id)}" data-student-id="${esc(enrollment.student_id)}" type="button">Retirar acceso</button></article>`;
-    }).join("") : `<div class="course-workspace-empty"><strong>NingÃºn alumno autorizado</strong><p>Agrega el correo de un alumno registrado para permitirle acceder al curso.</p></div>`}</div>`;
+    }).join("") : `<div class="course-workspace-empty"><strong>Ningún alumno autorizado</strong><p>Agrega el correo de un alumno registrado para permitirle acceder al curso.</p></div>`}</div>`;
 }
 function renderTeacherCourseResources(course, types, title, icon) {
   const resources = normalizeModules(course.modules).flatMap(module => module.activities.filter(activity => types.includes(activity.type)).map(activity => ({ activity, module })));
-  return `<div class="course-subpage-head"><div><span class="eyebrow">BIBLIOTECA DEL CURSO</span><h2>${title}</h2><p>Vista global de los recursos que ya pertenecen a mÃ³dulos.</p></div></div><div class="course-data-list">${resources.length ? resources.map(({ activity, module }) => `<article><span class="activity-type-icon">${modernIcon(activity.type || icon)}</span><div><strong>${esc(activity.title)}</strong><small>${esc(module.title)} Â· ${activityTypeLabel(activity.type)}</small></div><button class="btn secondary edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button></article>`).join("") : `<div class="course-workspace-empty"><strong>No hay ${title.toLocaleLowerCase("es")}</strong><p>Agrega contenido desde la secciÃ³n MÃ³dulos.</p></div>`}</div>`;
+  return `<div class="course-subpage-head"><div><span class="eyebrow">BIBLIOTECA DEL CURSO</span><h2>${title}</h2><p>Vista global de los recursos que ya pertenecen a módulos.</p></div></div><div class="course-data-list">${resources.length ? resources.map(({ activity, module }) => `<article><span class="activity-type-icon">${modernIcon(activity.type || icon)}</span><div><strong>${esc(activity.title)}</strong><small>${esc(module.title)} · ${activityTypeLabel(activity.type)}</small></div><button class="btn secondary edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button></article>`).join("") : `<div class="course-workspace-empty"><strong>No hay ${title.toLocaleLowerCase("es")}</strong><p>Agrega contenido desde la sección Módulos.</p></div>`}</div>`;
 }
 function renderTeacherCourseSettings(course) {
   const modules = normalizeModules(course.modules);
   const activities = modules.reduce((total, module) => total + module.activities.length, 0);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">ADMINISTRACIÃ“N</span><h2>ConfiguraciÃ³n</h2><p>Edita la informaciÃ³n general y revisa el estado estructural del curso.</p></div><button class="btn primary edit-published-course" data-id="${esc(course.id)}" type="button">Editar curso</button></div><div class="course-settings-grid"><article><span>Nombre</span><strong>${esc(course.name)}</strong></article><article><span>MÃ³dulos</span><strong>${modules.length}</strong></article><article><span>Elementos</span><strong>${activities}</strong></article><article><span>Estado</span><strong>${drafts.courses.some(item => item.id === course.id) ? "Borrador" : "Publicado"}</strong></article></div><section class="course-settings-description"><h3>DescripciÃ³n</h3><p>${esc(course.description || "Sin descripciÃ³n registrada.")}</p></section>`;
+  return `<div class="course-subpage-head"><div><span class="eyebrow">ADMINISTRACIÓN</span><h2>Configuración</h2><p>Edita la información general y revisa el estado estructural del curso.</p></div><button class="btn primary edit-published-course" data-id="${esc(course.id)}" type="button">Editar curso</button></div><div class="course-settings-grid"><article><span>Nombre</span><strong>${esc(course.name)}</strong></article><article><span>Módulos</span><strong>${modules.length}</strong></article><article><span>Elementos</span><strong>${activities}</strong></article><article><span>Estado</span><strong>${drafts.courses.some(item => item.id === course.id) ? "Borrador" : "Publicado"}</strong></article></div><section class="course-settings-description"><h3>Descripción</h3><p>${esc(course.description || "Sin descripción registrada.")}</p></section>`;
 }
 function renderTeacherCourseTasks(course) {
   const tasks = normalizeModules(course.modules).flatMap(module => module.activities.filter(activity => activity.type === "task").map(activity => ({ activity, module })));
-  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Tareas</h2><p>Filtro de las tareas ya ubicadas en los mÃ³dulos; no se crean copias.</p></div></div><div class="course-exam-list">${tasks.length ? tasks.map(({ activity, module }) => `<article class="exam-module-item"><span class="exam-module-type-icon">${modernIcon("task")}</span><div class="exam-module-item-main"><div class="exam-module-title-line"><h4>${esc(activity.title)}</h4><span class="status ${activity.published ? "published" : "draft"}">${activity.published ? "Publicado" : "Borrador"}</span></div><div class="exam-module-meta"><span>MÃ³dulo: <strong>${esc(module.title)}</strong></span><span>${activity.points ? `${activity.points} puntos` : "Sin puntaje"}</span><span>${activity.dueAt ? `Vence ${formatDate(activity.dueAt)}` : "Sin fecha lÃ­mite"}</span><span>${activity.submissionTypes.length ? activity.submissionTypes.join(" + ") : "Sin entrega configurada"}</span></div></div><div class="exam-module-actions"><button class="btn secondary edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button></div></article>`).join("") : `<div class="course-workspace-empty"><strong>No hay tareas en los mÃ³dulos</strong><p>Agrega una tarea desde â€œMÃ³dulosâ€ para verla tambiÃ©n en este filtro.</p></div>`}</div>`;
+  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Tareas</h2><p>Filtro de las tareas ya ubicadas en los módulos; no se crean copias.</p></div></div><div class="course-exam-list">${tasks.length ? tasks.map(({ activity, module }) => `<article class="exam-module-item"><span class="exam-module-type-icon">${modernIcon("task")}</span><div class="exam-module-item-main"><div class="exam-module-title-line"><h4>${esc(activity.title)}</h4><span class="status ${activity.published ? "published" : "draft"}">${activity.published ? "Publicado" : "Borrador"}</span></div><div class="exam-module-meta"><span>Módulo: <strong>${esc(module.title)}</strong></span><span>${activity.points ? `${activity.points} puntos` : "Sin puntaje"}</span><span>${activity.dueAt ? `Vence ${formatDate(activity.dueAt)}` : "Sin fecha límite"}</span><span>${activity.submissionTypes.length ? activity.submissionTypes.join(" + ") : "Sin entrega configurada"}</span></div></div><div class="exam-module-actions"><button class="btn secondary edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button></div></article>`).join("") : `<div class="course-workspace-empty"><strong>No hay tareas en los módulos</strong><p>Agrega una tarea desde “Módulos” para verla también en este filtro.</p></div>`}</div>`;
 }
 function renderTeacherStudentPreview(course, exams) {
   const modules = normalizeModules(course.modules);
   const activities = modules.reduce((total, module) => total + module.activities.length, 0);
   return `<section class="teacher-student-preview">
-    <div class="student-preview-banner"><span>${modernIcon("profile")}</span><div><strong>Vista del alumno</strong><p>PrevisualizaciÃ³n de solo lectura. Los cambios de progreso estÃ¡n desactivados.</p></div></div>
-    <div class="student-preview-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Contenido acadÃ©mico organizado por mÃ³dulos.")}</p></div><div class="student-preview-counts"><span><b>${modules.length}</b> mÃ³dulos</span><span><b>${activities}</b> actividades</span><span><b>${exams.length}</b> evaluaciones</span></div></div>
+    <div class="student-preview-banner"><span>${modernIcon("profile")}</span><div><strong>Vista del alumno</strong><p>Previsualización de solo lectura. Los cambios de progreso están desactivados.</p></div></div>
+    <div class="student-preview-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Contenido académico organizado por módulos.")}</p></div><div class="student-preview-counts"><span><b>${modules.length}</b> módulos</span><span><b>${activities}</b> actividades</span><span><b>${exams.length}</b> evaluaciones</span></div></div>
     <div class="student-preview-readonly" inert>
-      ${modules.length ? renderStudentCourseModules(course, []) : `<div class="course-workspace-empty"><strong>AÃºn no hay mÃ³dulos</strong><p>El alumno verÃ¡ aquÃ­ el contenido cuando se agreguen mÃ³dulos.</p></div>`}
+      ${modules.length ? renderStudentCourseModules(course, []) : `<div class="course-workspace-empty"><strong>Aún no hay módulos</strong><p>El alumno verá aquí el contenido cuando se agreguen módulos.</p></div>`}
     </div>
   </section>`;
 }
 function activityTypeLabel(type) {
-  return ({ page:"PÃ¡gina", lesson:"LecciÃ³n", file:"Archivo", video:"Video", pdf:"Archivo PDF", download:"Descargable", practice:"PrÃ¡ctica", task:"Tarea", quiz:"EvaluaciÃ³n", discussion:"Foro", live:"Videoclase", heading:"Encabezado", link:"Enlace" })[type] || "LecciÃ³n";
+  return ({ page:"Página", lesson:"Lección", file:"Archivo", video:"Video", pdf:"Archivo PDF", download:"Descargable", practice:"Práctica", task:"Tarea", quiz:"Evaluación", discussion:"Foro", live:"Videoclase", heading:"Encabezado", link:"Enlace" })[type] || "Lección";
 }
 function unlockRuleLabel(module, index) {
   const detail = module.unlockDetail ? `: ${esc(module.unlockDetail)}` : "";
-  return ({ immediate:"Disponible inmediatamente", previous:index ? "Tras completar el mÃ³dulo anterior" : "Disponible inmediatamente", evaluation:`DespuÃ©s de aprobar una evaluaciÃ³n${detail}`, date:`Disponible desde${detail}` })[module.unlockRule] || "Disponible inmediatamente";
+  return ({ immediate:"Disponible inmediatamente", previous:index ? "Tras completar el módulo anterior" : "Disponible inmediatamente", evaluation:`Después de aprobar una evaluación${detail}`, date:`Disponible desde${detail}` })[module.unlockRule] || "Disponible inmediatamente";
 }
 function activityMeta(activity, exams = []) {
   const exam = exams.find(item => item.id === activity.examId);
@@ -1962,7 +2012,7 @@ function activityMeta(activity, exams = []) {
     activity.duration ? `${activity.duration} min` : "",
     activity.attempts ? quantity(activity.attempts, "intento") : "",
     activity.submissionTypes?.length ? `Entrega: ${activity.submissionTypes.map(type => ({ file:"archivos", text:"texto", url:"enlace", questions:"preguntas", none:"sin entrega digital" })[type]).join(", ")}` : ""
-  ].filter(Boolean).join(" Â· ");
+  ].filter(Boolean).join(" · ");
 }
 function modulesWithDescriptionPreviews(value) {
   return normalizeModules(value).map(module => ({
@@ -1975,29 +2025,29 @@ function modulesWithDescriptionPreviews(value) {
 }
 function renderTeacherCourseModules(course, exams = []) {
   const modules = modulesWithDescriptionPreviews(course.modules);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>MÃ³dulos</h2><p>Todo el recorrido acadÃ©mico se organiza aquÃ­. Las vistas de tareas y evaluaciones son filtros de estos elementos.</p></div><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear mÃ³dulo</button></div><details class="course-builder-guide"><summary>Tipos de contenido disponibles</summary><div class="module-content-types" aria-label="Contenido disponible"><b>${modernIcon("page")} PÃ¡gina</b><b>${modernIcon("file")} Archivo</b><b>${modernIcon("video")} Video</b><b>${modernIcon("practice")} PrÃ¡ctica</b><b>${modernIcon("task")} Tarea</b><b>${modernIcon("quiz")} EvaluaciÃ³n</b><b>${modernIcon("discussion")} Foro</b><b>${modernIcon("live")} Videoclase</b><b>${modernIcon("heading")} Encabezado</b></div><p class="drag-help">Arrastra los controles â‹®â‹® o usa las flechas. TambiÃ©n puedes mover elementos entre mÃ³dulos.</p></details>
+  return `<div class="course-subpage-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>Todo el recorrido académico se organiza aquí. Las vistas de tareas y evaluaciones son filtros de estos elementos.</p></div><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear módulo</button></div><details class="course-builder-guide"><summary>Tipos de contenido disponibles</summary><div class="module-content-types" aria-label="Contenido disponible"><b>${modernIcon("page")} Página</b><b>${modernIcon("file")} Archivo</b><b>${modernIcon("video")} Video</b><b>${modernIcon("practice")} Práctica</b><b>${modernIcon("task")} Tarea</b><b>${modernIcon("quiz")} Evaluación</b><b>${modernIcon("discussion")} Foro</b><b>${modernIcon("live")} Videoclase</b><b>${modernIcon("heading")} Encabezado</b></div><p class="drag-help">Arrastra los controles ⋮⋮ o usa las flechas. También puedes mover elementos entre módulos.</p></details>
     <div class="teacher-module-list">${modules.length ? modules.map((module, index) => `<details class="teacher-module-card" data-course-id="${esc(course.id)}" data-module-drop="${esc(module.id)}" ${index === 0 ? "open" : ""}>
-      <summary><span class="drag-handle module-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" role="button" tabindex="0" aria-label="Arrastrar mÃ³dulo ${esc(module.title)}">â‹®â‹®</span><span class="module-order">${index + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, index)} Â· ${quantity(module.activities.length, "elemento", "elementos")}</small></div><span class="status ${module.published ? "published" : "draft"}">${module.published ? "Publicado" : "Borrador"}</span><div class="module-actions"><button class="icon-btn move-module" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === 0 ? "disabled" : ""} aria-label="Subir mÃ³dulo">â†‘</button><button class="icon-btn move-module" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === modules.length - 1 ? "disabled" : ""} aria-label="Bajar mÃ³dulo">â†“</button><button class="icon-btn edit-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Editar</button><button class="icon-btn delete delete-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Eliminar</button></div></summary>
-      <div class="teacher-activity-list">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="teacher-activity-row module-heading-row" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar encabezado ${esc(activity.title)}">â‹®</span><div><strong>${esc(activity.title)}</strong><small>Encabezado Â· no genera progreso ni calificaciÃ³n</small></div><div class="activity-actions"><button class="icon-btn move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === 0 ? "disabled" : ""} aria-label="Subir encabezado">â†‘</button><button class="icon-btn move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === module.activities.length - 1 ? "disabled" : ""} aria-label="Bajar encabezado">â†“</button><button class="icon-btn edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Editar</button><button class="icon-btn delete delete-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Eliminar</button></div></div>` : `<div class="teacher-activity-row ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar elemento ${esc(activity.title)}">â‹®</span><span class="activity-type-icon">${modernIcon(activity.type)}</span><div><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` Â· ${esc(activity.description)}` : ""}</small></div><span class="status ${activity.published ? "published" : "draft"}">${activity.published ? "Publicado" : "Borrador"}</span><div class="activity-actions"><button class="icon-btn move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === 0 ? "disabled" : ""} aria-label="Subir elemento">â†‘</button><button class="icon-btn move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === module.activities.length - 1 ? "disabled" : ""} aria-label="Bajar elemento">â†“</button><button class="icon-btn edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Editar</button><button class="icon-btn delete delete-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Eliminar</button></div></div>`).join("") : `<p class="module-empty">Este mÃ³dulo aÃºn no tiene contenido.</p>`}</div>
+      <summary><span class="drag-handle module-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" role="button" tabindex="0" aria-label="Arrastrar módulo ${esc(module.title)}">⋮⋮</span><span class="module-order">${index + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, index)} · ${quantity(module.activities.length, "elemento", "elementos")}</small></div><span class="status ${module.published ? "published" : "draft"}">${module.published ? "Publicado" : "Borrador"}</span><div class="module-actions"><button class="icon-btn move-module" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === 0 ? "disabled" : ""} aria-label="Subir módulo">↑</button><button class="icon-btn move-module" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === modules.length - 1 ? "disabled" : ""} aria-label="Bajar módulo">↓</button><button class="icon-btn edit-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Editar</button><button class="icon-btn delete delete-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}">Eliminar</button></div></summary>
+      <div class="teacher-activity-list">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="teacher-activity-row module-heading-row" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar encabezado ${esc(activity.title)}">⋮</span><div><strong>${esc(activity.title)}</strong><small>Encabezado · no genera progreso ni calificación</small></div><div class="activity-actions"><button class="icon-btn move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === 0 ? "disabled" : ""} aria-label="Subir encabezado">↑</button><button class="icon-btn move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === module.activities.length - 1 ? "disabled" : ""} aria-label="Bajar encabezado">↓</button><button class="icon-btn edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Editar</button><button class="icon-btn delete delete-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Eliminar</button></div></div>` : `<div class="teacher-activity-row ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar elemento ${esc(activity.title)}">⋮</span><span class="activity-type-icon">${modernIcon(activity.type)}</span><div><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` · ${esc(activity.description)}` : ""}</small></div><span class="status ${activity.published ? "published" : "draft"}">${activity.published ? "Publicado" : "Borrador"}</span><div class="activity-actions"><button class="icon-btn move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === 0 ? "disabled" : ""} aria-label="Subir elemento">↑</button><button class="icon-btn move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${activityIndex === module.activities.length - 1 ? "disabled" : ""} aria-label="Bajar elemento">↓</button><button class="icon-btn edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Editar</button><button class="icon-btn delete delete-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">Eliminar</button></div></div>`).join("") : `<p class="module-empty">Este módulo aún no tiene contenido.</p>`}</div>
       <button class="btn secondary add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button">+ Agregar contenido</button>
-    </details>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>AÃºn no hay mÃ³dulos</strong><p>Crea el primero para comenzar a organizar el recorrido acadÃ©mico.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer mÃ³dulo</button></div>`}</div>`;
+    </details>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>Aún no hay módulos</strong><p>Crea el primero para comenzar a organizar el recorrido académico.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer módulo</button></div>`}</div>`;
 }
 function renderModuleOptions(course, module, index, moduleCount) {
-  return `<div class="row-action-menu"><button class="row-action-toggle" aria-label="Opciones de ${esc(module.title)}" aria-expanded="false" title="Opciones" type="button">â‹®</button><div class="row-action-popover hidden"><button class="move-module" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === 0 ? "disabled" : ""} type="button">Mover arriba</button><button class="move-module" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === moduleCount - 1 ? "disabled" : ""} type="button">Mover abajo</button><button class="edit-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button">Editar mÃ³dulo</button><button class="delete-module danger" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button">Eliminar mÃ³dulo</button></div></div>`;
+  return `<div class="row-action-menu"><button class="row-action-toggle" aria-label="Opciones de ${esc(module.title)}" aria-expanded="false" title="Opciones" type="button">⋮</button><div class="row-action-popover hidden"><button class="move-module" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === 0 ? "disabled" : ""} type="button">Mover arriba</button><button class="move-module" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" ${index === moduleCount - 1 ? "disabled" : ""} type="button">Mover abajo</button><button class="edit-module" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button">Editar módulo</button><button class="delete-module danger" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button">Eliminar módulo</button></div></div>`;
 }
 function renderActivityOptions(course, module, activity, index) {
-  return `<div class="row-action-menu"><button class="row-action-toggle" aria-label="Opciones de ${esc(activity.title)}" aria-expanded="false" title="Opciones" type="button">â‹®</button><div class="row-action-popover hidden"><button class="move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${index === 0 ? "disabled" : ""} type="button">Mover arriba</button><button class="move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${index === module.activities.length - 1 ? "disabled" : ""} type="button">Mover abajo</button><button class="edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button><button class="delete-activity danger" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Eliminar</button></div></div>`;
+  return `<div class="row-action-menu"><button class="row-action-toggle" aria-label="Opciones de ${esc(activity.title)}" aria-expanded="false" title="Opciones" type="button">⋮</button><div class="row-action-popover hidden"><button class="move-activity" data-direction="up" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${index === 0 ? "disabled" : ""} type="button">Mover arriba</button><button class="move-activity" data-direction="down" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" ${index === module.activities.length - 1 ? "disabled" : ""} type="button">Mover abajo</button><button class="edit-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Editar</button><button class="delete-activity danger" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" type="button">Eliminar</button></div></div>`;
 }
 function renderTeacherCourseModulesCanvas(course, exams = []) {
   const modules = modulesWithDescriptionPreviews(course.modules);
   const totalItems = modules.reduce((total, module) => total + module.activities.length, 0);
   return `<div class="canvas-modules-page">
-    <div class="course-subpage-head canvas-modules-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>MÃ³dulos</h2><p>${quantity(modules.length, "mÃ³dulo")} Â· ${quantity(totalItems, "elemento")} organizados en el recorrido acadÃ©mico.</p></div></div>
-    <div class="canvas-module-toolbar" aria-label="Acciones de mÃ³dulos"><button class="btn secondary collapse-all-modules" type="button">Contraer todo</button><button class="btn secondary expand-all-modules" type="button">Expandir todo</button><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ MÃ³dulo</button></div>
+    <div class="course-subpage-head canvas-modules-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>${quantity(modules.length, "módulo")} · ${quantity(totalItems, "elemento")} organizados en el recorrido académico.</p></div></div>
+    <div class="canvas-module-toolbar" aria-label="Acciones de módulos"><button class="btn secondary collapse-all-modules" type="button">Contraer todo</button><button class="btn secondary expand-all-modules" type="button">Expandir todo</button><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Módulo</button></div>
     <div class="canvas-module-list">${modules.length ? modules.map((module, moduleIndex) => `<details class="canvas-module-card teacher-module-card" data-course-id="${esc(course.id)}" data-module-drop="${esc(module.id)}" ${moduleIndex < 2 ? "open" : ""}>
-      <summary class="canvas-module-summary"><span class="module-disclosure" aria-hidden="true">â€º</span><span class="module-sequence" aria-label="MÃ³dulo ${moduleIndex + 1}">${moduleIndex + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, moduleIndex)} Â· ${quantity(module.activities.length, "elemento", "elementos")} Â· ${module.published ? "Publicado" : "Borrador"}</small></div><button class="module-quick-add add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button" aria-label="Agregar contenido a ${esc(module.title)}" title="Agregar contenido">+</button>${renderModuleOptions(course, module, moduleIndex, modules.length)}</summary>
-      <div class="canvas-module-items">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="canvas-module-heading" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">â‹®</span><strong>${esc(activity.title)}</strong>${renderActivityOptions(course, module, activity, activityIndex)}</div>` : `<div class="canvas-module-item ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar ${esc(activity.title)}">â‹®</span><span class="canvas-item-icon">${modernIcon(activity.type)}</span><span class="activity-type-name">${esc(activityTypeLabel(activity.type))}</span><button class="canvas-item-copy preview-activity" data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}" type="button" aria-label="Ver ${esc(activity.title)}"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` Â· ${esc(activity.description)}` : ""}</small></button>${renderActivityOptions(course, module, activity, activityIndex)}</div>`).join("") : `<p class="canvas-module-empty">Este mÃ³dulo todavÃ­a no tiene contenido.</p>`}<button class="canvas-add-content add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button"><span aria-hidden="true">ï¼‹</span><strong>Agregar contenido</strong><small>PÃ¡gina, archivo, video, tarea, prÃ¡ctica o evaluaciÃ³n</small></button></div>
-    </details>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>AÃºn no hay mÃ³dulos</strong><p>Crea el primero para organizar el contenido del curso.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer mÃ³dulo</button></div>`}</div>
+      <summary class="canvas-module-summary"><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence" aria-label="Módulo ${moduleIndex + 1}">${moduleIndex + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, moduleIndex)} · ${quantity(module.activities.length, "elemento", "elementos")} · ${module.published ? "Publicado" : "Borrador"}</small></div><button class="module-quick-add add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button" aria-label="Agregar contenido a ${esc(module.title)}" title="Agregar contenido">+</button>${renderModuleOptions(course, module, moduleIndex, modules.length)}</summary>
+      <div class="canvas-module-items">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="canvas-module-heading" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">⋮</span><strong>${esc(activity.title)}</strong>${renderActivityOptions(course, module, activity, activityIndex)}</div>` : `<div class="canvas-module-item ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar ${esc(activity.title)}">⋮</span><span class="canvas-item-icon">${modernIcon(activity.type)}</span><span class="activity-type-name">${esc(activityTypeLabel(activity.type))}</span><button class="canvas-item-copy preview-activity" data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}" type="button" aria-label="Ver ${esc(activity.title)}"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` · ${esc(activity.description)}` : ""}</small></button>${renderActivityOptions(course, module, activity, activityIndex)}</div>`).join("") : `<p class="canvas-module-empty">Este módulo todavía no tiene contenido.</p>`}<button class="canvas-add-content add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button"><span aria-hidden="true">＋</span><strong>Agregar contenido</strong><small>Página, archivo, video, tarea, práctica o evaluación</small></button></div>
+    </details>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>Aún no hay módulos</strong><p>Crea el primero para organizar el contenido del curso.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer módulo</button></div>`}</div>
   </div>`;
 }
 
@@ -2006,42 +2056,42 @@ function renderTeacherCourseOverview(course, exams, publishedCount, questionCoun
   const modules = normalizeModules(course.modules);
   const activityCount = modules.reduce((total, module) => total + module.activities.length, 0);
   const metrics = [
-    ["MÃ³dulos", modules.length, "courses", "Estructura del curso"],
+    ["Módulos", modules.length, "courses", "Estructura del curso"],
     ["Elementos", activityCount, "page", "Contenido organizado"],
     ["Evaluaciones", exams.length, "quiz", `${publishedCount} publicadas`],
     ["Preguntas", questionCount, "practice", "En bancos del curso"]
   ];
   return `<div class="course-home">
-    <div class="course-subpage-head course-home-heading"><div><span class="eyebrow">INICIO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Administra el contenido, las evaluaciones y el progreso de este curso.")}</p></div><button class="btn primary course-home-open-modules" type="button">${modernIcon("courses")} Gestionar mÃ³dulos</button></div>
+    <div class="course-subpage-head course-home-heading"><div><span class="eyebrow">INICIO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Administra el contenido, las evaluaciones y el progreso de este curso.")}</p></div><button class="btn primary course-home-open-modules" type="button">${modernIcon("courses")} Gestionar módulos</button></div>
     <section class="course-home-metrics" aria-label="Resumen del curso">${metrics.map(([label, value, icon, detail]) => `<article><span class="course-home-metric-icon">${modernIcon(icon)}</span><div><small>${label}</small><strong>${value}</strong><p>${detail}</p></div></article>`).join("")}</section>
     <section class="course-home-panel">
-      <header class="course-home-panel-head"><div><span class="eyebrow">ACTIVIDAD RECIENTE</span><h3>Evaluaciones del curso</h3><p>Accede rÃ¡pidamente a las Ãºltimas evaluaciones configuradas.</p></div><button class="btn secondary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluaciÃ³n</button></header>
-      ${recent.length ? `<div class="course-recent-list">${recent.map(exam => `<button class="course-recent-exam edit-exam" data-id="${esc(exam.id)}" type="button"><span class="course-recent-icon">${modernIcon("quiz")}</span><span class="course-recent-copy"><strong>${esc(exam.title)}</strong><small><b>${exam.minutes} min</b><b>${quantity(exam.questions.length, "pregunta")}</b><b>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</b></small></span><span class="course-recent-action">Editar <b aria-hidden="true">â†’</b></span></button>`).join("")}</div>` : `<div class="course-workspace-empty course-home-empty"><strong>AÃºn no hay evaluaciones</strong><p>Crea la primera para comenzar a construir el recorrido del curso.</p></div>`}
+      <header class="course-home-panel-head"><div><span class="eyebrow">ACTIVIDAD RECIENTE</span><h3>Evaluaciones del curso</h3><p>Accede rápidamente a las últimas evaluaciones configuradas.</p></div><button class="btn secondary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluación</button></header>
+      ${recent.length ? `<div class="course-recent-list">${recent.map(exam => `<button class="course-recent-exam edit-exam" data-id="${esc(exam.id)}" type="button"><span class="course-recent-icon">${modernIcon("quiz")}</span><span class="course-recent-copy"><strong>${esc(exam.title)}</strong><small><b>${exam.minutes} min</b><b>${quantity(exam.questions.length, "pregunta")}</b><b>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</b></small></span><span class="course-recent-action">Editar <b aria-hidden="true">→</b></span></button>`).join("")}</div>` : `<div class="course-workspace-empty course-home-empty"><strong>Aún no hay evaluaciones</strong><p>Crea la primera para comenzar a construir el recorrido del curso.</p></div>`}
     </section>
   </div>`;
 }
 function renderTeacherCourseExams(course, exams) {
   const modules = normalizeModules(course.modules);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Evaluaciones</h2><p>Este listado filtra las evaluaciones del curso. La ubicaciÃ³n pedagÃ³gica se administra en MÃ³dulos.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear evaluaciÃ³n</button></div>
+  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Evaluaciones</h2><p>Este listado filtra las evaluaciones del curso. La ubicación pedagógica se administra en Módulos.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear evaluación</button></div>
     <div class="course-exam-list">${exams.length ? exams.map(exam => {
       const module = modules.find(item => item.activities.some(activity => activity.examId === exam.id && activity.type === "quiz"));
       return renderTeacherExamRow(exam, module?.title || "");
-    }).join("") : `<div class="course-workspace-empty"><strong>Este curso todavÃ­a no tiene evaluaciones</strong><p>Crea la primera y despuÃ©s ubÃ­cala dentro de un mÃ³dulo.</p></div>`}</div>`;
+    }).join("") : `<div class="course-workspace-empty"><strong>Este curso todavía no tiene evaluaciones</strong><p>Crea la primera y después ubícala dentro de un módulo.</p></div>`}</div>`;
 }
 function renderTeacherCourseQuestions(course, exams) {
   const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
   const publishedCount = exams.filter(exam => publishedExams.some(item => item.id === exam.id)).length;
   const average = exams.length ? Math.round(questionCount / exams.length) : 0;
   return `<div class="question-bank-page">
-    <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">CONTENIDO EVALUATIVO</span><h2>Banco de preguntas</h2><p>Organiza y administra las preguntas de cada evaluaciÃ³n desde una biblioteca centralizada.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluaciÃ³n</button></div>
+    <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">CONTENIDO EVALUATIVO</span><h2>Banco de preguntas</h2><p>Organiza y administra las preguntas de cada evaluación desde una biblioteca centralizada.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluación</button></div>
     <section class="question-bank-summary" aria-label="Resumen del banco"><article><span>${modernIcon("practice")}</span><div><small>Preguntas totales</small><strong>${questionCount}</strong></div></article><article><span>${modernIcon("quiz")}</span><div><small>Bancos activos</small><strong>${exams.length}</strong></div></article><article><span>${modernIcon("results")}</span><div><small>Publicados</small><strong>${publishedCount}</strong></div></article><article><span>${modernIcon("progress")}</span><div><small>Promedio por banco</small><strong>${average}</strong></div></article></section>
-    <div class="question-bank-toolbar"><label><span>${modernIcon("courses")}</span><input id="question-bank-search" type="search" placeholder="Buscar una evaluaciÃ³n o bancoâ€¦" autocomplete="off"></label><span>${quantity(exams.length, "banco disponible", "bancos disponibles")}</span></div>
+    <div class="question-bank-toolbar"><label><span>${modernIcon("courses")}</span><input id="question-bank-search" type="search" placeholder="Buscar una evaluación o banco…" autocomplete="off"></label><span>${quantity(exams.length, "banco disponible", "bancos disponibles")}</span></div>
     <div class="course-question-banks question-bank-grid">${exams.length ? exams.map(exam => {
       const isPublished = publishedExams.some(item => item.id === exam.id);
       const searchText = `${exam.title} ${isPublished ? "publicado" : "borrador"}`.toLocaleLowerCase("es");
-      return `<article class="course-question-bank" data-bank-search="${esc(searchText)}"><header><span class="question-bank-icon">${modernIcon("quiz")}</span><span class="status ${isPublished ? "published" : "draft"}">${isPublished ? "Publicado" : "Borrador"}</span></header><div class="question-bank-card-copy"><h3>${esc(exam.title)}</h3><p>Banco vinculado a esta evaluaciÃ³n.</p></div><div class="question-bank-card-metrics"><span><b>${exam.questions.length}</b><small>Preguntas</small></span><span><b>${exam.optionCount}</b><small>Opciones</small></span><span><b>${exam.minutes}</b><small>Minutos</small></span></div><footer><small>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento permitido" : "intentos permitidos"}</small><button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Administrar banco <span aria-hidden="true">â†’</span></button></footer></article>`;
-    }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea una evaluaciÃ³n para comenzar a construir su banco.</p><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear primera evaluaciÃ³n</button></div>`}</div>
-    <div id="question-bank-filter-empty" class="course-workspace-empty question-bank-filter-empty hidden"><strong>No hay coincidencias</strong><p>Prueba con otro nombre de evaluaciÃ³n.</p></div>
+      return `<article class="course-question-bank" data-bank-search="${esc(searchText)}"><header><span class="question-bank-icon">${modernIcon("quiz")}</span><span class="status ${isPublished ? "published" : "draft"}">${isPublished ? "Publicado" : "Borrador"}</span></header><div class="question-bank-card-copy"><h3>${esc(exam.title)}</h3><p>Banco vinculado a esta evaluación.</p></div><div class="question-bank-card-metrics"><span><b>${exam.questions.length}</b><small>Preguntas</small></span><span><b>${exam.optionCount}</b><small>Opciones</small></span><span><b>${exam.minutes}</b><small>Minutos</small></span></div><footer><small>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento permitido" : "intentos permitidos"}</small><button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Administrar banco <span aria-hidden="true">→</span></button></footer></article>`;
+    }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea una evaluación para comenzar a construir su banco.</p><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear primera evaluación</button></div>`}</div>
+    <div id="question-bank-filter-empty" class="course-workspace-empty question-bank-filter-empty hidden"><strong>No hay coincidencias</strong><p>Prueba con otro nombre de evaluación.</p></div>
   </div>`;
 }
 function renderTeacherExamRow(exam, moduleTitle = "") {
@@ -2053,7 +2103,7 @@ function renderTeacherExamRow(exam, moduleTitle = "") {
     <span class="exam-module-type-icon">${modernIcon("exams")}</span>
     <div class="exam-module-item-main">
       <div class="exam-module-title-line"><h4>${esc(exam.title)}</h4><span class="status ${isDraft ? "draft" : "published"}">${isDraft ? "Borrador local" : "Publicado"}</span></div>
-      <div class="exam-module-meta"><span><strong>${exam.questionsToShow}</strong> preguntas</span><span><strong>${exam.minutes}</strong> min</span><span><strong>${exam.attemptsAllowed}</strong> ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</span><span>Banco: <strong>${quantity(exam.questions.length, "pregunta")}</strong></span><span><strong>${exam.optionCount}</strong> opciones</span><span class="${moduleTitle ? "exam-assigned" : "exam-unassigned"}">${moduleTitle ? `MÃ³dulo: ${esc(moduleTitle)}` : "Sin asignar a un mÃ³dulo"}</span></div>
+      <div class="exam-module-meta"><span><strong>${exam.questionsToShow}</strong> preguntas</span><span><strong>${exam.minutes}</strong> min</span><span><strong>${exam.attemptsAllowed}</strong> ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</span><span>Banco: <strong>${quantity(exam.questions.length, "pregunta")}</strong></span><span><strong>${exam.optionCount}</strong> opciones</span><span class="${moduleTitle ? "exam-assigned" : "exam-unassigned"}">${moduleTitle ? `Módulo: ${esc(moduleTitle)}` : "Sin asignar a un módulo"}</span></div>
     </div>
     <div class="exam-module-actions">${actions}</div>
   </article>`;
@@ -2095,12 +2145,12 @@ function openPublishCourseModal(id) {
   if (!exams.length && !normalizeModules(course.modules).length) {
     const status = $("#course-publish-status");
     status.className = "course-publish-status error";
-    status.textContent = "Agrega al menos un mÃ³dulo o una evaluaciÃ³n antes de publicar el curso.";
+    status.textContent = "Agrega al menos un módulo o una evaluación antes de publicar el curso.";
     return;
   }
   publishingCourseId = id;
   $("#publish-course-title").textContent = `Publicar ${course.name}`;
-  $("#publish-exam-options").innerHTML = exams.length ? exams.map(exam => `<label class="publish-exam-option"><input type="checkbox" name="publish-exam" value="${esc(exam.id)}" checked><span><strong>${esc(exam.title)}</strong><small>${quantity(exam.questions.length, "pregunta")} Â· ${exam.minutes} min</small></span></label>`).join("") : `<p class="muted">Se publicarÃ¡n los mÃ³dulos y actividades del curso. AÃºn no hay evaluaciones.</p>`;
+  $("#publish-exam-options").innerHTML = exams.length ? exams.map(exam => `<label class="publish-exam-option"><input type="checkbox" name="publish-exam" value="${esc(exam.id)}" checked><span><strong>${esc(exam.title)}</strong><small>${quantity(exam.questions.length, "pregunta")} · ${exam.minutes} min</small></span></label>`).join("") : `<p class="muted">Se publicarán los módulos y actividades del curso. Aún no hay evaluaciones.</p>`;
   $("#publish-course-error").textContent = "";
   $("#publish-course-modal").classList.remove("hidden");
 }
@@ -2217,7 +2267,7 @@ async function authorizeCourseStudent(event) {
   }
 }
 async function revokeCourseStudent(courseId, studentId) {
-  if (!sb || !confirm("Â¿Retirar el acceso de este alumno al curso?")) return;
+  if (!sb || !confirm("¿Retirar el acceso de este alumno al curso?")) return;
   const button = $(`.revoke-course-access[data-course-id="${CSS.escape(courseId)}"][data-student-id="${CSS.escape(studentId)}"]`);
   if (button) button.disabled = true;
   try {
@@ -2238,7 +2288,7 @@ async function publishSelectedCourseExams(event) {
   const selectedIds = new Set($$('input[name="publish-exam"]:checked').map(input => input.value));
   const exams = drafts.exams.filter(exam => exam.courseId === courseId && selectedIds.has(exam.id));
   if (!course) return;
-  if (!exams.length && !normalizeModules(course.modules).length) { $("#publish-course-error").textContent = "Agrega al menos un mÃ³dulo o una evaluaciÃ³n antes de publicar el curso."; return; }
+  if (!exams.length && !normalizeModules(course.modules).length) { $("#publish-course-error").textContent = "Agrega al menos un módulo o una evaluación antes de publicar el curso."; return; }
   const button = event.submitter;
   const status = $("#course-publish-status");
   button.disabled = true;
@@ -2250,14 +2300,14 @@ async function publishSelectedCourseExams(event) {
     };
     const { data, error } = await sb.rpc("publish_academy_course", { payload });
     if (error) throw error;
-    if (!data || data.course_id !== course.id || Number(data.exam_count) !== exams.length) throw new Error("Supabase no confirmÃ³ todos los exÃ¡menes seleccionados.");
+    if (!data || data.course_id !== course.id || Number(data.exam_count) !== exams.length) throw new Error("Supabase no confirmó todos los exámenes seleccionados.");
 
     await loadCourseChanges();
     const verifiedCourse = publishedCourses.find(item => item.id === course.id && item.dynamic);
     const verifiedExams = exams.filter(exam => publishedExams.some(item => item.id === exam.id && item.courseId === course.id));
     const expectedQuestions = exams.reduce((total, exam) => total + exam.questions.length, 0);
     const verifiedQuestions = verifiedExams.reduce((total, exam) => total + (publishedExams.find(item => item.id === exam.id)?.questions.length || 0), 0);
-    if (!verifiedCourse || verifiedExams.length !== exams.length || verifiedQuestions !== expectedQuestions) throw new Error("La publicaciÃ³n no pudo recuperarse completa desde Supabase. El borrador se conservÃ³.");
+    if (!verifiedCourse || verifiedExams.length !== exams.length || verifiedQuestions !== expectedQuestions) throw new Error("La publicación no pudo recuperarse completa desde Supabase. El borrador se conservó.");
 
     drafts.courses = drafts.courses.filter(item => item.id !== courseId);
     drafts.exams = drafts.exams.filter(exam => !selectedIds.has(exam.id));
@@ -2272,7 +2322,7 @@ async function publishSelectedCourseExams(event) {
     console.error("Publicar curso:", error);
     $("#publish-course-error").textContent = error.message || translateError(error);
     status.className = "course-publish-status error";
-    status.textContent = "La publicaciÃ³n no se completÃ³. El borrador local permanece intacto.";
+    status.textContent = "La publicación no se completó. El borrador local permanece intacto.";
   } finally {
     button.disabled = false;
   }
@@ -2300,7 +2350,7 @@ function playAuthLoginExit() {
 }
 function fillTeacherFilters() {
   $("#teacher-course-filter").innerHTML = `<option value="">Todos los cursos</option>${publishedCourses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("")}`;
-  $("#teacher-exam-filter").innerHTML = `<option value="">Todos los exÃ¡menes</option>${publishedExams.map(exam => `<option value="${esc(exam.id)}">${esc(exam.title)}</option>`).join("")}`;
+  $("#teacher-exam-filter").innerHTML = `<option value="">Todos los exámenes</option>${publishedExams.map(exam => `<option value="${esc(exam.id)}">${esc(exam.title)}</option>`).join("")}`;
 }
 function filteredTeacherResults() {
   const query = ($("#teacher-search")?.value || "").trim().toLowerCase();
@@ -2323,7 +2373,7 @@ function renderTeacherGrades(grades) {
     return `<details class="student-result-group"${index === 0 ? " open" : ""}>
       <summary><span class="student-result-avatar" aria-hidden="true">${esc((student.name || "A").charAt(0).toUpperCase())}</span><span class="student-result-name"><strong>${esc(student.name)}</strong><small>${student.grades.length} ${student.grades.length === 1 ? "resultado" : "resultados"}</small></span><span class="student-best-score"><small>Mejor nota</small><strong>${bestScore} / 20</strong></span><span class="student-result-toggle" aria-hidden="true"></span></summary>
       <div class="student-grade-list">${student.grades.map(grade => `<article class="student-grade-row">
-        <div class="grade-exam"><small>EvaluaciÃ³n</small><strong>${esc(grade.examTitle)}</strong><span>${esc(grade.courseName)} Â· Intento ${grade.attempt || 1}</span></div>
+        <div class="grade-exam"><small>Evaluación</small><strong>${esc(grade.examTitle)}</strong><span>${esc(grade.courseName)} · Intento ${grade.attempt || 1}</span></div>
         <div><small>Nota</small><strong class="grade">${grade.score} / 20</strong><span>${grade.correct} de ${grade.total} aciertos</span></div>
         <div><small>Tiempo</small><strong>${Math.round((grade.secondsUsed || 0) / 60)} min</strong></div>
         <div class="grade-date"><small>Fecha</small><strong>${formatDateOnly(grade.date)}</strong></div>
@@ -2331,14 +2381,14 @@ function renderTeacherGrades(grades) {
         <div class="grade-action"><button class="icon-btn delete delete-result" data-id="${esc(grade.databaseId)}" type="button" aria-label="Eliminar resultado de ${esc(student.name)}">Eliminar</button></div>
       </article>`).join("")}</div>
     </details>`;
-  }).join("") : emptyCard("AÃºn no hay resultados.");
+  }).join("") : emptyCard("Aún no hay resultados.");
   $$(".delete-result").forEach(button => button.addEventListener("click", () => deleteResult(button.dataset.id)));
 }
 async function deleteResult(databaseId) {
   if (!sb || currentUser?.role !== "teacher") return;
   const grade = results.find(item => item.databaseId === databaseId);
   if (!grade) return;
-  if (!confirm(`Â¿Eliminar definitivamente el intento ${grade.attempt || 1} de ${grade.studentName} en â€œ${grade.examTitle}â€?`)) return;
+  if (!confirm(`¿Eliminar definitivamente el intento ${grade.attempt || 1} de ${grade.studentName} en “${grade.examTitle}”?`)) return;
   const status = $("#teacher-results-status");
   if (status) status.textContent = "Eliminando resultado...";
   try {
@@ -2379,7 +2429,7 @@ function renderStudent() {
     const attemptsUsed = myGrades.filter(item => item.examId === grade.examId).length;
     const canReview = grade.review?.length && attemptsUsed >= (exam?.attemptsAllowed || 1);
     return `<tr><td class="student-grade-course">${esc(grade.courseName)}</td><td class="student-grade-exam">${esc(grade.examTitle)}</td><td class="student-grade-count">${grade.attempt || 1}</td><td class="grade">${grade.score} / 20</td><td class="student-grade-count">${grade.correct} / ${grade.total}</td><td class="student-grade-date"><span>${formatDateOnly(grade.date)}</span><small>${formatTimeOnly(grade.date)}</small></td><td>${canReview ? `<button class="icon-btn review-attempt" data-id="${esc(grade.id)}">Ver respuestas</button>` : `<span class="muted small">Al agotar intentos</span>`}</td></tr>`;
-  }).join("") : empty("TodavÃ­a no has rendido exÃ¡menes.", 7);
+  }).join("") : empty("Todavía no has rendido exámenes.", 7);
   $$(".start-exam").forEach(button => button.addEventListener("click", () => startExam(button.dataset.id)));
   $$(".review-exam").forEach(button => button.addEventListener("click", () => showExamReviews(button.dataset.id)));
   $$(".review-attempt").forEach(button => button.addEventListener("click", () => showAttemptReview(button.dataset.id)));
@@ -2389,7 +2439,7 @@ function renderStudent() {
   $$(".student-course-nav-button").forEach(button => button.addEventListener("click", () => { activeStudentCourseSection = button.dataset.section; renderStudent(); }));
 }
 function renderStudentCourseDirectory(courses, summaries) {
-  if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>AÃºn no tienes cursos autorizados</strong><p>Cuando un profesor te conceda acceso, el curso aparecerÃ¡ aquÃ­.</p></div>`;
+  if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Aún no tienes cursos autorizados</strong><p>Cuando un profesor te conceda acceso, el curso aparecerá aquí.</p></div>`;
   return `<div class="canvas-dashboard-grid student-course-gallery">${courses.map(course => {
     return `<article class="canvas-dashboard-card student-dashboard-course-card"><div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div><div class="canvas-dashboard-card-body"><strong class="canvas-course-title">${esc(course.name)}</strong><div class="canvas-dashboard-actions student-dashboard-actions"><button class="manage-course-content open-student-course" data-course-id="${esc(course.id)}" type="button">Abrir curso</button></div></div></article>`;
   }).join("")}</div>`;
@@ -2398,16 +2448,16 @@ function renderStudentCourseWorkspace(course, myGrades) {
   const summary = courseStudentSummary(course);
   const gradesActive = activeStudentCourseSection === "grades";
   const mainContent = gradesActive ? renderStudentCourseGrades(course, myGrades) : renderStudentCourseModules(course, myGrades);
-  return `<div class="student-course-page"><aside class="student-course-sidebar"><div class="student-course-sidebar-title"><span>Curso</span><h2>${esc(course.name)}</h2></div><nav aria-label="NavegaciÃ³n del curso"><button class="student-course-nav-button ${gradesActive ? "" : "active"}" data-section="modules" type="button">${modernIcon("modules")}<span>MÃ³dulos</span></button><button class="student-course-nav-button ${gradesActive ? "active" : ""}" data-section="grades" type="button">${modernIcon("grade")}<span>Calificaciones</span></button></nav><div class="student-course-sidebar-progress"><span><b>Progreso</b><strong>${summary.percent}%</strong></span><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${summary.percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><span style="width:${summary.percent}%"></span></div></div><button class="course-workspace-back contextual-back" id="back-to-student-courses" type="button"><span aria-hidden="true">â†</span> Mis cursos</button></aside><main class="student-course-content"><header class="student-course-main-header"><h2>${gradesActive ? "Calificaciones" : "MÃ³dulos"}</h2></header>${mainContent}</main></div>`;
+  return `<div class="student-course-page"><aside class="student-course-sidebar"><div class="student-course-sidebar-title"><span>Curso</span><h2>${esc(course.name)}</h2></div><nav aria-label="Navegación del curso"><button class="student-course-nav-button ${gradesActive ? "" : "active"}" data-section="modules" type="button">${modernIcon("modules")}<span>Módulos</span></button><button class="student-course-nav-button ${gradesActive ? "active" : ""}" data-section="grades" type="button">${modernIcon("grade")}<span>Calificaciones</span></button></nav><div class="student-course-sidebar-progress"><span><b>Progreso</b><strong>${summary.percent}%</strong></span><div class="course-progress-track" role="progressbar" aria-label="Progreso del curso: ${summary.percent}%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${summary.percent}"><span style="width:${summary.percent}%"></span></div></div><button class="course-workspace-back contextual-back" id="back-to-student-courses" type="button"><span aria-hidden="true">←</span> Mis cursos</button></aside><main class="student-course-content"><header class="student-course-main-header"><h2>${gradesActive ? "Calificaciones" : "Módulos"}</h2></header>${mainContent}</main></div>`;
 }
 function renderStudentCourseGrades(course, myGrades) {
   const grades = myGrades.filter(grade => grade.courseId === course.id).sort((left, right) => new Date(right.date) - new Date(left.date));
-  if (!grades.length) return `<div class="student-course-empty"><span>${modernIcon("grade")}</span><strong>AÃºn no tienes calificaciones</strong><p>Los resultados aparecerÃ¡n aquÃ­ despuÃ©s de completar una evaluaciÃ³n del curso.</p></div>`;
+  if (!grades.length) return `<div class="student-course-empty"><span>${modernIcon("grade")}</span><strong>Aún no tienes calificaciones</strong><p>Los resultados aparecerán aquí después de completar una evaluación del curso.</p></div>`;
   return `<div class="student-course-grade-list">${grades.map(grade => {
     const exam = publishedExams.find(item => item.id === grade.examId);
     const attemptsUsed = myGrades.filter(item => item.examId === grade.examId).length;
     const canReview = grade.review?.length && attemptsUsed >= (exam?.attemptsAllowed || 1);
-    return `<article class="student-course-grade-row"><div><strong>${esc(grade.examTitle)}</strong><small>Intento ${grade.attempt || 1} Â· ${formatDateOnly(grade.date)}</small></div><span class="student-course-grade-score">${grade.score} / 20</span>${canReview ? `<button class="btn secondary review-attempt" data-id="${esc(grade.id)}" type="button">Ver respuestas</button>` : ""}</article>`;
+    return `<article class="student-course-grade-row"><div><strong>${esc(grade.examTitle)}</strong><small>Intento ${grade.attempt || 1} · ${formatDateOnly(grade.date)}</small></div><span class="student-course-grade-score">${grade.score} / 20</span>${canReview ? `<button class="btn secondary review-attempt" data-id="${esc(grade.id)}" type="button">Ver respuestas</button>` : ""}</article>`;
   }).join("")}</div>`;
 }
 function courseStudentSummary(course) {
@@ -2430,7 +2480,7 @@ function renderStudentOverview(courses, summaries) {
 }
 function renderStudentCourseModules(course, myGrades) {
   const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published) }));
-  if (!modules.length) return `<div class="student-course-empty"><span>${modernIcon("modules")}</span><strong>Este curso aÃºn no tiene mÃ³dulos publicados</strong><p>El contenido aparecerÃ¡ aquÃ­ cuando el profesor publique la estructura del curso.</p></div>`;
+  if (!modules.length) return `<div class="student-course-empty"><span>${modernIcon("modules")}</span><strong>Este curso aún no tiene módulos publicados</strong><p>El contenido aparecerá aquí cuando el profesor publique la estructura del curso.</p></div>`;
   const progress = courseProgress[course.id] || { completed: {}, lastActivityId:"" };
   let previousComplete = true;
   return `<section class="student-module-space"><div class="student-module-list">${modules.map((module, index) => {
@@ -2440,7 +2490,7 @@ function renderStudentCourseModules(course, myGrades) {
       const progressItems = module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none");
       const moduleCompletedCount = progressItems.filter(activity => activityCompleted(activity, progress, myGrades)).length;
       const moduleComplete = progressItems.length > 0 && moduleCompletedCount === progressItems.length;
-      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-disclosure" aria-hidden="true">â€º</span><span class="module-sequence">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `Bloqueado Â· ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados Â· ${moduleComplete ? "Completado" : "En progreso"}`}</small></span></summary>${locked ? `<p class="module-lock-message">Este mÃ³dulo estÃ¡ bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
+      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `Bloqueado · ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
         if (activity.type === "heading") return `<h5 class="student-module-heading">${esc(activity.title)}</h5>`;
         const exam = activity.examId ? publishedExams.find(item => item.id === activity.examId) : null;
         const actionClass = exam && ["practice","quiz"].includes(activity.type) ? "start-exam" : "open-lesson";
@@ -2518,7 +2568,7 @@ function lessonMediaMarkup(activity) {
     const youtube = youtubeEmbedUrl(url);
     if (youtube) return `<div class="lesson-video-frame"><iframe src="${esc(youtube)}" title="Video: ${esc(activity.title)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
     if (url && /\.(mp4|webm|ogg)(?:\?|$)/i.test(url)) return `<video controls preload="metadata"><source src="${esc(url)}">Tu navegador no puede reproducir este video.</video>`;
-    return `<div class="lesson-media-placeholder"><span>${modernIcon("video")}</span><strong>Video no disponible</strong><p>${url ? "Este enlace no admite reproducciÃ³n integrada. Solicita al profesor un enlace compatible." : "El profesor todavÃ­a no ha agregado el video de esta clase."}</p></div>`;
+    return `<div class="lesson-media-placeholder"><span>${modernIcon("video")}</span><strong>Video no disponible</strong><p>${url ? "Este enlace no admite reproducción integrada. Solicita al profesor un enlace compatible." : "El profesor todavía no ha agregado el video de esta clase."}</p></div>`;
   }
   if (activity.type === "pdf" && url) return `<iframe class="lesson-pdf-frame" src="${esc(url)}" title="Documento: ${esc(activity.title)}" loading="lazy"></iframe>`;
   return "";
@@ -2539,8 +2589,8 @@ function renderLesson() {
   const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
   $("#lesson-sidebar-course").textContent = course.name;
   $("#lesson-title").textContent = activity.title;
-  $("#lesson-type").textContent = `${activity.moduleTitle} Â· ${activityTypeLabel(activity.type)}`;
-  $("#lesson-description").innerHTML = renderActivityContent(activity.description || "Esta pÃ¡gina todavÃ­a no tiene contenido publicado.");
+  $("#lesson-type").textContent = `${activity.moduleTitle} · ${activityTypeLabel(activity.type)}`;
+  $("#lesson-description").innerHTML = renderActivityContent(activity.description || "Esta página todavía no tiene contenido publicado.");
   const mediaMarkup = lessonMediaMarkup(activity);
   $("#lesson-media").innerHTML = mediaMarkup;
   $("#lesson-media").classList.toggle("hidden", !mediaMarkup);
@@ -2553,7 +2603,7 @@ function renderLesson() {
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
   const url = safeActivityUrl(activity.url);
   const externalResource = url && !["video", "pdf"].includes(activity.type);
-  $("#lesson-materials-card").innerHTML = externalResource ? `<div><span class="activity-type-icon">${modernIcon(activity.type)}</span><span><strong>Material complementario</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Consultar material â†—</a>` : "";
+  $("#lesson-materials-card").innerHTML = externalResource ? `<div><span class="activity-type-icon">${modernIcon(activity.type)}</span><span><strong>Material complementario</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Consultar material ↗</a>` : "";
   $("#lesson-materials-card").classList.toggle("hidden", !externalResource);
   renderLessonTree(course, activity.id);
   show("lesson-view");
@@ -2564,7 +2614,7 @@ function renderLessonTree(course, activeActivityId) {
   const progress = courseProgress[course.id] || { completed:{} };
   $("#lesson-module-tree").innerHTML = normalizeModules(course.modules).map(module => {
     const moduleAccessible = module.activities.some(activity => accessibleIds.has(activity.id)) || !module.activities.length;
-    return `<details class="lesson-tree-module ${moduleAccessible ? "" : "is-locked"}" ${module.activities.some(activity => activity.id === activeActivityId) ? "open" : ""}><summary><strong>${esc(module.title)}</strong><b class="module-expand-control" aria-hidden="true">${moduleAccessible ? "" : "ðŸ”’"}</b></summary><div>${moduleAccessible ? module.activities.filter(activity => activity.type !== "heading").map(activity => `<button class="lesson-tree-activity ${activity.id === activeActivityId ? "active" : ""}" data-activity-id="${esc(activity.id)}" type="button" ${accessibleIds.has(activity.id) ? "" : "disabled"}><span class="lesson-tree-activity-copy"><strong>${esc(activity.title)}</strong><small>${teacherLessonPreview ? activityTypeLabel(activity.type) : progress.completed?.[activity.id] ? "Completado" : activity.id === activeActivityId ? "En progreso" : "No iniciado"}</small></span></button>`).join("") : `<p>Completa el requisito anterior para desbloquearlo.</p>`}</div></details>`;
+    return `<details class="lesson-tree-module ${moduleAccessible ? "" : "is-locked"}" ${module.activities.some(activity => activity.id === activeActivityId) ? "open" : ""}><summary><strong>${esc(module.title)}</strong><b class="module-expand-control" aria-hidden="true">${moduleAccessible ? "" : "🔒"}</b></summary><div>${moduleAccessible ? module.activities.filter(activity => activity.type !== "heading").map(activity => `<button class="lesson-tree-activity ${activity.id === activeActivityId ? "active" : ""}" data-activity-id="${esc(activity.id)}" type="button" ${accessibleIds.has(activity.id) ? "" : "disabled"}><span class="lesson-tree-activity-copy"><strong>${esc(activity.title)}</strong><small>${teacherLessonPreview ? activityTypeLabel(activity.type) : progress.completed?.[activity.id] ? "Completado" : activity.id === activeActivityId ? "En progreso" : "No iniciado"}</small></span></button>`).join("") : `<p>Completa el requisito anterior para desbloquearlo.</p>`}</div></details>`;
   }).join("");
   $$(".lesson-tree-activity:not(:disabled)").forEach(button => button.addEventListener("click", () => teacherLessonPreview ? openTeacherActivityPreview(course.id, button.dataset.activityId) : openLesson(course.id, button.dataset.activityId)));
 }
@@ -2597,7 +2647,7 @@ function renderStudentExamRow(exam, myGrades) {
   const attempts = myGrades.filter(item => item.examId === exam.id);
   const best = attempts.length ? Math.max(...attempts.map(item => item.score)) : null;
   const reviewButton = attempts.length >= exam.attemptsAllowed && attempts.some(item => item.review?.length) ? `<button class="btn secondary review-exam" data-id="${esc(exam.id)}">Revisar intentos</button>` : "";
-  return `<div class="exam-row"><div><strong>${esc(exam.title)}</strong><small>${quantity(exam.questionsToShow, "pregunta")} Â· ${exam.minutes} minutos Â· ${quantity(exam.attemptsAllowed, "intento permitido", "intentos permitidos")}</small></div><div class="attempt-actions">${best !== null ? `<span class="completed">Mejor nota: ${best}/20</span>` : ""}${attempts.length < exam.attemptsAllowed ? `<button class="btn primary start-exam" data-id="${esc(exam.id)}">${attempts.length ? "Intentar nuevamente" : "Rendir examen"}</button>` : `<span class="attempts-finished">Intentos completados</span>${reviewButton}`}</div></div>`;
+  return `<div class="exam-row"><div><strong>${esc(exam.title)}</strong><small>${quantity(exam.questionsToShow, "pregunta")} · ${exam.minutes} minutos · ${quantity(exam.attemptsAllowed, "intento permitido", "intentos permitidos")}</small></div><div class="attempt-actions">${best !== null ? `<span class="completed">Mejor nota: ${best}/20</span>` : ""}${attempts.length < exam.attemptsAllowed ? `<button class="btn primary start-exam" data-id="${esc(exam.id)}">${attempts.length ? "Intentar nuevamente" : "Rendir examen"}</button>` : `<span class="attempts-finished">Intentos completados</span>${reviewButton}`}</div></div>`;
 }
 
 async function startExam(id) {
@@ -2615,7 +2665,7 @@ async function startExam(id) {
   finishingExam = false;
   $("#exam-course-name").textContent = activeCourse?.name || "CURSO";
   $("#exam-title").textContent = activeExam.title;
-  $("#questions-container").innerHTML = activeQuestions.map((question, index) => `<article class="question-card" data-question-id="${esc(question.id)}"><div class="question-card-head"><span class="question-number">Pregunta ${index + 1} <small>de ${activeQuestions.length}</small></span><span class="question-status">Pendiente</span></div><h3>${esc(question.text)}</h3>${questionImageMarkup(question)}<div class="options-list">${question.options.map((option, i) => `<label class="option"><input type="radio" name="q-${esc(question.id)}" value="${i}"><span class="option-letter" aria-hidden="true">${"ABCDEFGH"[i] || i + 1}</span><span class="option-copy">${esc(option)}</span><span class="option-check" aria-hidden="true">âœ“</span></label>`).join("")}</div></article>`).join("");
+  $("#questions-container").innerHTML = activeQuestions.map((question, index) => `<article class="question-card" data-question-id="${esc(question.id)}"><div class="question-card-head"><span class="question-number">Pregunta ${index + 1} <small>de ${activeQuestions.length}</small></span><span class="question-status">Pendiente</span></div><h3>${esc(question.text)}</h3>${questionImageMarkup(question)}<div class="options-list">${question.options.map((option, i) => `<label class="option"><input type="radio" name="q-${esc(question.id)}" value="${i}"><span class="option-letter" aria-hidden="true">${"ABCDEFGH"[i] || i + 1}</span><span class="option-copy">${esc(option)}</span><span class="option-check" aria-hidden="true">✓</span></label>`).join("")}</div></article>`).join("");
   $("#take-exam-form").querySelectorAll('input[type="radio"]').forEach(input => input.addEventListener("change", () => { updateQuestionCardState(input); updateExamProgress(); saveActiveAttempt(); }));
   updateTimer();
   updateExamProgress();
@@ -2661,7 +2711,7 @@ function updateQuestionCardState(input) {
   if (!card) return;
   card.classList.add("answered");
   const status = card.querySelector(".question-status");
-  if (status) status.textContent = "Respondida âœ“";
+  if (status) status.textContent = "Respondida ✓";
 }
 function saveActiveAttempt() {
   if (!activeExam || finishingExam || !currentUser) return;
@@ -2711,7 +2761,7 @@ async function finishExam(timeExpired, reason = "", silent = false) {
     question_ids: activeQuestions.map(question => question.id),
     started_at: examStartedAt,
     seconds_used: Math.max(0, activeExam.minutes * 60 - secondsLeft),
-    completion_reason: reason || (timeExpired ? "El tiempo terminÃ³." : "Entregado por el alumno."),
+    completion_reason: reason || (timeExpired ? "El tiempo terminó." : "Entregado por el alumno."),
     created_at: nowIso()
   };
   enqueuePending(payload);
@@ -2787,9 +2837,9 @@ async function sendResultKeepalive(payload) {
 }
 function renderExamResult(grade, includeReview = false) {
   resultCourseId = grade.courseId || activeExam?.courseId || activeCourse?.id || activeStudentCourseId || "";
-  $("#result-title").textContent = grade.examTitle || "EvaluaciÃ³n completada";
+  $("#result-title").textContent = grade.examTitle || "Evaluación completada";
   $("#result-score").textContent = grade.score;
-  $("#result-message").textContent = `${grade.correct} de ${grade.total} respuestas correctas Â· Intento ${grade.attempt || 1}`;
+  $("#result-message").textContent = `${grade.correct} de ${grade.total} respuestas correctas · Intento ${grade.attempt || 1}`;
   $("#result-review").innerHTML = includeReview ? reviewSectionMarkup([grade]) : "";
   show("result-view");
 }
@@ -2807,13 +2857,13 @@ function reviewMarkup(grades) {
   return `<div class="attempt-review-list">${grades.map(grade => `<section class="attempt-review">${multipleAttempts ? `<div class="attempt-review-head"><span>Intento ${grade.attempt || 1}</span><strong>${grade.score}<small>/20</small></strong></div>` : ""}${(grade.review || []).map((question, index) => {
     const answeredCorrectly = question.selected === question.correct;
     const unanswered = question.selected === null || question.selected === undefined;
-    return `<article class="review-question ${answeredCorrectly ? "review-correct" : "review-incorrect"}"><div class="review-question-title"><strong>Pregunta ${index + 1}</strong><span>${answeredCorrectly ? "âœ“ Correcta" : unanswered ? "Sin respuesta" : "âœ• Incorrecta"}</span></div><h4>${esc(question.text)}</h4>${questionImageMarkup(question, "review-image")}<div class="review-options">${question.options.map((option, optionIndex) => {
+    return `<article class="review-question ${answeredCorrectly ? "review-correct" : "review-incorrect"}"><div class="review-question-title"><strong>Pregunta ${index + 1}</strong><span>${answeredCorrectly ? "✓ Correcta" : unanswered ? "Sin respuesta" : "✕ Incorrecta"}</span></div><h4>${esc(question.text)}</h4>${questionImageMarkup(question, "review-image")}<div class="review-options">${question.options.map((option, optionIndex) => {
       const classes = ["review-option"];
       if (optionIndex === question.correct) classes.push("correct-answer");
       if (optionIndex === question.selected && optionIndex !== question.correct) classes.push("wrong-answer");
-      const label = optionIndex === question.correct ? (optionIndex === question.selected ? "Tu respuesta Â· Correcta" : "Respuesta correcta") : optionIndex === question.selected ? "Tu respuesta" : "";
+      const label = optionIndex === question.correct ? (optionIndex === question.selected ? "Tu respuesta · Correcta" : "Respuesta correcta") : optionIndex === question.selected ? "Tu respuesta" : "";
       return `<div class="${classes.join(" ")}"><span class="review-option-marker">${String.fromCharCode(65 + optionIndex)}</span><span>${esc(option)}</span>${label ? `<small>${label}</small>` : ""}</div>`;
-    }).join("")}</div>${unanswered ? `<p class="unanswered">Esta pregunta quedÃ³ sin respuesta.</p>` : ""}</article>`;
+    }).join("")}</div>${unanswered ? `<p class="unanswered">Esta pregunta quedó sin respuesta.</p>` : ""}</article>`;
   }).join("")}</section>`).join("")}</div>`;
 }
 function reviewSectionMarkup(grades) {
@@ -2862,7 +2912,7 @@ function recoverInterruptedAttempt() {
     question_ids: activeQuestions.map(question => question.id),
     started_at: examStartedAt,
     seconds_used: Math.max(0, exam.minutes * 60 - (draft.secondsLeft || 0)),
-    completion_reason: "El examen se registrÃ³ al detectar que la pÃ¡gina se cerrÃ³ inesperadamente.",
+    completion_reason: "El examen se registró al detectar que la página se cerró inesperadamente.",
     created_at: nowIso()
   });
   localStorage.removeItem(ACTIVE_ATTEMPT_KEY);
@@ -2896,14 +2946,14 @@ async function saveLegacyCourseModules(courseId, modules) {
   const staleIds = (existing || []).map(row => row.course_id).filter(id => !activeIds.has(id));
   if (staleIds.length) {
     const { error: cleanupError } = await sb.from("course_changes").delete().in("course_id", staleIds);
-    if (cleanupError) console.warn("No se pudieron limpiar fragmentos antiguos de mÃ³dulos:", cleanupError);
+    if (cleanupError) console.warn("No se pudieron limpiar fragmentos antiguos de módulos:", cleanupError);
   }
   return { error:null };
 }
 async function removeLegacyCourseModules(courseId) {
   const prefix = legacyModulePrefix(courseId);
   const { error } = await sb.from("course_changes").delete().like("course_id", `${prefix}%`);
-  if (error) console.warn("No se pudo retirar el respaldo compatible de mÃ³dulos:", error);
+  if (error) console.warn("No se pudo retirar el respaldo compatible de módulos:", error);
 }
 function showCourseContentError(error) {
   console.error("Guardar contenido del curso:", error);
@@ -2946,7 +2996,7 @@ function openModuleModal(courseId, moduleId = "") {
   closeRowActionMenus();
   closeActivityMenus();
   const module = normalizeModules(findCourse(courseId)?.modules).find(item => item.id === moduleId);
-  $("#module-modal-title").textContent = module ? "Editar mÃ³dulo" : "Crear mÃ³dulo";
+  $("#module-modal-title").textContent = module ? "Editar módulo" : "Crear módulo";
   $("#module-course-id").value = courseId;
   $("#module-id").value = module?.id || "";
   $("#module-title").value = module?.title || "";
@@ -2966,7 +3016,7 @@ async function saveModule(event) {
   const published = $("#module-published").value === "true";
   const unlockRule = $("#module-unlock-rule").value;
   const unlockDetail = $("#module-unlock-detail").value.trim();
-  if (!title) { $("#module-error").textContent = "Escribe un nombre para el mÃ³dulo."; return; }
+  if (!title) { $("#module-error").textContent = "Escribe un nombre para el módulo."; return; }
   const saved = await updateCourseModules(courseId, modules => moduleId
     ? modules.map(module => module.id === moduleId ? { ...module, title, published, unlockRule, unlockDetail } : module)
     : [...modules, { id: uid(), title, published, unlockRule, unlockDetail, activities: [] }]);
@@ -2980,7 +3030,7 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   const activity = module?.activities.find(item => item.id === activityId);
   const exams = getTeacherExams().filter(exam => exam.courseId === courseId);
   $("#activity-modal-title").textContent = activity ? "Editar contenido" : "Agregar contenido";
-  $("#activity-editor-context").textContent = activity ? `Actualiza â€œ${activity.title}â€ sin alterar su ubicaciÃ³n en el recorrido.` : `Agrega un nuevo elemento a ${module?.title || "este mÃ³dulo"}.`;
+  $("#activity-editor-context").textContent = activity ? `Actualiza “${activity.title}” sin alterar su ubicación en el recorrido.` : `Agrega un nuevo elemento a ${module?.title || "este módulo"}.`;
   $("#activity-course-id").value = courseId;
   $("#activity-module-id").value = moduleId;
   $("#activity-id").value = activity?.id || "";
@@ -2999,12 +3049,12 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   $("#activity-points").value = activity?.points || 0;
   $("#activity-duration").value = activity?.duration || 0;
   $("#activity-attempts").value = activity?.attempts || 0;
-  $("#activity-exam-id").innerHTML = `<option value="">${exams.length ? "Selecciona una evaluaciÃ³n" : "Primero crea una evaluaciÃ³n en este curso"}</option>${exams.map(exam => `<option value="${esc(exam.id)}">${esc(exam.title)}</option>`).join("")}`;
+  $("#activity-exam-id").innerHTML = `<option value="">${exams.length ? "Selecciona una evaluación" : "Primero crea una evaluación en este curso"}</option>${exams.map(exam => `<option value="${esc(exam.id)}">${esc(exam.title)}</option>`).join("")}`;
   $("#activity-exam-id").value = activity?.examId || "";
   $$('input[name="activity-submission"]').forEach(input => { input.checked = activity?.submissionTypes?.includes(input.value) || false; });
   toggleActivityFields();
   $("#activity-error").textContent = "";
-  $(".module-content-editor-footer .btn.primary").textContent = activity ? "Guardar cambios" : "Agregar al mÃ³dulo";
+  $(".module-content-editor-footer .btn.primary").textContent = activity ? "Guardar cambios" : "Agregar al módulo";
   $(".activity-advanced-settings").open = Boolean(activity);
   $("#activity-modal").classList.remove("hidden");
   $("#activity-title").focus();
@@ -3014,23 +3064,23 @@ function toggleActivityFields() {
   const isHeading = type === "heading";
   const resourceTypes = ["file","video","link","live","pdf","download"];
   const typeCopy = {
-    page: ["PÃ¡gina de contenido", "Redacta una pÃ¡gina con informaciÃ³n, recursos e indicaciones."],
-    lesson: ["LecciÃ³n", "Explica el tema y orienta el recorrido de aprendizaje."],
-    file: ["Archivo", "AÃ±ade el tÃ­tulo, la ruta del archivo y una descripciÃ³n opcional."],
+    page: ["Página de contenido", "Redacta una página con información, recursos e indicaciones."],
+    lesson: ["Lección", "Explica el tema y orienta el recorrido de aprendizaje."],
+    file: ["Archivo", "Añade el título, la ruta del archivo y una descripción opcional."],
     video: ["Video", "Agrega el enlace del video y las indicaciones para visualizarlo."],
     link: ["Enlace externo", "Comparte un recurso externo con contexto para el alumno."],
-    practice: ["PrÃ¡ctica", "Vincula un banco de preguntas y explica el objetivo de la prÃ¡ctica."],
+    practice: ["Práctica", "Vincula un banco de preguntas y explica el objetivo de la práctica."],
     task: ["Tarea", "Describe la entrega esperada y configura sus condiciones."],
-    quiz: ["EvaluaciÃ³n", "Vincula una evaluaciÃ³n existente y agrega instrucciones breves."],
-    discussion: ["Foro o discusiÃ³n", "Formula la pregunta y las pautas de participaciÃ³n."],
-    live: ["Videoclase", "Incluye el enlace de acceso y la agenda de la sesiÃ³n."],
-    heading: ["Encabezado", "Crea un separador visual dentro del mÃ³dulo."],
-    pdf: ["Archivo PDF", "AÃ±ade la ruta del PDF y una descripciÃ³n para el alumno."],
-    download: ["Material descargable", "AÃ±ade el recurso y explica cÃ³mo debe utilizarse."]
+    quiz: ["Evaluación", "Vincula una evaluación existente y agrega instrucciones breves."],
+    discussion: ["Foro o discusión", "Formula la pregunta y las pautas de participación."],
+    live: ["Videoclase", "Incluye el enlace de acceso y la agenda de la sesión."],
+    heading: ["Encabezado", "Crea un separador visual dentro del módulo."],
+    pdf: ["Archivo PDF", "Añade la ruta del PDF y una descripción para el alumno."],
+    download: ["Material descargable", "Añade el recurso y explica cómo debe utilizarse."]
   };
-  const [label, help] = typeCopy[type] || ["Contenido", "Completa la informaciÃ³n que verÃ¡ el alumno."];
+  const [label, help] = typeCopy[type] || ["Contenido", "Completa la información que verá el alumno."];
   $("#activity-content-help").textContent = help;
-  $("#activity-title").placeholder = `TÃ­tulo de ${label.toLocaleLowerCase("es")}`;
+  $("#activity-title").placeholder = `Título de ${label.toLocaleLowerCase("es")}`;
   $("#activity-url-field").classList.toggle("hidden", !resourceTypes.includes(type));
   $("#activity-description-field").classList.toggle("hidden", isHeading);
   $("#activity-exam-field").classList.toggle("hidden", !["practice","quiz"].includes(type));
@@ -3235,18 +3285,18 @@ function formatActivityDescription(command) {
   if (nativeCommands[command]) document.execCommand(nativeCommands[command][0], false, nativeCommands[command][1] || null);
   else if (["table-row", "table-column", "table-delete"].includes(command)) editActiveActivityTable(command);
   else if (command === "link") {
-    const url = requestActivityUrl("Pega la direcciÃ³n del enlace");
+    const url = requestActivityUrl("Pega la dirección del enlace");
     if (url) {
       const selection = window.getSelection();
       if (selection?.isCollapsed) insertActivityEditorHtml(`<a href="${esc(url)}">Abrir enlace</a>`);
       else document.execCommand("createLink", false, url);
     }
   } else if (command === "image") {
-    const url = requestActivityUrl("Pega la direcciÃ³n de la imagen");
+    const url = requestActivityUrl("Pega la dirección de la imagen");
     if (url) document.execCommand("insertImage", false, url);
   } else if (["video", "file"].includes(command)) {
-    const url = requestActivityUrl(command === "video" ? "Pega la direcciÃ³n del video" : "Pega la direcciÃ³n del archivo");
-    if (url) insertActivityEditorHtml(`<p><a href="${esc(url)}">${command === "video" ? "â–¶ Ver video" : "â–¤ Abrir archivo"}</a></p>`);
+    const url = requestActivityUrl(command === "video" ? "Pega la dirección del video" : "Pega la dirección del archivo");
+    if (url) insertActivityEditorHtml(`<p><a href="${esc(url)}">${command === "video" ? "▶ Ver video" : "▤ Abrir archivo"}</a></p>`);
   } else if (command === "table") {
     insertActivityEditorHtml("<table><thead><tr><th>Encabezado 1</th><th>Encabezado 2</th></tr></thead><tbody><tr><td>Contenido</td><td>Contenido</td></tr></tbody></table><p><br></p>");
   }
@@ -3282,7 +3332,7 @@ async function saveActivity(event) {
   };
   if (!activity.title) { $("#activity-error").textContent = "Escribe un nombre para la actividad."; return; }
   if (activity.url && !safeActivityUrl(activity.url)) { $("#activity-error").textContent = "Usa una URL https:// o una ruta local que empiece con ./ o /."; return; }
-  if (["practice","quiz"].includes(type) && !activity.examId) { $("#activity-error").textContent = "Selecciona la evaluaciÃ³n o banco que utilizarÃ¡ este elemento."; return; }
+  if (["practice","quiz"].includes(type) && !activity.examId) { $("#activity-error").textContent = "Selecciona la evaluación o banco que utilizará este elemento."; return; }
   if (type === "task" && !activity.submissionTypes.length) { $("#activity-error").textContent = "Selecciona al menos un tipo de entrega para la tarea."; return; }
   const saved = await updateCourseModules(courseId, modules => {
     if (!activityId || targetModuleId === moduleId) return modules.map(module => module.id === moduleId ? { ...module, activities:activityId ? module.activities.map(item => item.id === activityId ? activity : item) : [...module.activities, activity] } : module);
@@ -3295,11 +3345,11 @@ async function saveActivity(event) {
   if (saved) closeModal("activity-modal");
 }
 async function deleteModule(courseId, moduleId) {
-  if (!confirm("Â¿Eliminar este mÃ³dulo y todas sus actividades?")) return;
+  if (!confirm("¿Eliminar este módulo y todas sus actividades?")) return;
   await updateCourseModules(courseId, modules => modules.filter(module => module.id !== moduleId));
 }
 async function deleteActivity(courseId, moduleId, activityId) {
-  if (!confirm("Â¿Eliminar esta actividad?")) return;
+  if (!confirm("¿Eliminar esta actividad?")) return;
   await updateCourseModules(courseId, modules => modules.map(module => module.id === moduleId ? { ...module, activities: module.activities.filter(activity => activity.id !== activityId) } : module));
 }
 async function moveModule(courseId, moduleId, direction) {
@@ -3404,7 +3454,7 @@ function updateCourseSetupPreview() {
   const id = $("#course-id")?.value || "";
   const course = findCourse(id);
   const name = $("#course-name")?.value.trim() || "Nuevo curso";
-  const description = $("#course-description")?.value.trim() || "Agrega una descripciÃ³n para orientar a tus estudiantes.";
+  const description = $("#course-description")?.value.trim() || "Agrega una descripción para orientar a tus estudiantes.";
   const modules = normalizeModules(course?.modules);
   const activities = modules.reduce((total, module) => total + module.activities.length, 0);
   const exams = getTeacherExams().filter(exam => exam.courseId === id).length;
@@ -3455,7 +3505,7 @@ async function deletePublishedCourse(id) {
   const course = publishedCourses.find(item => item.id === id);
   if (!course) return;
   const examCount = publishedExams.filter(exam => exam.courseId === id).length;
-  if (!confirm(`Â¿Deseas eliminar el curso ${course.name}?\nEl curso dejarÃ¡ de mostrarse a los alumnos${examCount ? ` junto con ${quantity(examCount, "examen", "exÃ¡menes")}` : ""}, pero las notas anteriores y los resultados existentes se conservarÃ¡n.`)) return;
+  if (!confirm(`¿Deseas eliminar el curso ${course.name}?\nEl curso dejará de mostrarse a los alumnos${examCount ? ` junto con ${quantity(examCount, "examen", "exámenes")}` : ""}, pero las notas anteriores y los resultados existentes se conservarán.`)) return;
   const { error } = await sb.from("course_changes").upsert({ course_id: id, name: course.name, description: course.description || "", deleted: true, updated_by: currentUser.id }, { onConflict: "course_id" });
   if (error) {
     console.error("Eliminar curso publicado:", error);
@@ -3467,7 +3517,7 @@ async function deletePublishedCourse(id) {
 }
 function deleteCourseDraft(id) {
   const examCount = drafts.exams.filter(exam => exam.courseId === id).length;
-  if (!confirm(`Â¿Eliminar este curso local${examCount ? ` y ${quantity(examCount, "examen", "exÃ¡menes")}` : ""}?`)) return;
+  if (!confirm(`¿Eliminar este curso local${examCount ? ` y ${quantity(examCount, "examen", "exámenes")}` : ""}?`)) return;
   drafts.courses = drafts.courses.filter(course => course.id !== id);
   drafts.exams = drafts.exams.filter(exam => exam.courseId !== id);
   saveDrafts();
@@ -3481,13 +3531,13 @@ function populateEditorModuleOptions(preferredModuleId = null) {
   const course = findCourse($("#editor-course").value);
   const modules = normalizeModules(course?.modules);
   const assignedModuleId = preferredModuleId ?? examAssignedModuleId(course, $("#editor-exam-id").value);
-  select.innerHTML = `<option value="">Sin asignar a un mÃ³dulo</option>${modules.map(module => `<option value="${esc(module.id)}">${esc(module.title)}</option>`).join("")}`;
+  select.innerHTML = `<option value="">Sin asignar a un módulo</option>${modules.map(module => `<option value="${esc(module.id)}">${esc(module.title)}</option>`).join("")}`;
   select.value = modules.some(module => module.id === assignedModuleId) ? assignedModuleId : "";
   select.disabled = !modules.length;
   select.closest("label")?.classList.toggle("has-no-modules", !modules.length);
   $("#editor-module-help").textContent = modules.length
-    ? "La evaluaciÃ³n aparecerÃ¡ dentro del mÃ³dulo seleccionado."
-    : "Este curso aÃºn no tiene mÃ³dulos. Crea uno desde la secciÃ³n MÃ³dulos para poder asignar la evaluaciÃ³n.";
+    ? "La evaluación aparecerá dentro del módulo seleccionado."
+    : "Este curso aún no tiene módulos. Crea uno desde la sección Módulos para poder asignar la evaluación.";
 }
 function applyExamModuleAssignment(rawModules, exam, targetModuleId) {
   const modules = normalizeModules(rawModules);
@@ -3541,7 +3591,7 @@ function changeOptionCount() {
     if (question.correct >= builderOptionCount) { question.correct = 0; resetAnswers++; }
   });
   renderBuilder();
-  $("#option-count-message").textContent = `Todas las preguntas usarÃ¡n ${builderOptionCount} opciones.${resetAnswers ? ` Se reiniciÃ³ la respuesta correcta de ${quantity(resetAnswers, "pregunta")}.` : ""}`;
+  $("#option-count-message").textContent = `Todas las preguntas usarán ${builderOptionCount} opciones.${resetAnswers ? ` Se reinició la respuesta correcta de ${quantity(resetAnswers, "pregunta")}.` : ""}`;
 }
 function setQuestionMode(panelId) {
   $$(".question-mode").forEach(button => button.classList.toggle("active", button.dataset.questionMode === panelId));
@@ -3567,16 +3617,16 @@ function generateQuestions() {
     return { concept: line.slice(0, separator).trim(), definition: line.slice(separator + 1).trim() };
   }).filter(fact => fact?.concept && fact?.definition);
   if (facts.length < 2) {
-    $("#generator-message").textContent = "Escribe al menos dos lÃ­neas con el formato concepto: definiciÃ³n.";
+    $("#generator-message").textContent = "Escribe al menos dos líneas con el formato concepto: definición.";
     return;
   }
   const amount = Math.min(Number($("#generator-count").value) || 1, facts.length);
-  const fallbacks = ["Ninguna de las anteriores", "Todas las anteriores", "No se puede determinar", "InformaciÃ³n insuficiente", "La afirmaciÃ³n es falsa", "La afirmaciÃ³n es verdadera", "No corresponde"];
+  const fallbacks = ["Ninguna de las anteriores", "Todas las anteriores", "No se puede determinar", "Información insuficiente", "La afirmación es falsa", "La afirmación es verdadera", "No corresponde"];
   facts.slice(0, amount).forEach((fact, factIndex) => {
     const distractors = facts.filter((_, index) => index !== factIndex).map(item => item.definition);
     const alternatives = [...new Set([fact.definition, ...distractors, ...fallbacks])].slice(0, builderOptionCount);
-    while (alternatives.length < builderOptionCount) alternatives.push(`OpciÃ³n ${alternatives.length + 1}`);
-    builderQuestions.push({ id: uid(), text: `Â¿CuÃ¡l es la definiciÃ³n correcta de ${fact.concept}?`, image: "", options: alternatives, correct: 0 });
+    while (alternatives.length < builderOptionCount) alternatives.push(`Opción ${alternatives.length + 1}`);
+    builderQuestions.push({ id: uid(), text: `¿Cuál es la definición correcta de ${fact.concept}?`, image: "", options: alternatives, correct: 0 });
   });
   $("#generator-message").textContent = "";
   renderBuilder();
@@ -3601,9 +3651,9 @@ async function importQuestions(event) {
     $("#import-message").textContent = `Se importaron ${quantity(imported.length, "pregunta")}.`;
     renderBuilder();
   } catch (error) {
-    console.error("ImportaciÃ³n:", error);
+    console.error("Importación:", error);
     $("#import-message").className = "error";
-    $("#import-message").textContent = `Archivo no vÃ¡lido: ${error.message}`;
+    $("#import-message").textContent = `Archivo no válido: ${error.message}`;
   } finally {
     event.target.value = "";
   }
@@ -3612,11 +3662,11 @@ function renderBuilder() {
   $("#builder-count").textContent = builderQuestions.length;
   $("#question-builder").innerHTML = builderQuestions.length ? builderQuestions.map((question, index) => `
     <article class="builder-question" data-qid="${esc(question.id)}">
-      <div class="builder-title"><strong>Pregunta ${index + 1} <small>Â· editable</small></strong><button class="icon-btn delete remove-builder-question" type="button" data-id="${esc(question.id)}">Eliminar</button></div>
+      <div class="builder-title"><strong>Pregunta ${index + 1} <small>· editable</small></strong><button class="icon-btn delete remove-builder-question" type="button" data-id="${esc(question.id)}">Eliminar</button></div>
       <label>Enunciado<textarea class="b-text" rows="2" placeholder="Escribe la pregunta" required>${esc(question.text)}</textarea></label>
       ${questionImageMarkup(question, "builder-question-image")}
-      <div class="options-grid">${question.options.map((option, i) => `<label>OpciÃ³n ${"ABCDEFGH"[i]}<input class="b-option" data-index="${i}" value="${esc(option)}" required></label>`).join("")}</div>
-      <label>Respuesta correcta<select class="b-correct">${question.options.map((_, i) => `<option value="${i}" ${question.correct === i ? "selected" : ""}>OpciÃ³n ${"ABCDEFGH"[i]}</option>`).join("")}</select></label>
+      <div class="options-grid">${question.options.map((option, i) => `<label>Opción ${"ABCDEFGH"[i]}<input class="b-option" data-index="${i}" value="${esc(option)}" required></label>`).join("")}</div>
+      <label>Respuesta correcta<select class="b-correct">${question.options.map((_, i) => `<option value="${i}" ${question.correct === i ? "selected" : ""}>Opción ${"ABCDEFGH"[i]}</option>`).join("")}</select></label>
     </article>`).join("") : `<div class="empty">Agrega por lo menos una pregunta.</div>`;
   $$(".remove-builder-question").forEach(button => button.addEventListener("click", () => {
     collectBuilder();
@@ -3655,7 +3705,7 @@ function validateCurrentExam(showMessage = false) {
     const exam = buildExamFromEditor();
     if (showMessage) {
       $("#exam-editor-error").className = "success";
-      $("#exam-editor-error").textContent = `JSON vÃ¡lido. Ruta sugerida: ./data/exams/${slug(exam.id)}.json`;
+      $("#exam-editor-error").textContent = `JSON válido. Ruta sugerida: ./data/exams/${slug(exam.id)}.json`;
     }
     return exam;
   } catch (error) {
@@ -3699,11 +3749,11 @@ async function saveExamDraft(event) {
       };
       const { data, error } = await sb.rpc("publish_academy_course", { payload });
       if (error) throw error;
-      if (!data || data.course_id !== course.id || Number(data.exam_count) !== 1) throw new Error("Supabase no confirmÃ³ la publicaciÃ³n del examen.");
+      if (!data || data.course_id !== course.id || Number(data.exam_count) !== 1) throw new Error("Supabase no confirmó la publicación del examen.");
       const persistedAssignment = await persistPublishedCourseModules(course, assignedModules);
       if (persistedAssignment.error) throw persistedAssignment.error;
       const storedModuleId = examAssignedModuleId({ modules:persistedAssignment.modules }, exam.id);
-      if (storedModuleId !== targetModuleId) throw new Error("Supabase no confirmÃ³ la asignaciÃ³n de la evaluaciÃ³n al mÃ³dulo.");
+      if (storedModuleId !== targetModuleId) throw new Error("Supabase no confirmó la asignación de la evaluación al módulo.");
       cachePublishedExamAssignment(course, exam, persistedAssignment.modules);
       drafts.exams = drafts.exams.filter(item => item.id !== exam.id);
       saveDrafts();
@@ -3712,7 +3762,7 @@ async function saveExamDraft(event) {
       try {
         await loadCourseChanges();
       } catch (syncError) {
-        console.warn("El examen se guardÃ³, pero la recarga de datos se completarÃ¡ en la prÃ³xima actualizaciÃ³n:", syncError);
+        console.warn("El examen se guardó, pero la recarga de datos se completará en la próxima actualización:", syncError);
       }
       cachePublishedExamAssignment(course, exam, persistedAssignment.modules);
       renderTeacher();
@@ -3728,7 +3778,7 @@ async function saveExamDraft(event) {
   const assignmentSaved = await updateCourseModules(exam.courseId, modules => applyExamModuleAssignment(modules, exam, targetModuleId));
   if (!assignmentSaved) {
     $("#exam-editor-error").className = "error";
-    $("#exam-editor-error").textContent = "No se pudo guardar la asignaciÃ³n del mÃ³dulo.";
+    $("#exam-editor-error").textContent = "No se pudo guardar la asignación del módulo.";
     return;
   }
   const draftIndex = drafts.exams.findIndex(item => item.id === exam.id);
@@ -3738,7 +3788,7 @@ async function saveExamDraft(event) {
   renderTeacher();
 }
 function deleteExamDraft(id) {
-  if (!confirm("Â¿Eliminar este borrador local?")) return;
+  if (!confirm("¿Eliminar este borrador local?")) return;
   drafts.exams = drafts.exams.filter(exam => exam.id !== id);
   saveDrafts();
   renderTeacher();
@@ -3773,7 +3823,7 @@ function downloadTemplateJson() {
     attempts_allowed: 1,
     published: true,
     option_count: 5,
-    questions: [{ id: "pregunta-001", text: "Escribe aquÃ­ la pregunta", image: "", options: ["OpciÃ³n A","OpciÃ³n B","OpciÃ³n C","OpciÃ³n D","OpciÃ³n E"], correct: 0 }]
+    questions: [{ id: "pregunta-001", text: "Escribe aquí la pregunta", image: "", options: ["Opción A","Opción B","Opción C","Opción D","Opción E"], correct: 0 }]
   }, "plantilla", courseId));
   download(JSON.stringify(template, null, 2), "plantilla-examen.json", "application/json;charset=utf-8");
 }
@@ -3820,11 +3870,11 @@ async function saveProfile(event) {
     const newPassword = $("#profile-new-password").value;
     const confirmation = $("#profile-confirm-password").value;
     if (newPassword || confirmation || currentPassword) {
-      if (!currentPassword) throw new Error("Escribe tu contraseÃ±a actual para cambiarla.");
-      if (newPassword.length < 8) throw new Error("La nueva contraseÃ±a debe tener al menos 8 caracteres.");
-      if (newPassword !== confirmation) throw new Error("Las nuevas contraseÃ±as no coinciden.");
+      if (!currentPassword) throw new Error("Escribe tu contraseña actual para cambiarla.");
+      if (newPassword.length < 8) throw new Error("La nueva contraseña debe tener al menos 8 caracteres.");
+      if (newPassword !== confirmation) throw new Error("Las nuevas contraseñas no coinciden.");
       const { error: reauthError } = await sb.auth.signInWithPassword({ email: currentUser.email, password: currentPassword });
-      if (reauthError) throw new Error("La contraseÃ±a actual es incorrecta.");
+      if (reauthError) throw new Error("La contraseña actual es incorrecta.");
       const { error: passError } = await sb.auth.updateUser({ password: newPassword });
       if (passError) throw passError;
     }
@@ -3836,11 +3886,11 @@ async function saveProfile(event) {
     if (profileError) throw profileError;
     currentUser = { ...currentUser, name, email };
     message.className = "success";
-    message.textContent = email !== currentUser.email ? "Perfil actualizado. Supabase puede pedir confirmaciÃ³n del nuevo correo." : "Perfil actualizado correctamente.";
+    message.textContent = email !== currentUser.email ? "Perfil actualizado. Supabase puede pedir confirmación del nuevo correo." : "Perfil actualizado correctamente.";
     renderApp();
     $("#profile-modal").classList.remove("hidden");
     $("#profile-message").className = "success";
-    $("#profile-message").textContent = "Perfil actualizado correctamente. Si cambiaste el correo, revisa la confirmaciÃ³n de Supabase.";
+    $("#profile-message").textContent = "Perfil actualizado correctamente. Si cambiaste el correo, revisa la confirmación de Supabase.";
   } catch (error) {
     console.error("Perfil:", error);
     message.textContent = error.message || translateError(error);

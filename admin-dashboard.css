@@ -550,6 +550,247 @@ body.admin-shell-mode
     width: 100%;
   }
 }
+
+/* Refinamiento visual del panel y del directorio de profesores. */
+body.admin-shell-mode {
+  background: #f5f8fb;
+}
+
+body.admin-shell-mode .admin-main {
+  max-width: 1480px;
+  padding: 34px clamp(24px, 4vw, 58px) 64px;
+}
+
+body.admin-shell-mode .admin-header {
+  margin-bottom: 34px;
+}
+
+body.admin-shell-mode .admin-header h2 {
+  letter-spacing: -0.035em;
+}
+
+body.admin-shell-mode .admin-stat-grid.modern-admin-stats {
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+body.admin-shell-mode .modern-admin-stats .admin-stat-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 12px;
+  min-height: 116px;
+  padding: 16px;
+  border-color: #e1e8ef;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(27, 57, 82, 0.05);
+}
+
+body.admin-shell-mode .modern-admin-stats .stat-icon {
+  grid-row: 1 / span 2;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #e8f7fa;
+  color: #087d9d;
+  font-size: 17px;
+}
+
+body.admin-shell-mode .modern-admin-stats .stat-copy {
+  min-width: 0;
+}
+
+body.admin-shell-mode .modern-admin-stats .stat-copy span {
+  margin: 0;
+  overflow: hidden;
+  color: #526679;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.admin-shell-mode .modern-admin-stats .stat-copy small {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #9aa9b7;
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.admin-shell-mode .modern-admin-stats .admin-stat-card > strong {
+  grid-column: 2;
+  align-self: end;
+  margin: 0;
+  color: #172f45;
+  font-size: 25px;
+  line-height: 1;
+}
+
+body.admin-shell-mode .admin-section-header {
+  margin-bottom: 22px;
+}
+
+body.admin-shell-mode .admin-section-header h2 {
+  letter-spacing: -0.03em;
+}
+
+body.admin-shell-mode .modern-tools {
+  min-height: 58px;
+  margin: 0 0 14px;
+  padding: 9px;
+  border: 1px solid #e0e8ef;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 7px 18px rgba(27, 57, 82, 0.035);
+}
+
+body.admin-shell-mode .modern-tools .tools-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.admin-shell-mode .modern-tools .input-group-icon {
+  width: min(100%, 500px);
+  min-height: 40px;
+  border-color: #d9e4ec;
+  border-radius: 9px;
+  background: #fbfdff;
+}
+
+body.admin-shell-mode .modern-tools .input-group-icon:focus-within {
+  border-color: #0891b2;
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.12);
+}
+
+body.admin-shell-mode .modern-tools .input-icon {
+  color: #7d93a5;
+}
+
+body.admin-shell-mode .modern-tools input,
+body.admin-shell-mode .modern-tools .compact-select {
+  min-height: 40px;
+  border-color: #d9e4ec;
+  border-radius: 9px;
+  color: #1e3a50;
+  font-size: 13px;
+}
+
+body.admin-shell-mode .modern-tools .compact-select {
+  min-width: 168px;
+  background: #ffffff;
+}
+
+body.admin-shell-mode .modern-tools .icon-btn {
+  color: #8aa0b0;
+}
+
+body.admin-shell-mode .admin-content-card {
+  padding: 0;
+  border-color: #e0e8ef;
+  border-radius: 14px;
+  box-shadow: 0 9px 24px rgba(27, 57, 82, 0.045);
+}
+
+body.admin-shell-mode .admin-content-card .admin-table-container {
+  padding: 0;
+}
+
+body.admin-shell-mode .teachers-table,
+body.admin-shell-mode .admin-teachers-table {
+  border-radius: 14px;
+}
+
+body.admin-shell-mode .teachers-table th,
+body.admin-shell-mode .teachers-table td,
+body.admin-shell-mode .admin-teachers-table th,
+body.admin-shell-mode .admin-teachers-table td {
+  padding: 16px 18px;
+  border-color: #edf1f4;
+}
+
+body.admin-shell-mode .teachers-table th,
+body.admin-shell-mode .admin-teachers-table th {
+  color: #7890a1;
+  background: #fbfdfe;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+body.admin-shell-mode .teachers-table tbody tr,
+body.admin-shell-mode .admin-teachers-table tbody tr {
+  transition: background-color 0.16s ease;
+}
+
+body.admin-shell-mode .teachers-table tbody tr:hover,
+body.admin-shell-mode .admin-teachers-table tbody tr:hover {
+  background: #f8fcfd;
+}
+
+body.admin-shell-mode .admin-teacher-identity {
+  min-width: 190px;
+}
+
+body.admin-shell-mode .admin-teacher-actions {
+  justify-content: flex-start;
+}
+
+body.admin-shell-mode .admin-action-button {
+  min-height: 32px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+body.admin-shell-mode .modern-pagination {
+  padding: 12px 16px 14px;
+  border-top: 1px solid #edf1f4;
+}
+
+@media (max-width: 1250px) {
+  body.admin-shell-mode .admin-stat-grid.modern-admin-stats {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  body.admin-shell-mode .admin-main {
+    padding: 24px 16px 40px;
+  }
+
+  body.admin-shell-mode .admin-stat-grid.modern-admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body.admin-shell-mode .modern-tools {
+    padding: 10px;
+  }
+
+  body.admin-shell-mode .modern-tools .tools-left {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.admin-shell-mode .modern-tools .input-group-icon,
+  body.admin-shell-mode .modern-tools .compact-select {
+    width: 100%;
+    max-width: none !important;
+  }
+
+  body.admin-shell-mode .modern-tools .tools-right,
+  body.admin-shell-mode .modern-tools .actions-row {
+    width: 100%;
+  }
+
+  body.admin-shell-mode .modern-tools .actions-row .btn {
+    flex: 1;
+  }
+}
 .register-role-field {
   margin: 17px 0;
 }
