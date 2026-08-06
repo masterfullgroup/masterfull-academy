@@ -973,3 +973,64 @@ body.auth-game-mode .register-role-options input {
     padding-bottom: 42px;
   }
 }
+
+@media (min-width: 901px) {
+  html:has(body.auth-game-mode) {
+    overflow-y: auto !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-y: auto !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) main {
+    display: block !important;
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+    padding-top: 32px !important;
+    padding-bottom: 40px !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-layout {
+    display: grid !important;
+    grid-template-columns: 48% 52%;
+    height: auto !important;
+    min-height: 760px !important;
+    margin: 0 auto 32px !important;
+    overflow: visible !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-copy {
+    position: relative !important;
+    inset: auto !important;
+    grid-column: 2;
+    grid-row: 1;
+    width: auto !important;
+    height: auto !important;
+    min-height: 760px !important;
+    border-radius: 0 29px 29px 0 !important;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-card {
+    position: relative !important;
+    inset: auto !important;
+    grid-column: 1;
+    grid-row: 1;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 760px !important;
+    overflow: visible !important;
+    justify-content: flex-start !important;
+    padding-top: 56px !important;
+  }
+}
+
+body.auth-game-mode .register-role-options label {
+  min-height: 92px !important;
+  color: #101c2d !important;
+  font-weight: 750 !important;
+}
