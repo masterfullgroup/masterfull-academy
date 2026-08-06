@@ -574,9 +574,50 @@
           </div>
           <div id="teacher-grades" class="tab-content">
             <div class="teacher-section-title"><div><span class="eyebrow">SEGUIMIENTO</span><h3>Libro de calificaciones</h3><p>Consulta intentos, desempeño y respuestas de cada alumno.</p></div><div><button class="btn secondary" id="refresh-results">Actualizar</button><button class="btn secondary" id="export-grades">Exportar CSV</button></div></div>
-            <div class="filters"><input id="teacher-search" placeholder="Buscar alumno o correo"><select id="teacher-course-filter"><option value="">Todos los cursos</option></select><select id="teacher-exam-filter"><option value="">Todos los exámenes</option></select></div>
-            <p id="teacher-results-status" class="muted small"></p>
-            <div id="teacher-grades-body" class="student-results-list"></div>
+          <!-- Redesigned Grades top bar + filters (presentational only; IDs unchanged) -->
+          <div class="grades-topbar">
+            <div class="grades-stats" aria-hidden="true">
+              <div class="grades-stat-item">
+                <div class="stat-icon" aria-hidden="true">📚</div>
+                <div class="stat-meta"><small>Cursos</small><strong class="stat-value">—</strong></div>
+              </div>
+              <div class="grades-stat-item">
+                <div class="stat-icon" aria-hidden="true">📝</div>
+                <div class="stat-meta"><small>Exámenes</small><strong id="exams-tab-count" class="stat-value">0</strong></div>
+              </div>
+              <div class="grades-stat-item">
+                <div class="stat-icon" aria-hidden="true">📊</div>
+                <div class="stat-meta"><small>Resultados</small><strong id="grades-tab-count" class="stat-value">0</strong></div>
+              </div>
+            </div>
+
+            <div class="grades-controls">
+              <div class="grades-search">
+                <label for="teacher-search" class="sr-only">Buscar alumno</label>
+                <div class="input-search">
+                  <input id="teacher-search" placeholder="Buscar alumno o correo" type="search" aria-label="Buscar alumno o correo">
+                  <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
+                </div>
+              </div>
+
+              <div class="grades-filters">
+                <label class="sr-only" for="teacher-course-filter">Filtrar por curso</label>
+                <select id="teacher-course-filter" class="compact-select"><option value="">Todos los cursos</option></select>
+                <label class="sr-only" for="teacher-exam-filter">Filtrar por examen</label>
+                <select id="teacher-exam-filter" class="compact-select"><option value="">Todos los exámenes</option></select>
+              </div>
+
+              <div class="grades-actions">
+                <button class="btn secondary" id="refresh-results">Actualizar</button>
+                <button class="btn secondary" id="export-grades">Exportar CSV</button>
+              </div>
+            </div>
+          </div>
+
+          <p id="teacher-results-status" class="muted small" aria-live="polite"></p>
+
+          <!-- The JS renders grade rows inside this container. Keep id and class to preserve behavior. -->
+          <div id="teacher-grades-body" class="student-results-list"></div>
           </div>
         </div>
       </div>

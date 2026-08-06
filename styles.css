@@ -118,6 +118,65 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
 .student-best-score strong { color: var(--primary); }
 .student-result-toggle::before { content: ""; display: block; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .18s; }
 .student-result-group[open] .student-result-toggle::before { transform: rotate(225deg); }
+
+/* === Teacher grades redesign: visual-only styles === */
+.grades-topbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem 0 1.25rem;
+  padding: 0.5rem;
+}
+.grades-stats {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+.grades-stat-item {
+  background: var(--pale, #f5f7fb);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  min-width: 110px;
+  box-shadow: 0 1px 3px rgba(20,30,50,0.04);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.grades-stat-item:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(20,30,50,0.08); }
+.grades-stat-item .stat-icon { font-size: 1.25rem; width: 32px; height: 32px; display:flex; align-items:center; justify-content:center; border-radius:8px; background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent); color: var(--primary); }
+.grades-stat-item .stat-meta small { display:block; color:var(--muted); font-size:0.75rem; line-height:1; }
+.grades-stat-item .stat-value { display:block; font-size:1rem; color:var(--ink); }
+.grades-controls { display:flex; gap:0.75rem; align-items:center; }
+.grades-search .input-search { display:flex; align-items:center; gap:0.4rem; background:var(--bg, #fff); border-radius:8px; padding:6px 8px; border:1px solid rgba(60,70,90,0.06); box-shadow: 0 1px 2px rgba(20,30,50,0.02); }
+.grades-search input[type="search"] { border: none; outline: none; min-width:220px; font-size:0.95rem; padding:6px 4px; background:transparent; color:var(--ink); }
+.icon-btn.search-clear { background: transparent; border: none; cursor:pointer; color:var(--muted); font-size:0.9rem; padding:0 6px; }
+.grades-filters { display:flex; gap:0.5rem; align-items:center; }
+.compact-select { padding:6px 8px; border-radius:8px; border:1px solid rgba(60,70,90,0.06); background:var(--bg); font-size:0.95rem; }
+.grades-actions { display:flex; gap:0.5rem; align-items:center; }
+
+/* Make the student-results-list/table cleaner */
+.student-results-list { background: transparent; border-radius:10px; padding:0; }
+.student-results-list .result-row { display:flex; gap:0.75rem; align-items:center; padding:0.6rem 0.8rem; border-bottom:1px solid rgba(30,40,60,0.04); transition: background 160ms ease; }
+.student-results-list .result-row:hover { background: rgba(0,0,0,0.02); }
+.student-results-list .result-cell { flex:1; min-width:0; font-size:0.95rem; color:var(--ink); }
+.student-results-list .result-cell .muted { color:var(--muted); font-size:0.85rem; }
+.student-results-list .result-actions { display:flex; gap:0.5rem; align-items:center; }
+
+/* Responsive: collapse stats on small screens and make controls stack */
+@media (max-width: 880px) {
+  .grades-topbar { grid-template-columns: 1fr; gap:0.6rem; }
+  .grades-stats { order:2; width:100%; justify-content:space-between; }
+  .grades-controls { order:1; width:100%; justify-content:space-between; gap:0.6rem; }
+  .grades-search input[type="search"] { min-width: 120px; }
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .grades-stat-item, .student-results-list .result-row { transition: none; transform: none; }
+}
+/* End teacher grades redesign CSS */
 .student-grade-list { padding: 0 14px 14px; border-top: 1px solid var(--line); background: #fbfbfd; }
 .student-grade-row { display: grid; grid-template-columns: minmax(190px,1.4fr) minmax(110px,.7fr) minmax(70px,.45fr) minmax(100px,.65fr) minmax(120px,.75fr) auto; align-items: start; gap: 18px; padding: 16px 6px; border-bottom: 1px solid var(--line); }
 .student-grade-row:last-child { border-bottom: 0; }
