@@ -518,7 +518,34 @@
           </header>
 
           <div id="teacher-home" class="tab-content active">
-            <div id="teacher-overview" class="teacher-overview" aria-live="polite"></div>
+          <!-- Estadísticas modernas del profesor -->
+          <div id="teacher-stats" class="stats teacher-stats" aria-hidden="false">
+            <article class="stat-card">
+              <span class="stat-icon" aria-hidden="true">
+                <!-- Icono: cursos -->
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
+              </span>
+              <div class="stat-body"><strong>—</strong><small>Cursos</small></div>
+            </article>
+
+            <article class="stat-card">
+              <span class="stat-icon" aria-hidden="true">
+                <!-- Icono: exámenes -->
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h10a2 2 0 0 1 2 2v12H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="M7 7H5a2 2 0 0 0-2 2v10h14M12 9h5M12 13h5"/></svg>
+              </span>
+              <div class="stat-body"><strong id="exams-tab-count">0</strong><small>Exámenes</small></div>
+            </article>
+
+            <article class="stat-card">
+              <span class="stat-icon" aria-hidden="true">
+                <!-- Icono: calificaciones -->
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg>
+              </span>
+              <div class="stat-body"><strong id="grades-tab-count">0</strong><small>Resultados</small></div>
+            </article>
+          </div>
+
+          <div id="teacher-overview" class="teacher-overview" aria-live="polite"></div>
           </div>
 
           <div id="teacher-courses" class="tab-content">
