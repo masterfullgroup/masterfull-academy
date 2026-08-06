@@ -177,6 +177,39 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
   .grades-stat-item, .student-results-list .result-row { transition: none; transform: none; }
 }
 /* End teacher grades redesign CSS */
+
+/* === Course management redesign styles === */
+.grid-courses { display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:18px; }
+.course-card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; box-shadow: 0 8px 20px rgba(37,50,80,0.04); display:flex; flex-direction:column; gap:10px; transition: transform .18s ease, box-shadow .18s ease; }
+.course-card:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(37,50,80,0.08); }
+.course-card .course-title { font-weight:800; color:var(--ink); font-size:1rem; }
+.course-card .course-meta { color:var(--muted); font-size:0.9rem; display:flex; gap:8px; align-items:center; }
+.course-card .course-actions { display:flex; gap:8px; margin-top:auto; }
+.course-empty { background: transparent; border: 1px dashed var(--line); border-radius: 12px; padding: 18px; display:flex; align-items:center; justify-content:center; }
+
+.course-search-input .input-group-icon { display:flex; align-items:center; gap:8px; border-radius:10px; padding:6px 8px; border:1px solid rgba(60,70,90,0.06); background:var(--white); }
+.course-search-input .input-icon { font-size:16px; }
+.search-clear { background:transparent; border:0; color:var(--muted); cursor:pointer; }
+
+/* Modal modernizations */
+.course-setup-card.modern { border-radius:14px; padding:18px; max-width:920px; width:100%; }
+.course-setup-head.modern-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:10px; }
+.modern-layout { display:grid; grid-template-columns: 1fr 320px; gap:18px; align-items:start; }
+@media (max-width: 920px){ .modern-layout { grid-template-columns: 1fr; } }
+.modern-field .input-group-icon { display:flex; gap:8px; align-items:center; }
+.course-preview-cover.modern-cover { width:72px; height:72px; border-radius:12px; background:linear-gradient(180deg,var(--pale),#fff); display:grid; place-items:center; font-weight:800; color:var(--primary); font-size:22px; }
+.course-next-steps.modern-steps { display:flex; flex-direction:column; gap:6px; margin-top:10px; color:var(--muted); }
+.modern-actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:14px; }
+.modern-actions-row { display:flex; gap:8px; }
+
+/* Microanimations */
+@keyframes popIn { from{ transform: scale(.98); opacity:0 } to{ transform: scale(1); opacity:1 } }
+.course-card, .course-empty, .course-setup-card { animation: popIn .18s ease both; }
+
+/* Responsive tweaks */
+@media (max-width: 640px){ .grid-courses { grid-template-columns: 1fr; } .grades-stats { gap:0.5rem; } .grades-stat-item { min-width:90px; } }
+
+/* End course management redesign styles */
 .student-grade-list { padding: 0 14px 14px; border-top: 1px solid var(--line); background: #fbfbfd; }
 .student-grade-row { display: grid; grid-template-columns: minmax(190px,1.4fr) minmax(110px,.7fr) minmax(70px,.45fr) minmax(100px,.65fr) minmax(120px,.75fr) auto; align-items: start; gap: 18px; padding: 16px 6px; border-bottom: 1px solid var(--line); }
 .student-grade-row:last-child { border-bottom: 0; }

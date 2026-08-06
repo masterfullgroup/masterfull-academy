@@ -559,8 +559,26 @@
                 </aside>
                 <main class="canvas-course-main">
                   <div class="teacher-section-title course-directory-head"><div><span class="eyebrow">TABLERO DE CURSOS</span><h3>Mis cursos</h3><p>Organiza y abre tu contenido desde una biblioteca clara.</p></div><div><button class="btn secondary course-quick-toggle" id="course-quick-toggle" type="button" aria-expanded="false">☰ Cursos</button><button class="btn primary" id="new-course-btn" type="button">+ Crear curso</button></div></div>
-                  <div class="course-tools course-directory-tools" role="search"><label class="sr-only" for="course-search">Buscar curso</label><input id="course-search" type="search" placeholder="Buscar cursos…"><p id="course-publish-status" class="course-publish-status" aria-live="polite"></p></div>
-                  <div id="teacher-course-list" class="canvas-course-directory" aria-live="polite"></div>
+                  <div class="course-tools course-directory-tools" role="search">
+                    <label class="sr-only" for="course-search">Buscar curso</label>
+                    <div class="course-search-input">
+                      <div class="input-group-icon">
+                        <div class="input-icon" aria-hidden="true">🔎</div>
+                        <input id="course-search" type="search" placeholder="Buscar cursos…" aria-label="Buscar cursos">
+                        <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
+                      </div>
+                    </div>
+                    <div class="course-tools-right">
+                      <p id="course-publish-status" class="course-publish-status" aria-live="polite"></p>
+                    </div>
+                  </div>
+
+                  <div id="teacher-course-list" class="canvas-course-directory grid-courses" aria-live="polite">
+                    <!-- Curso cards rendered here by existing JS. Cards will receive class .course-card and use existing data attributes. -->
+                    <div class="course-empty">
+                      <p class="muted">No hay cursos aún. Crea tu primer curso para empezar a organizar contenido.</p>
+                    </div>
+                  </div>
                 </main>
               </div>
             </div>
@@ -674,34 +692,64 @@
   </main>
 
   <div id="course-modal" class="modal hidden course-setup-modal" role="dialog" aria-modal="true" aria-labelledby="course-modal-title">
-    <div class="modal-card panel course-setup-card"><button class="modal-close" data-close="course-modal" type="button" aria-label="Cerrar">×</button>
-      <header class="course-setup-head">
+    <div class="modal-card panel course-setup-card modern">
+      <button class="modal-close" data-close="course-modal" type="button" aria-label="Cerrar">×</button>
+      <header class="course-setup-head modern-head">
         <nav class="course-setup-breadcrumb" aria-label="Ruta de navegación"><span>Panel docente</span><b aria-hidden="true">›</b><span>Cursos</span><b aria-hidden="true">›</b><strong id="course-breadcrumb-current">Nuevo curso</strong></nav>
-        <div class="course-setup-title-row"><div><span class="eyebrow">CONFIGURACIÓN DEL CURSO</span><h2 id="course-modal-title">Crear curso</h2><p>Define la base del curso. Después podrás organizar módulos, actividades y evaluaciones.</p></div><span id="course-setup-status" class="course-setup-status">Borrador local</span></div>
+        <div class="course-setup-title-row"><div><span class="eyebrow">CONFIGURACIÓN DEL CURSO</span><h2 id="course-modal-title">Crear curso</h2><p class="muted">Define la base del curso. Después podrás organizar módulos, actividades y evaluaciones.</p></div><span id="course-setup-status" class="course-setup-status">Borrador local</span></div>
       </header>
-      <form id="course-form" class="course-setup-form"><input type="hidden" id="course-id">
-        <div class="course-setup-layout">
+
+      <form id="course-form" class="course-setup-form modern-form">
+        <input type="hidden" id="course-id">
+        <div class="course-setup-layout modern-layout">
+
           <div class="course-setup-sections">
             <details class="course-config-section" open>
-              <summary><span class="course-section-number">1</span><span><strong>Información general</strong><small>Identidad principal del espacio académico</small></span><i aria-hidden="true"></i></summary>
-              <div class="course-section-content"><label>Nombre completo del curso<input id="course-name" required maxlength="80" placeholder="Ej. Matemática 5.º"></label><small class="course-field-help">Este nombre aparecerá en el panel del profesor y de los alumnos.</small></div>
+              <summary><span class="course-section-number">1</span><span><strong>Información general</strong><small>Identidad del curso</small></span><i aria-hidden="true"></i></summary>
+              <div class="course-section-content modern-field">
+                <label class="modern-label">Nombre completo del curso
+                  <div class="input-group-icon">
+                    <div class="input-icon" aria-hidden="true">📘</div>
+                    <input id="course-name" required maxlength="80" placeholder="Ej. Matemática 5.º">
+                  </div>
+                </label>
+                <small class="course-field-help muted">Este nombre aparecerá en el panel del profesor y de los alumnos.</small>
+              </div>
             </details>
+
             <details class="course-config-section" open>
               <summary><span class="course-section-number">2</span><span><strong>Descripción</strong><small>Presentación breve para tus estudiantes</small></span><i aria-hidden="true"></i></summary>
-              <div class="course-section-content"><label>Resumen del curso<textarea id="course-description" rows="4" maxlength="250" placeholder="Describe los objetivos y el contenido principal del curso"></textarea></label><div class="course-field-meta"><small>Utiliza un mensaje claro y directo.</small><small id="course-description-count">0 / 250</small></div></div>
+              <div class="course-section-content modern-field">
+                <label class="modern-label">Resumen del curso
+                  <textarea id="course-description" rows="4" maxlength="250" placeholder="Describe los objetivos y el contenido principal del curso"></textarea>
+                </label>
+                <div class="course-field-meta"><small class="muted">Utiliza un mensaje claro y directo.</small><small id="course-description-count">0 / 250</small></div>
+              </div>
             </details>
+
             <details class="course-config-section">
               <summary><span class="course-section-number">3</span><span><strong>Estructura académica</strong><small>Vista previa de módulos y evaluaciones</small></span><i aria-hidden="true"></i></summary>
-              <div class="course-section-content"><div class="course-structure-preview"><span><b id="course-module-preview-count">0</b> módulos</span><span><b id="course-activity-preview-count">0</b> actividades</span><span><b id="course-exam-preview-count">0</b> evaluaciones</span></div><p class="course-structure-note">Guarda el curso para entrar a su espacio y organizar el contenido por módulos, como en Moodle, con una navegación directa y visual inspirada en Canvas.</p></div>
+              <div class="course-section-content modern-field">
+                <div class="course-structure-preview modern-preview"><span><b id="course-module-preview-count">0</b> módulos</span><span><b id="course-activity-preview-count">0</b> actividades</span><span><b id="course-exam-preview-count">0</b> evaluaciones</span></div>
+                <p class="course-structure-note muted">Guarda el curso para entrar a su espacio y organizar el contenido por módulos.</p>
+              </div>
             </details>
           </div>
-          <aside class="course-setup-summary" aria-label="Vista previa del curso">
-            <div class="course-preview-cover"><span id="course-preview-initial">C</span></div>
-            <span class="eyebrow">VISTA PREVIA</span><h3 id="course-preview-name">Nuevo curso</h3><p id="course-preview-description">Agrega una descripción para orientar a tus estudiantes.</p>
-            <div class="course-next-steps"><strong>Siguiente recorrido</strong><span><i>1</i> Crear módulos</span><span><i>2</i> Añadir clases y recursos</span><span><i>3</i> Preparar evaluaciones</span></div>
+
+          <aside class="course-setup-summary modern-summary" aria-label="Vista previa del curso">
+            <div class="course-preview-cover modern-cover"><span id="course-preview-initial">C</span></div>
+            <span class="eyebrow muted">VISTA PREVIA</span>
+            <h3 id="course-preview-name">Nuevo curso</h3>
+            <p id="course-preview-description" class="muted">Agrega una descripción para orientar a tus estudiantes.</p>
+            <div class="course-next-steps modern-steps"><strong>Siguiente recorrido</strong><span><i>1</i> Crear módulos</span><span><i>2</i> Añadir clases y recursos</span><span><i>3</i> Preparar evaluaciones</span></div>
           </aside>
+
         </div>
-        <div class="course-setup-actions"><p id="course-error" class="error" aria-live="polite"></p><div><button class="btn secondary" data-close="course-modal" type="button">Cancelar</button><button class="btn primary" type="submit">Guardar y administrar contenido</button></div></div>
+
+        <div class="course-setup-actions modern-actions">
+          <p id="course-error" class="error" aria-live="polite"></p>
+          <div class="modern-actions-row"><button class="btn secondary" data-close="course-modal" type="button">Cancelar</button><button class="btn primary" type="submit">Guardar y administrar contenido</button></div>
+        </div>
       </form>
     </div>
   </div>
