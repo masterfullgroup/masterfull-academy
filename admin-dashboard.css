@@ -885,3 +885,91 @@ body.admin-shell-mode .modern-pagination {
   width: auto;
   margin: 0;
 }
+
+/* Registro: tarjetas de rol legibles y formulario sin recortes. */
+body.auth-game-mode .register-role-field {
+  margin: 18px 0 20px;
+}
+
+body.auth-game-mode .register-role-label {
+  margin-bottom: 10px;
+  color: #e8f0fb;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+body.auth-game-mode .register-role-options {
+  gap: 12px;
+}
+
+body.auth-game-mode .register-role-options label {
+  min-height: 76px;
+  padding: 16px 17px;
+  border: 1px solid #cbd8e4;
+  border-radius: 12px;
+  color: #101c2d;
+  background: #ffffff;
+  box-shadow: 0 8px 18px #02061718;
+  font-size: 13px;
+  font-weight: 700;
+  transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+body.auth-game-mode .register-role-options label:hover {
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+body.auth-game-mode .register-role-options label:has(input:checked) {
+  border-color: #0891b2;
+  background: #f0fcfd;
+  box-shadow: 0 0 0 3px #22d3ee24, 0 10px 22px #02061720;
+}
+
+body.auth-game-mode .register-role-options input {
+  width: 16px;
+  min-height: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #0284c7;
+}
+
+@media (min-width: 901px) {
+  html:has(body.auth-game-mode) {
+    overflow-y: auto;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) main {
+    height: auto;
+    min-height: 100vh;
+    place-items: start center;
+    overflow: visible;
+    padding-top: 26px;
+    padding-bottom: 36px;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-layout {
+    height: auto;
+    min-height: 720px;
+    overflow: visible;
+  }
+
+  body.auth-game-mode:has(#register-form:not(.hidden)) .auth-card {
+    height: auto;
+    min-height: 720px;
+    overflow: visible;
+    justify-content: flex-start;
+    padding-top: 42px;
+    padding-bottom: 42px;
+  }
+}
