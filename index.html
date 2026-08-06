@@ -585,9 +585,37 @@
             <div id="teacher-course-workspace" class="hidden" aria-live="polite"></div>
           </div>
           <div id="teacher-exams" class="tab-content">
-            <div id="teacher-exam-directory">
-              <div class="teacher-section-title"><div><span class="eyebrow">EVALUACIONES</span><h3>Cursos con evaluaciones</h3><p>Abre un curso para entrar a su espacio y administrar su contenido por separado.</p></div><button class="btn primary" id="new-exam-btn" type="button">+ Crear evaluación</button></div>
-              <div id="teacher-exam-course-list" class="exam-course-directory" aria-live="polite"></div>
+            <div id="teacher-exam-directory" class="exam-directory-modern">
+              <div class="exam-topbar">
+                <div class="exam-head-copy">
+                  <span class="eyebrow">EVALUACIONES</span>
+                  <h3>Cursos con evaluaciones</h3>
+                  <p class="muted">Abre un curso para entrar a su espacio y administrar su contenido por separado.</p>
+                </div>
+
+                <div class="exam-controls">
+                  <div class="exam-search">
+                    <label class="sr-only">Buscar evaluación</label>
+                    <div class="input-group-icon">
+                      <div class="input-icon" aria-hidden="true">🔎</div>
+                      <input id="exam-search" type="search" placeholder="Buscar evaluaciones…" aria-label="Buscar evaluaciones">
+                      <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
+                    </div>
+                  </div>
+
+                  <div class="exam-actions">
+                    <button class="btn secondary" id="refresh-exams" type="button">Actualizar</button>
+                    <button class="btn primary" id="new-exam-btn" type="button">+ Crear evaluación</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="teacher-exam-course-list" class="exam-course-directory grid-exams" aria-live="polite">
+                <!-- Las tarjetas de examen se renderizan aquí por el JS existente. Mantener clases y atributos de datos. -->
+                <div class="exam-empty">
+                  <p class="muted">Aún no hay evaluaciones. Crea una evaluación para empezar a medir resultados.</p>
+                </div>
+              </div>
             </div>
           </div>
           <div id="teacher-grades" class="tab-content">
@@ -859,8 +887,8 @@
   </div>
 
   <div id="exam-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exam-modal-title">
-    <div class="modal-card panel large exam-editor-card">
-      <div class="editor-sticky-bar">
+    <div class="modal-card panel large exam-editor-card modern">
+      <div class="editor-sticky-bar modern-sticky">
         <div><span class="eyebrow">EDITOR DE EXÁMENES</span><h2 id="exam-modal-title">Crear examen</h2></div>
         <div class="exam-editor-header-actions"><button class="btn primary editor-save" type="submit" form="exam-editor-form">Guardar examen</button><button class="modal-close" data-close="exam-modal" type="button" aria-label="Cerrar">×</button></div>
       </div>
