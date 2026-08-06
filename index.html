@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260803-14">
-  <link rel="stylesheet" href="admin-dashboard.css?v=20260804-1">
+  <link rel="stylesheet" href="styles.css?v=20260806-1">
+  <link rel="stylesheet" href="admin-dashboard.css?v=20260806-2">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -225,7 +225,7 @@
           class="admin-nav-item active"
           type="button"
           data-admin-section="dashboard">
-          <span aria-hidden="true">⌂</span>
+          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m4 11 8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg></span>
           Dashboard
         </button>
 
@@ -233,7 +233,7 @@
           class="admin-nav-item"
           type="button"
           data-admin-section="teachers">
-          <span aria-hidden="true">♙</span>
+          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
           Profesores
         </button>
 
@@ -241,7 +241,7 @@
           class="admin-nav-item"
           type="button"
           data-admin-section="students">
-          <span aria-hidden="true">♙</span>
+          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/><path d="M4 20h16"/></svg></span>
           Alumnos
         </button>
 
@@ -249,7 +249,7 @@
           class="admin-nav-item"
           type="button"
           data-admin-section="courses">
-          <span aria-hidden="true">▤</span>
+          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span>
           Cursos
         </button>
 
@@ -257,7 +257,7 @@
           class="admin-nav-item"
           type="button"
           data-admin-section="payments">
-          <span aria-hidden="true">▣</span>
+          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span>
           Pagos
         </button>
 
@@ -265,14 +265,14 @@
           class="admin-nav-item"
           type="button"
           data-admin-section="settings">
-          <span aria-hidden="true">⚙</span>
+          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L14.6 3h-4l-.3 2.9a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1l.3 2.9h4l.3-2.9a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5c.1-.3.1-.7.1-1Z"/></svg></span>
           Configuración
         </button>
       </nav>
 
       <div class="admin-sidebar-footer">
         <button id="admin-logout" class="admin-logout-button" type="button">
-          <span aria-hidden="true">↪</span>
+          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 5H5v14h5"/><path d="m14 8 4 4-4 4M8 12h10"/></svg></span>
           Cerrar sesión
         </button>
       </div>
@@ -1050,6 +1050,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260803-14"></script>
+  <script src="app.js?v=20260806-1"></script>
 </body>
 </html>

@@ -138,6 +138,16 @@ body.admin-shell-mode .admin-nav-item > span {
   width: 20px;
 }
 
+body.admin-shell-mode .admin-nav-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
 body.admin-shell-mode .admin-sidebar-footer {
   position: absolute;
   right: 18px;
@@ -169,6 +179,11 @@ body.admin-shell-mode .admin-logout-button > span {
   place-items: center;
   width: 20px;
   font-size: 17px;
+}
+
+body.admin-shell-mode .admin-logout-button .admin-nav-icon svg {
+  width: 17px;
+  height: 17px;
 }
 
 body.admin-shell-mode .admin-logout-button:hover,

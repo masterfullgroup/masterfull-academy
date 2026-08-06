@@ -1726,7 +1726,11 @@ async function logout() {
   studentProfiles = [];
   courseAccessError = "";
   saveActiveLesson();
-  if (sb) await sb.auth.signOut({ scope: "local" });
+  try {
+    if (sb) await sb.auth.signOut({ scope: "local" });
+  } catch (error) {
+    console.error("Cierre de sesión remoto:", error);
+  }
   currentUser = null;
   results = [];
   localStorage.removeItem(ACTIVE_ATTEMPT_KEY);
