@@ -145,19 +145,19 @@ function modernIcon(name) {
     exams: `<path d="M9 5h10a2 2 0 0 1 2 2v12H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="M7 7H5a2 2 0 0 0-2 2v10h14M12 9h5M12 13h5"/>`,
     results: `<path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="9"/>`,
     course: `<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/>`
-    ,lesson: `<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a3 3 0 0 1 3 3v15a3 3 0 0 0-3-3H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M14 6a3 3 0 0 1 3-3h3v15h-3a3 3 0 0 0-3 3"/>`
-    ,page: `<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 8h18M7 12h10M7 16h7M6 6h.01"/>`
-    ,video: `<rect x="2.75" y="5" width="18.5" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/>`
-    ,pdf: `<path d="M6 2.75h8.5L19 7.25V21H6z"/><path d="M14 3v5h5M9 12.5h6M9 16.5h4"/>`
-    ,download: `<path d="M12 3v11m-4-3 4 4 4-4"/><path d="M4.5 18v2.5h15V18"/>`
-    ,task: `<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V2.5h6V4M9 10l1.5 1.5L14 8M9 16h6"/>`
-    ,practice: `<path d="M8 3h8M10 3v5l-5.5 9.5A2.3 2.3 0 0 0 6.5 21h11a2.3 2.3 0 0 0 2-3.5L14 8V3"/><path d="M7.5 15h9"/>`
-    ,quiz: `<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V2.5h6V4M10 10a2 2 0 1 1 2.8 1.8c-.7.4-.8.8-.8 1.4M12 16.5h.01"/>`
-    ,link: `<path d="m9.5 14.5-1 1a4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.7 0"/><path d="m14.5 9.5 1-1a4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.7 0"/><path d="m8.5 15.5 7-7"/>`
-    ,file: `<path d="M6 2.75h8.5L19 7.25V21H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/>`
-    ,discussion: `<path d="M3 5h14v10H8l-4.5 4v-4H3z"/><path d="M8 9h5M19 8h2v9h-4l-3 3v-3h-2"/>`
-    ,live: `<rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="m16 10 5-3v10l-5-3zM7 10.5h.01"/>`
-    ,heading: `<path d="M5 6v12M19 6v12M5 12h14M3 6h4M17 6h4"/>`
+    ,lesson: `<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/>`
+    ,page: `<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 12h7M9 16h7"/>`
+    ,video: `<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/>`
+    ,pdf: `<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 13h6M9 17h4"/>`
+    ,download: `<path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 20h14"/>`
+    ,task: `<path d="M7 4h10v17H7z"/><path d="M9 4V2h6v2M10 9h4M10 13h4M10 17h3"/>`
+    ,practice: `<path d="M5 19h14M7 16l4-10h2l4 10M9 12h6"/>`
+    ,quiz: `<circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.3 2.3 0 1 1 3.2 2.1c-.8.4-1 1-1 1.9M12 17h.01"/>`
+    ,link: `<path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"/>`
+    ,file: `<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 13h6M9 17h4"/>`
+    ,discussion: `<path d="M4 5h16v12H8l-4 4z"/><path d="M8 9h8M8 13h5"/>`
+    ,live: `<rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3z"/>`
+    ,heading: `<path d="M5 6v12M19 6v12M5 12h14"/>`
     ,progress: `<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>`
     ,certificate: `<circle cx="12" cy="9" r="6"/><path d="m8.5 14-1 8 4.5-2 4.5 2-1-8M9.5 9l1.5 1.5L14.5 7"/>`
     ,students: `<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 5M17 14a5 5 0 0 1 4 5"/>`
@@ -175,7 +175,7 @@ function modernIcon(name) {
   };
   const aliases = { "▦": "courses", "▤": "exams", "✓": "results", "◇": "course" };
   const key = aliases[name] || name;
-  return `<svg class="modern-icon icon-${esc(key)}" data-icon="${esc(key)}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${paths[key] || paths.course}</svg>`;
+  return `<svg class="modern-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${paths[key] || paths.course}</svg>`;
 }
 function stat(label, value, icon, action = "") { return `<button class="stat-card" type="button" data-stat-action="${action}"><span>${modernIcon(icon)}</span><span><strong>${esc(value)}</strong><small>${esc(label)}</small></span></button>`; }
 function formatDate(value) { return value ? new Date(value).toLocaleString("es-PE") : "-"; }

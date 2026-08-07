@@ -50,8 +50,6 @@ assert.doesNotMatch(cssSource, /\.dashboard-course-cover::after\s*,\s*\.student-
 assert.match(cssSource, /\.canvas-add-content\s*\{\s*display:none/, "La acción inferior redundante para agregar contenido debe permanecer oculta");
 assert.match(appSource, /\["overview", "Inicio", "home"\]/, "La navegación debe usar iconos específicos y profesionales");
 assert.match(appSource, /stroke-width="1\.75"/, "Los iconos deben compartir un trazo visual consistente");
-assert.match(appSource, /class="modern-icon icon-\$\{esc\(key\)\}" data-icon="\$\{esc\(key\)\}"/, "Cada icono debe exponer su tipo para recibir un acabado visual propio");
-assert.match(appSource, /practice: `<path[\s\S]*?quiz: `<rect[\s\S]*?discussion: `<path[\s\S]*?live: `<rect/, "Las actividades deben conservar iconos modernos y reconocibles por tipo");
 assert.match(appSource, /document\.addEventListener\("click", closeRowActionMenus\)/, "Los menús de tres puntos deben cerrarse al pulsar fuera");
 assert.match(appSource, /menu\.classList\.add\("is-open"\)/, "El menú abierto debe elevarse sobre las demás filas");
 assert.match(cssSource, /\.row-action-menu\.is-open\s*\{\s*z-index:60/, "El menú abierto debe tener prioridad visual");
@@ -73,9 +71,6 @@ assert.match(appSource, /modernIcon\(isStudentPreview \? "edit" : "eye"\)/, "La 
 assert.match(appSource, /function openActivityModal[\s\S]*?closeRowActionMenus\(\);[\s\S]*?closeActivityMenus\(\);/, "El editor debe cerrar los menús anteriores antes de abrirse");
 assert.match(cssSource, /#activity-modal\s*\{\s*z-index:120;/, "El editor debe quedar por encima de las tarjetas del módulo");
 assert.match(htmlSource, /module-content-editor-head[\s\S]*?class="modal-close"[\s\S]*?<\/header>/, "El cierre debe permanecer dentro de la cabecera fija");
-assert.match(htmlSource, /class="module-content-head-actions"[\s\S]*?module-content-step[\s\S]*?class="modal-close"/, "El indicador y el cierre deben compartir una zona de acciones alineada");
-assert.match(cssSource, /\.module-content-head-actions\s*\{[\s\S]*?align-items:center;/, "Las acciones de la cabecera deben compartir el mismo eje vertical");
-assert.match(cssSource, /\.module-content-head-actions > \.modal-close\s*\{[\s\S]*?position:static;/, "Cerrar debe mantenerse alineado dentro de la cabecera durante el scroll");
 assert.match(htmlSource, /module-content-editor-actions/, "Las acciones del editor deben estar agrupadas");
 assert.match(cssSource, /\.module-content-editor-footer\s*\{[\s\S]*?position:sticky;[\s\S]*?background:#fff;/, "La barra de acciones debe permanecer visible y usar una superficie limpia");
 assert.doesNotMatch(cssSource, /\.app-shell-mode footer\s*\{/, "El pie principal no debe desplazar las barras internas del editor");
