@@ -3409,6 +3409,9 @@ function openCourseModal(id = "") {
   $("#course-breadcrumb-current").textContent = course ? "Editar curso" : "Nuevo curso";
   $("#course-setup-status").textContent = publishedCourse ? "Curso publicado" : "Borrador local";
   $("#course-setup-status").classList.toggle("published", Boolean(publishedCourse));
+  $("#course-publish-on-save").checked = false;
+  $("#course-publish-on-save").disabled = Boolean(publishedCourse);
+  $("#course-publish-on-save").closest(".course-publish-option").classList.toggle("hidden", Boolean(publishedCourse));
   $("#course-id").value = course?.id || "";
   $("#course-name").value = course?.name || "";
   $("#course-description").value = course?.description || "";
@@ -3418,20 +3421,7 @@ function openCourseModal(id = "") {
   $("#course-name").focus();
 }
 function updateCourseSetupPreview() {
-  const id = $("#course-id")?.value || "";
-  const course = findCourse(id);
-  const name = $("#course-name")?.value.trim() || "Nuevo curso";
-  const description = $("#course-description")?.value.trim() || "Agrega una descripción para orientar a tus estudiantes.";
-  const modules = normalizeModules(course?.modules);
-  const activities = modules.reduce((total, module) => total + module.activities.length, 0);
-  const exams = getTeacherExams().filter(exam => exam.courseId === id).length;
-  $("#course-preview-initial").textContent = name.charAt(0).toLocaleUpperCase("es");
-  $("#course-preview-name").textContent = name;
-  $("#course-preview-description").textContent = description;
   $("#course-description-count").textContent = `${$("#course-description").value.length} / 250`;
-  $("#course-module-preview-count").textContent = modules.length;
-  $("#course-activity-preview-count").textContent = activities;
-  $("#course-exam-preview-count").textContent = exams;
 }
 function toggleSidebar() {
   const mobile = matchMedia("(max-width: 900px)").matches;
@@ -3442,6 +3432,7 @@ function toggleSidebar() {
 }
 async function saveCourseDraft(event) {
   event.preventDefault();
+  const publishOnSave = $("#course-publish-on-save").checked;
   const id = $("#course-id").value;
   const existingCourse = findCourse(id);
   const course = { id: id || slug($("#course-name").value), name: $("#course-name").value.trim(), description: $("#course-description").value.trim(), teacherName: currentUser.name, modules: normalizeModules(existingCourse?.modules), local: true, updatedAt: nowIso() };
@@ -3465,6 +3456,7 @@ async function saveCourseDraft(event) {
   saveDrafts();
   closeModal("course-modal");
   renderTeacher();
+  if (publishOnSave) openPublishCourseModal(course.id);
 }
 
 async function deletePublishedCourse(id) {
