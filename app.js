@@ -1823,12 +1823,16 @@ function renderTeacherOverview() {
   const allCourses = getTeacherCourses();
   const courseCards = allCourses.length ? allCourses.map(course => {
     const isDraft = drafts.courses.some(item => item.id === course.id);
+    const editClass = isDraft ? "edit-course" : "edit-published-course";
+    const deleteClass = isDraft ? "delete-course" : "delete-published-course";
     return `<article class="canvas-dashboard-card">
       <div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${isDraft ? "NO PUBLICADO" : "PUBLICADO"}</small></div>
       <div class="canvas-dashboard-card-body">
         <strong class="canvas-course-title">${esc(course.name)}</strong>
         <div class="canvas-dashboard-actions">
           <button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button>
+          <button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar</button>
+          <button class="${deleteClass}" data-id="${esc(course.id)}" type="button">Eliminar</button>
         </div>
       </div>
     </article>`;

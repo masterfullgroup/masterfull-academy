@@ -3962,6 +3962,10 @@ body.result-game-mode #return-student:focus-visible {
 .canvas-dashboard-actions button { display:inline-flex; min-height:34px; align-items:center; justify-content:center; gap:6px; padding:7px 10px; border:0; border-radius:7px; background:transparent; font-size:11px; font-weight:650; cursor:pointer; }
 .canvas-dashboard-actions .manage-course-content { color:#0b7185; background:#e7f7fa; }
 .canvas-dashboard-actions .manage-course-content:hover { color:#075568; background:#d8f0f4; }
+.canvas-dashboard-actions .edit-course,
+.canvas-dashboard-actions .edit-published-course { color:#315b99; background:#edf3ff; }
+.canvas-dashboard-actions .edit-course:hover,
+.canvas-dashboard-actions .edit-published-course:hover { background:#dfeaff; }
 .canvas-dashboard-actions .delete-course,
 .canvas-dashboard-actions .delete-published-course { color:#b42335; }
 .canvas-dashboard-actions .delete-course:hover,
