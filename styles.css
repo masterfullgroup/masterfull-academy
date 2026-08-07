@@ -8175,69 +8175,6 @@ details[open] > summary .module-expand-control:empty::before {
     font-size:9.5px;
   }
 }
-
-/* Curso docente: cabecera y navegación permanentes, contenido desplazable */
-body.teacher-course-open {
-  overflow:hidden;
-}
-body.teacher-course-open.app-shell-mode > main {
-  height:100vh;
-  min-height:0;
-  overflow:hidden;
-}
-body.teacher-course-open #teacher-view,
-body.teacher-course-open .teacher-lms-shell,
-body.teacher-course-open .teacher-workspace,
-body.teacher-course-open #teacher-courses,
-body.teacher-course-open #teacher-course-workspace {
-  height:100%;
-  min-height:0;
-}
-body.teacher-course-open .course-workspace-page {
-  display:grid;
-  height:100%;
-  min-height:0;
-  grid-template-rows:auto minmax(0,1fr);
-  overflow:hidden;
-}
-body.teacher-course-open .course-context-bar {
-  position:sticky;
-  top:0;
-  z-index:10;
-}
-body.teacher-course-open .course-workspace-layout {
-  height:100%;
-  min-height:0;
-  align-items:stretch;
-  overflow:hidden;
-}
-body.teacher-course-open .course-workspace-sidebar {
-  position:sticky;
-  top:0;
-  height:100%;
-  overflow-x:hidden;
-  overflow-y:auto;
-}
-body.teacher-course-open .course-workspace-content {
-  height:100%;
-  min-height:0;
-  overflow-x:hidden;
-  overflow-y:auto;
-  overscroll-behavior:contain;
-  scrollbar-gutter:stable;
-}
-@media (max-width:700px) {
-  body.teacher-course-open .course-workspace-layout {
-    display:grid;
-    grid-template-rows:auto minmax(0,1fr);
-  }
-  body.teacher-course-open .course-workspace-sidebar {
-    position:relative;
-    height:auto;
-    overflow-x:auto;
-    overflow-y:hidden;
-  }
-}
 /* Campos de autenticación con icono lateral */
 .auth-form .input-group-icon {
   display: flex;
