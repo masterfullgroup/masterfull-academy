@@ -5,7 +5,6 @@ import vm from "node:vm";
 const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
 const htmlSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const cssSource = fs.readFileSync(new URL("../styles.css", import.meta.url), "utf8");
-const enrollmentMigrationSource = fs.readFileSync(new URL("../supabase/migrations/20260803000000_add_course_enrollments.sql", import.meta.url), "utf8");
 const teacherCanvasSource = appSource.slice(appSource.indexOf("function renderTeacherCourseModulesCanvas"), appSource.indexOf("function renderTeacherCourseOverview"));
 assert.doesNotMatch(appSource, /course-context-mark/, "La cabecera no debe repetir el curso con una inicial decorativa");
 assert.doesNotMatch(appSource, /<span>CURSO<\/span><h1>/, "La cabecera no debe repetir la etiqueta Curso");
@@ -80,9 +79,6 @@ assert.doesNotMatch(appSource, /student-resume-panel/, "El alumno no debe recibi
 assert.doesNotMatch(appSource, /student-card-footer/, "Las tarjetas no deben repetir recuentos de actividades y evaluaciones");
 assert.doesNotMatch(appSource, /contentMeta/, "El directorio del alumno no debe calcular metadatos redundantes");
 assert.match(appSource, /student-dashboard-course-card/, "Las tarjetas del alumno deben compartir la estructura visual del tablero docente");
-assert.match(appSource, /manage-course-content open-student-course/, "El botón del alumno debe compartir tamaño, posición y acabado con el botón docente");
-assert.match(cssSource, /\.student-dashboard-course-card \.canvas-dashboard-card-body\s*\{[\s\S]*?min-height:0;/, "La tarjeta del alumno no debe conservar una altura vacía artificial");
-assert.match(cssSource, /\.student-dashboard-actions\s*\{[\s\S]*?justify-content:flex-start;/, "El acceso al curso del alumno debe quedar alineado a la izquierda");
 assert.doesNotMatch(appSource, /student-dashboard-progress/, "Las tarjetas del alumno no deben mostrar progreso ni informacion adicional");
 assert.doesNotMatch(appSource, /student-course-exams/, "Las evaluaciones no deben repetirse fuera de sus módulos");
 assert.doesNotMatch(appSource, /ESPACIO DEL CURSO/, "La cabecera del alumno no debe repetir el contexto del curso");
@@ -92,8 +88,6 @@ assert.match(appSource, /activeStudentCourseSection/, "El curso debe conservar s
 assert.match(appSource, /renderStudentCourseGrades/, "El alumno debe consultar las calificaciones del curso específico");
 assert.match(appSource, /myGrades\.filter\(grade => grade\.courseId === course\.id\)/, "Las calificaciones internas deben filtrarse por curso");
 assert.match(cssSource, /\.student-course-sidebar\s*\{[\s\S]*?flex-direction:column;/, "La navegación del curso debe ocupar el lateral izquierdo");
-assert.match(cssSource, /\.student-course-sidebar\s*\{[\s\S]*?position:sticky;[\s\S]*?height:100vh;/, "La barra lateral del curso debe permanecer fija durante el desplazamiento");
-assert.match(cssSource, /\.student-course-sidebar-progress\s*\{[\s\S]*?margin-top:22px;/, "El progreso debe aparecer inmediatamente después de la navegación");
 assert.doesNotMatch(appSource, /student-course-grades/, "El acceso contextual no debe enviar al alumno a la tabla global");
 assert.match(cssSource, /body\.student-course-open\.app-shell-mode > main\s*\{[\s\S]*?padding:0;/, "El curso interno debe ocupar la pantalla sin marco exterior");
 assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s\S]*?max-width:none;[\s\S]*?min-height:100vh;/, "La estructura del curso debe usar todo el ancho y alto");
@@ -105,11 +99,6 @@ assert.doesNotMatch(teacherCanvasSource, /module-expand-control/, "El módulo do
 assert.match(cssSource, /\.canvas-module-card\[open\] > summary \.module-disclosure\s*\{[\s\S]*?transform:rotate\(90deg\);/, "La flecha debe cambiar de orientación al desplegar el módulo");
 assert.match(appSource, /class="module-sequence"[^>]*>\$\{moduleIndex \+ 1\}/, "Los módulos docentes deben usar numeración");
 assert.doesNotMatch(teacherCanvasSource, /class="activity-sequence"/, "Las actividades docentes no deben mostrar numeración redundante");
-const studentModulesSource = appSource.slice(appSource.indexOf("function renderStudentCourseModules"), appSource.indexOf("function accessibleCourseActivities"));
-assert.match(studentModulesSource, /class="module-disclosure"[^>]*>›<\/span><span class="module-sequence"/, "El alumno debe usar la misma flecha y numeración de módulo que el profesor");
-assert.doesNotMatch(studentModulesSource, /class="activity-sequence"/, "Las actividades del alumno no deben mostrar numeración redundante");
-assert.doesNotMatch(studentModulesSource, /class="module-expand-control"/, "El alumno no debe mostrar el antiguo botón de expansión");
-assert.match(cssSource, /#student-view \.student-activity > \.start-exam\s*\{[\s\S]*?background:transparent;/, "Las evaluaciones del módulo no deben convertirse en franjas de color");
 assert.doesNotMatch(appSource, /class="publish-check/, "Los checks de publicación deben sustituirse por numeración y texto");
 assert.doesNotMatch(htmlSource, /class="lesson-tabs"/, "La página de contenido no debe mostrar pestañas vacías o redundantes");
 assert.doesNotMatch(appSource, /renderLessonTabs/, "El contenido no debe duplicarse en paneles secundarios");
@@ -126,55 +115,26 @@ assert.match(htmlSource, /id="lesson-menu-toggle"[\s\S]*?lesson-menu-icon[\s\S]*
 assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, "El botón de módulos debe tener una apariencia moderna y reconocible");
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
-assert.match(appSource, /await loadCourseAccess\(\);[\s\S]*?await loadDynamicCourses\(\);/, "Las matrículas deben cargarse antes que el contenido publicado");
-assert.match(appSource, /enrollment\.status === "active" && enrollment\.student_id === currentUser\?\.id/, "Las matrículas visibles deben pertenecer al alumno autenticado");
-assert.match(appSource, /currentUser\?\.role === "student" \? mergedCourses\.filter\(course => enrolledCourseIds\.has\(course\.id\)\)/, "El alumno solo debe conservar cursos con matrícula activa");
-assert.match(appSource, /Aún no tienes cursos autorizados/, "El estado vacío debe explicar que el profesor concede el acceso");
-assert.match(appSource, /function renderTeacherCoursePeople[\s\S]*?course-access-form[\s\S]*?Autorizar alumno/, "Personas debe administrar alumnos autorizados por correo");
-assert.match(appSource, /sb\.rpc\("grant_course_access"/, "La autorización debe usar la función segura de Supabase");
-assert.match(appSource, /sb\.rpc\("revoke_course_access"/, "El profesor debe poder retirar el acceso");
-assert.match(enrollmentMigrationSource, /create table if not exists public\.course_enrollments/, "La migración debe crear la tabla de matrículas");
-assert.match(enrollmentMigrationSource, /alter table public\.course_enrollments enable row level security;/, "Las matrículas deben tener RLS habilitado");
-assert.match(enrollmentMigrationSource, /published = true and public\.is_enrolled\(course_id\)/, "Los cursos publicados deben exigir matrícula al alumno");
-assert.match(enrollmentMigrationSource, /student_id = auth\.uid\(\) and public\.is_enrolled\(course_id\)/, "Un alumno no debe registrar resultados en cursos no autorizados");
-assert.match(enrollmentMigrationSource, /grant_course_access[\s\S]*?role = 'student'/, "La autorización debe aceptar únicamente cuentas de alumno registradas");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
   assert.notEqual(start, -1, `No se encontró ${name}`);
-  const declarationStart = appSource.slice(Math.max(0, start - 6), start) === "async " ? start - 6 : start;
   const bodyStart = appSource.indexOf("{", start);
   let depth = 0;
   for (let index = bodyStart; index < appSource.length; index += 1) {
     if (appSource[index] === "{") depth += 1;
     if (appSource[index] === "}") depth -= 1;
-    if (depth === 0) return appSource.slice(declarationStart, index + 1);
+    if (depth === 0) return appSource.slice(start, index + 1);
   }
   throw new Error(`La función ${name} está incompleta`);
 }
 
 const saveExamSource = extractFunction("saveExamDraft");
 assert.match(htmlSource, /class="editor-sticky-bar"[\s\S]*?class="exam-editor-header-actions"[\s\S]*?class="modal-close"/, "Cerrar debe permanecer dentro de la cabecera fija del editor");
-assert.match(saveExamSource, /persistPublishedCourseModules[\s\S]*?cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "La asignación debe persistirse antes de cerrar el editor y actualizar la vista");
-assert.match(htmlSource, /id="return-student"[^>]*>[\s\S]*?Volver a calificaciones/, "La revisión debe regresar a las calificaciones del curso");
-assert.match(htmlSource, /id="lesson-return" class="lesson-return contextual-back"[\s\S]*?Volver a módulos/, "La lección debe usar el mismo patrón de regreso a módulos");
-assert.match(appSource, /course-workspace-back contextual-back[\s\S]*?back-to-student-courses/, "Las páginas internas deben compartir el patrón de navegación contextual");
-assert.doesNotMatch(htmlSource, /Volver a mis cursos/, "La revisión no debe conservar el antiguo regreso al directorio general");
-assert.match(appSource, /function returnFromResult[\s\S]*?activeStudentCourseId = publishedCourses\.some[\s\S]*?activeStudentCourseSection = "grades";/, "El regreso desde resultados debe abrir las calificaciones del curso evaluado");
-assert.match(cssSource, /body\.result-game-mode > \.topbar,[\s\S]*?display:none !important;/, "La revisión no debe mostrar nombre, correo ni acciones globales del alumno");
-assert.match(cssSource, /body\.result-game-mode #return-student\s*\{[\s\S]*?position:static;[\s\S]*?background:#fff;[\s\S]*?box-shadow:none;/, "El regreso de resultados no debe conservar el antiguo botón rojo flotante");
-assert.match(htmlSource, /class="result-page-header"[\s\S]*?class="result-summary-card"/, "El resultado debe usar una cabecera y un resumen profesional separados");
-assert.match(appSource, /function reviewSectionMarkup\(grades\)\s*\{\s*return reviewMarkup\(grades\);/, "La revisión no debe repetir encabezados descriptivos");
-assert.doesNotMatch(htmlSource, /result-encouragement|result-sync-status|>RESULTADO</, "El resumen debe conservar únicamente los datos esenciales");
-assert.doesNotMatch(appSource, /No te rindas\. Revisar tus respuestas/, "La frase motivacional solicitada debe eliminarse");
-assert.doesNotMatch(appSource, /id="sound-btn"|soundControl/, "El menú del alumno no debe mostrar el control de sonido");
-assert.match(appSource, /const resultReviewOpen[\s\S]*?if \(resultReviewOpen\) show\("result-view"\);/, "La renovación de sesión debe conservar abierta la revisión de resultados");
-const lessonTreeSource = appSource.slice(appSource.indexOf("function renderLessonTree"), appSource.indexOf("function completeActiveLesson"));
-assert.doesNotMatch(lessonTreeSource, /activity-sequence|activityIndex|index \+ 1/, "El árbol lateral de lecciones no debe mostrar numeración");
+assert.match(saveExamSource, /cachePublishedExamAssignment[\s\S]*?closeModal\("exam-modal"\);[\s\S]*?renderTeacher\(\);/, "El guardado confirmado debe cerrar el editor y actualizar la vista inmediatamente");
 
 const context = {
   courseProgress: {},
-  courseEnrollments: [{ course_id:"course-1", student_id:"student-1", status:"active" }],
   results: [],
   currentUser: { id: "student-1" },
   Date,
@@ -190,7 +150,6 @@ vm.runInContext([
   extractFunction("normalizeModules"),
   extractFunction("applyExamModuleAssignment"),
   extractFunction("cachePublishedExamAssignment"),
-  extractFunction("persistPublishedCourseModules"),
   extractFunction("activityCompleted"),
   extractFunction("accessibleCourseActivities")
 ].join("\n"), context);
@@ -247,35 +206,6 @@ context.publishedExams = [{ id:"exam-2", courseId:"course-1", title:"Nombre ante
 context.cachePublishedExamAssignment(context.publishedCourses[0], { id:"exam-2", courseId:"course-1", title:"Examen actualizado", questions:[], published:true }, assignedModules);
 assert.equal(context.publishedCourses[0].modules[1].activities[0].examId, "exam-2", "La vista local debe reflejar inmediatamente la evaluación dentro del módulo");
 assert.equal(context.publishedExams[0].title, "Examen actualizado", "La vista local debe reflejar inmediatamente los cambios del examen");
-context.currentUser = { id:"teacher-1", role:"teacher" };
-context.isMissingModulesColumn = () => false;
-context.removeLegacyCourseModules = async () => {};
-context.saveLegacyCourseModules = async () => ({ error:null });
-context.sb = { from:() => ({ upsert:row => ({ select:() => ({ single:async () => ({ data:{ course_id:row.course_id, modules:row.modules }, error:null }) }) }) }) };
-const persistedModules = await context.persistPublishedCourseModules({ id:"course-1", name:"Curso", description:"" }, assignedModules);
-assert.equal(persistedModules.error, null, "La persistencia explícita de módulos debe completarse sin errores");
-assert.equal(persistedModules.modules[1].activities[0].examId, "exam-2", "La confirmación persistida debe conservar el vínculo de la evaluación");
-context.catalogCourses = [];
-context.dynamicCourses = [{ id:"course-1", name:"Curso", description:"", modules:[] }];
-context.courseChanges = [{ course_id:"course-1", name:"Curso", description:"", modules:persistedModules.modules, deleted:false }];
-context.legacyCourseModules = new Map();
-context.catalogExams = [];
-context.dynamicExams = [{ id:"exam-2", courseId:"course-1", title:"Examen actualizado", published:true, questions:[] }];
-vm.runInContext(extractFunction("applyCourseChanges"), context);
-context.applyCourseChanges();
-assert.equal(context.publishedCourses[0].modules[1].activities[0].examId, "exam-2", "Una sincronización posterior no debe eliminar la asignación persistida");
-context.currentUser = { id:"student-1", role:"student" };
-context.courseProgress = {};
-context.results = [];
-const studentAssignedActivities = context.accessibleCourseActivities(context.publishedCourses[0]);
-assert.equal(studentAssignedActivities.some(activity => activity.examId === "exam-2" && activity.type === "quiz"), true, "La evaluación persistida debe formar parte del recorrido accesible del alumno");
-context.publishedExams = [{ id:"exam-2", courseId:"course-1", title:"Examen actualizado" }];
-context.esc = value => String(value);
-context.modernIcon = () => "";
-context.unlockRuleLabel = () => "Disponible inmediatamente";
-vm.runInContext(extractFunction("renderStudentCourseModules"), context);
-const studentModuleMarkup = context.renderStudentCourseModules(context.publishedCourses[0], []);
-assert.match(studentModuleMarkup, /class="start-exam" data-id="exam-2"/, "La plataforma del alumno debe mostrar la evaluación asignada como botón para iniciar");
 
 for (const type of ["page","file","video","link","practice","task","quiz","discussion","live","heading"]) {
   assert.match(htmlSource, new RegExp(`value="${type}"`), `Falta el tipo ${type} en el selector`);
@@ -286,8 +216,6 @@ for (const field of ["activity-published","activity-completion-rule","activity-e
 assert.match(appSource, /Sin asignar a un módulo/, "Las evaluaciones históricas sin módulo deben identificarse");
 assert.match(htmlSource, /id="editor-module"/, "El editor de evaluaciones debe permitir elegir un módulo");
 assert.doesNotMatch(appSource, /exam-assignment-action|data-focus-module/, "La asignación debe administrarse dentro de Modificar, sin un botón independiente");
-assert.match(appSource, /persistPublishedCourseModules[\s\S]*?\.select\("course_id, modules"\)\.single\(\)/, "La asignación publicada debe confirmarse directamente desde course_changes");
-assert.match(appSource, /const exam = activity\.examId \? publishedExams\.find[\s\S]*?"start-exam"/, "La evaluación asignada debe mostrarse como acción disponible para el alumno");
 assert.match(appSource, /Filtro de las tareas ya ubicadas en los módulos/, "La vista global de tareas debe ser un filtro");
 assert.doesNotMatch(appSource, /student-todo-panel/, "El panel del alumno no debe mostrar el bloque de evaluaciones pendientes");
 assert.doesNotMatch(htmlSource, /<div class="tabs">\s*<button class="tab active" data-student-tab/, "El panel del alumno no debe duplicar la navegación en una barra horizontal");

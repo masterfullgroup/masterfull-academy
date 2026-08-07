@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Plataforma de cursos y exámenes para profesores y alumnos.">
   <title>Masterfull Academy | Cursos y exámenes</title>
-  <link rel="stylesheet" href="styles.css?v=20260806-1">
-  <link rel="stylesheet" href="admin-dashboard.css?v=20260806-6">
+  <link rel="stylesheet" href="styles.css?v=20260803-4">
 </head>
 <body class="session-loading">
   <header class="topbar">
@@ -51,155 +50,24 @@
           <form id="login-form" class="auth-form">
             <h2>Bienvenido</h2>
             <p class="muted">Ingresa con tu correo y contraseña.</p>
-            <label>Correo electrónico
-    <div class="input-group-icon">
-        <div class="input-icon">
-            @
-        </div>
-
-        <input
-            id="login-email"
-            type="email"
-            required
-            autocomplete="email"
-            placeholder="nombre@correo.com">
-    </div>
-</label>
+            <label>Correo electrónico<input id="login-email" type="email" required autocomplete="email" placeholder="nombre@correo.com"></label>
             <label>Contraseña
-  <div class="input-group-icon password-field">
-    <div class="input-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24">
-        <rect x="5" y="10" width="14" height="10" rx="2"></rect>
-        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-      </svg>
-    </div>
-
-    <input
-      id="login-password"
-      type="password"
-      required
-      autocomplete="current-password"
-      placeholder="Tu contraseña">
-
-    <button
-      class="password-toggle"
-      type="button"
-      data-password="login-password"
-      aria-label="Mostrar contraseña"
-      title="Mostrar contraseña">
-    </button>
-  </div>
-</label>
+              <span class="password-field"><input id="login-password" type="password" required autocomplete="current-password" placeholder="Tu contraseña"><button class="password-toggle" type="button" data-password="login-password" aria-label="Mostrar contraseña" title="Mostrar contraseña"></button></span>
+            </label>
             <button class="btn primary full" type="submit">Ingresar</button>
             <p id="login-error" class="error"></p>
           </form>
 
           <form id="register-form" class="auth-form hidden">
             <h2>Crea tu cuenta</h2>
-            <label>Nombre completo
-              <div class="register-role-field">
-  <span class="register-role-label">Tipo de cuenta</span>
-
-  <div class="register-role-options">
-    <label>
-      <input
-        type="radio"
-        name="register-role"
-        value="student"
-        checked>
-      Alumno
-    </label>
-
-    <label>
-      <input
-        type="radio"
-        name="register-role"
-        value="teacher">
-      Profesor
-    </label>
-  </div>
-</div>
-  <div class="input-group-icon">
-    <div class="input-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="8" r="4"></circle>
-        <path d="M4 21a8 8 0 0 1 16 0"></path>
-      </svg>
-    </div>
-
-    <input
-      id="register-name"
-      required
-      maxlength="80"
-      placeholder="Nombres y apellidos">
-  </div>
-</label>
-            <label>Correo electrónico
-  <div class="input-group-icon">
-    <div class="input-icon" aria-hidden="true">
-      @
-    </div>
-
-    <input
-      id="register-email"
-      type="email"
-      required
-      autocomplete="email"
-      placeholder="nombre@correo.com">
-  </div>
-</label>
+            <label>Nombre completo<input id="register-name" required maxlength="80" placeholder="Nombres y apellidos"></label>
+            <label>Correo electrónico<input id="register-email" type="email" required autocomplete="email" placeholder="nombre@correo.com"></label>
             <label>Contraseña
-  <div class="input-group-icon password-field">
-    <div class="input-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24">
-        <rect x="5" y="10" width="14" height="10" rx="2"></rect>
-        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-      </svg>
-    </div>
-
-    <input
-      id="register-password"
-      type="password"
-      required
-      minlength="8"
-      autocomplete="new-password"
-      placeholder="Mínimo 8 caracteres">
-
-    <button
-      class="password-toggle"
-      type="button"
-      data-password="register-password"
-      aria-label="Mostrar contraseña"
-      title="Mostrar contraseña">
-    </button>
-  </div>
-</label>
+              <span class="password-field"><input id="register-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres"><button class="password-toggle" type="button" data-password="register-password" aria-label="Mostrar contraseña" title="Mostrar contraseña"></button></span>
+            </label>
             <label>Confirmar contraseña
-  <div class="input-group-icon password-field">
-    <div class="input-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24">
-        <rect x="5" y="10" width="14" height="10" rx="2"></rect>
-        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-      </svg>
-    </div>
-
-    <input
-      id="register-password-confirm"
-      type="password"
-      required
-      minlength="8"
-      autocomplete="new-password"
-      placeholder="Escribe la contraseña otra vez">
-
-    <button
-      class="password-toggle"
-      type="button"
-      data-password="register-password-confirm"
-      aria-label="Mostrar contraseña"
-      title="Mostrar contraseña">
-    </button>
-  </div>
-</label>
+              <span class="password-field"><input id="register-password-confirm" type="password" required minlength="8" autocomplete="new-password" placeholder="Escribe la contraseña otra vez"><button class="password-toggle" type="button" data-password="register-password-confirm" aria-label="Mostrar contraseña" title="Mostrar contraseña"></button></span>
+            </label>
             <p class="notice compact">El registro público crea cuentas de alumno. Para convertir una cuenta en profesor, cambia su rol desde Supabase siguiendo el README.</p>
             <button class="btn primary full" type="submit">Crear cuenta</button>
             <p id="register-error" class="error"></p>
@@ -207,329 +75,6 @@
         </div>
       </div>
     </section>
-    <section id="admin-view" class="view admin-panel">
-  <div class="admin-shell">
-
-    <aside class="admin-sidebar" aria-label="Navegación del administrador">
-      <div class="admin-brand">
-        
-
-        <div>
-          <strong>Masterfull Academy</strong>
-          <small>Administración</small>
-        </div>
-      </div>
-
-      <nav class="admin-navigation">
-        <button
-          class="admin-nav-item active"
-          type="button"
-          data-admin-section="dashboard">
-          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m4 11 8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg></span>
-          Dashboard
-        </button>
-
-        <button
-          class="admin-nav-item"
-          type="button"
-          data-admin-section="teachers">
-          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
-          Profesores
-        </button>
-
-        <button
-          class="admin-nav-item"
-          type="button"
-          data-admin-section="students">
-          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/><path d="M4 20h16"/></svg></span>
-          Alumnos
-        </button>
-
-        <button
-          class="admin-nav-item"
-          type="button"
-          data-admin-section="courses">
-          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span>
-          Cursos
-        </button>
-
-        <button
-          class="admin-nav-item"
-          type="button"
-          data-admin-section="payments">
-          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span>
-          Pagos
-        </button>
-
-        <button
-          class="admin-nav-item"
-          type="button"
-          data-admin-section="settings">
-          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L14.6 3h-4l-.3 2.9a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1l.3 2.9h4l.3-2.9a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5c.1-.3.1-.7.1-1Z"/></svg></span>
-          Configuración
-        </button>
-      </nav>
-
-      <div class="admin-sidebar-footer">
-        <button id="admin-logout" class="admin-logout-button" type="button">
-          <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 5H5v14h5"/><path d="m14 8 4 4-4 4M8 12h10"/></svg></span>
-          Cerrar sesión
-        </button>
-      </div>
-    </aside>
-
-    <main class="admin-main">
-      <header class="admin-header">
-        <div>
-          <span class="eyebrow">PANEL DEL ADMINISTRADOR</span>
-          <h2 id="admin-welcome">Bienvenido, administrador</h2>
-          <p>Supervisa profesores, alumnos, cursos y el estado general de la plataforma.</p>
-        </div>
-
-       
-      </header>
-
-      <section
-        id="admin-dashboard"
-        class="admin-section active"
-        data-admin-page="dashboard">
-
-        <div class="admin-stat-grid modern-admin-stats">
-          <article class="admin-stat-card modern-card">
-            <div class="stat-icon">👩‍🏫</div>
-            <div class="stat-copy"><span>Profesores totales</span><small>Registrados en la plataforma</small></div>
-            <strong id="admin-total-teachers">0</strong>
-          </article>
-
-          <article class="admin-stat-card modern-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-copy"><span>Profesores activos</span><small>Con acceso habilitado</small></div>
-            <strong id="admin-active-teachers">0</strong>
-          </article>
-
-          <article class="admin-stat-card modern-card">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-copy"><span>Profesores pendientes</span><small>Esperando aprobación</small></div>
-            <strong id="admin-pending-teachers">0</strong>
-          </article>
-
-          <article class="admin-stat-card modern-card">
-            <div class="stat-icon">🎓</div>
-            <div class="stat-copy"><span>Alumnos</span><small>Usuarios registrados</small></div>
-            <strong id="admin-total-students">0</strong>
-          </article>
-
-          <article class="admin-stat-card modern-card">
-            <div class="stat-icon">📚</div>
-            <div class="stat-copy"><span>Cursos</span><small>Cursos creados</small></div>
-            <strong id="admin-total-courses">0</strong>
-          </article>
-
-          <article class="admin-stat-card modern-card">
-            <div class="stat-icon">💳</div>
-            <div class="stat-copy"><span>Matrículas</span><small>Accesos a cursos</small></div>
-            <strong id="admin-total-enrollments">0</strong>
-          </article>
-        </div>
-
-        <section class="admin-content-card">
-          <header class="admin-card-header">
-            <div>
-              <h3>Profesores pendientes</h3>
-              <p>Solicitudes que necesitan revisión.</p>
-            </div>
-
-            <button
-              class="btn secondary"
-              id="admin-view-all-teachers"
-              type="button">
-              Ver profesores
-            </button>
-          </header>
-
-          <div
-            id="admin-pending-teachers-list"
-            class="admin-teacher-list">
-            <p class="empty">Todavía no se cargaron los profesores.</p>
-          </div>
-        </section>
-      </section>
-
-      <section id="admin-teachers" class="admin-section" data-admin-page="teachers" aria-labelledby="admin-teachers-title">
-
-  <header class="admin-section-header">
-    <div>
-      <span class="eyebrow">GESTIÓN DE USUARIOS</span>
-      <h2 id="admin-teachers-title">Profesores</h2>
-      <p>Aprueba, suspende, reactiva y administra las cuentas docentes.</p>
-    </div>
-  </header>
-
-  <div class="admin-teacher-tools modern-tools" role="toolbar" aria-label="Herramientas del listado de profesores">
-    <div class="tools-left">
-      <div class="input-group-icon" style="max-width:480px;">
-        <div class="input-icon" aria-hidden="true">🔎</div>
-        <input id="admin-teacher-search" type="search" placeholder="Buscar por nombre, correo o institución" aria-label="Buscar profesores">
-        <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
-      </div>
-
-      <select id="admin-teacher-status-filter" class="compact-select" aria-label="Filtrar por estado">
-        <option value="">Todos los estados</option>
-        <option value="pending">Pendientes</option>
-        <option value="active">Activos</option>
-        <option value="suspended">Suspendidos</option>
-        <option value="archived">Archivados</option>
-      </select>
-    </div>
-
-    <div class="tools-right">
-      <div class="actions-row">
-        <button class="btn ghost small" id="admin-export-teachers" type="button">Exportar</button>
-        <button class="btn secondary" id="admin-view-all-teachers" type="button">Ver profesores</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="admin-content-card">
-    <div id="admin-teachers-table" class="admin-table-container modern-table" role="region" aria-live="polite">
-      <table class="teachers-table" aria-describedby="admin-teachers-desc">
-        <caption id="admin-teachers-desc" class="sr-only">Lista de profesores registrados en la plataforma</caption>
-        <thead>
-          <tr>
-            <th scope="col">Profesor</th>
-            <th scope="col">Institución</th>
-            <th scope="col">Teléfono</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Registro</th>
-            <th scope="col">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="empty-row"><td colspan="6" class="empty">Cargando profesores...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div id="admin-teacher-pagination" class="admin-pagination modern-pagination" aria-label="Paginación de profesores"></div>
-  </div>
-</section>
-
-<div
-  id="admin-teacher-modal"
-  class="modal hidden"
-  aria-hidden="true">
-
-  <div class="panel admin-teacher-modal-card">
-    <button
-      id="admin-teacher-modal-close"
-      class="modal-close"
-      type="button"
-      aria-label="Cerrar">
-      ×
-    </button>
-
-    <header class="admin-teacher-modal-head">
-      <span class="eyebrow">PERFIL DEL PROFESOR</span>
-      <h2 id="admin-teacher-modal-title">Profesor</h2>
-      <p id="admin-teacher-modal-email"></p>
-    </header>
-
-    <form id="admin-teacher-form">
-      <input
-        id="admin-teacher-id"
-        type="hidden">
-
-      <label>
-        Nombre completo
-        <input
-          id="admin-teacher-name"
-          type="text"
-          maxlength="80"
-          required>
-      </label>
-
-      <label>
-        Institución
-        <input
-          id="admin-teacher-institution"
-          type="text"
-          maxlength="120"
-          placeholder="Nombre de la institución">
-      </label>
-
-      <label>
-        Teléfono
-        <input
-          id="admin-teacher-phone"
-          type="text"
-          maxlength="30"
-          placeholder="Número de contacto">
-      </label>
-
-      <label>
-        Estado
-        <select id="admin-teacher-modal-status">
-          <option value="pending">Pendiente</option>
-          <option value="active">Activo</option>
-          <option value="suspended">Suspendido</option>
-          <option value="archived">Archivado</option>
-        </select>
-      </label>
-
-      <p
-        id="admin-teacher-form-message"
-        class="error">
-      </p>
-
-      <div class="admin-teacher-modal-actions">
-        <button
-          id="admin-teacher-cancel"
-          class="btn ghost"
-          type="button">
-          Cancelar
-        </button>
-
-        <button
-          class="btn primary"
-          type="submit">
-          Guardar cambios
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-      <section id="admin-students" class="admin-section" data-admin-page="students">
-        <div class="admin-panel-card modern-panel">
-          <header><h2>Alumnos</h2><p class="muted">Gestión y búsqueda de alumnos registrados</p></header>
-          <div class="admin-panel-body"><p>Este módulo se implementará después de completar Profesores.</p></div>
-        </div>
-      </section>
-
-      <section id="admin-courses" class="admin-section" data-admin-page="courses">
-        <div class="admin-panel-card modern-panel">
-          <header><h2>Cursos</h2><p class="muted">Listado y administración de cursos</p></header>
-          <div class="admin-panel-body"><p>Este módulo mostrará los cursos sin modificar su estructura actual.</p></div>
-        </div>
-      </section>
-
-      <section id="admin-payments" class="admin-section" data-admin-page="payments">
-        <div class="admin-panel-card modern-panel">
-          <header><h2>Pagos</h2><p class="muted">Historial y gestión de pagos</p></header>
-          <div class="admin-panel-body"><p>Este módulo se incorporará en la fase de suscripciones.</p></div>
-        </div>
-      </section>
-
-      <section id="admin-settings" class="admin-section" data-admin-page="settings">
-        <div class="admin-panel-card modern-panel">
-          <header><h2>Configuración</h2><p class="muted">Configuraciones generales de la plataforma</p></header>
-          <div class="admin-panel-body"><p>Opciones de ajuste, integraciones y parámetros del sistema.</p></div>
-        </div>
-      </section>
-    </main>
-
-  </div>
-</section>
 
     <section id="teacher-view" class="view teacher-lms">
       <div class="teacher-lms-shell">
@@ -540,7 +85,7 @@
           </header>
 
           <div id="teacher-home" class="tab-content active">
-          <div id="teacher-overview" class="teacher-overview" aria-live="polite"></div>
+            <div id="teacher-overview" class="teacher-overview" aria-live="polite"></div>
           </div>
 
           <div id="teacher-courses" class="tab-content">
@@ -562,124 +107,29 @@
             <div id="teacher-course-workspace" class="hidden" aria-live="polite"></div>
           </div>
           <div id="teacher-exams" class="tab-content">
-            <div id="teacher-exam-directory" class="exam-directory-modern">
-              <div class="exam-topbar">
-                <div class="exam-head-copy">
-                  <span class="eyebrow">EVALUACIONES</span>
-                  <h3>Cursos con evaluaciones</h3>
-                  <p class="muted">Abre un curso para entrar a su espacio y administrar su contenido por separado.</p>
-                </div>
-
-                <div class="exam-controls">
-                  <div class="exam-search">
-                    <label class="sr-only">Buscar evaluación</label>
-                    <div class="input-group-icon">
-                      <div class="input-icon" aria-hidden="true">🔎</div>
-                      <input id="exam-search" type="search" placeholder="Buscar evaluaciones…" aria-label="Buscar evaluaciones">
-                      <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
-                    </div>
-                  </div>
-
-                  <div class="exam-actions">
-                    <button class="btn secondary" id="refresh-exams" type="button">Actualizar</button>
-                    <button class="btn primary" id="new-exam-btn" type="button">+ Crear evaluación</button>
-                  </div>
-                </div>
-              </div>
-
-              <div id="teacher-exam-course-list" class="exam-course-directory grid-exams" aria-live="polite">
-                <!-- Las tarjetas de examen se renderizan aquí por el JS existente. Mantener clases y atributos de datos. -->
-                <div class="exam-empty">
-                  <p class="muted">Aún no hay evaluaciones. Crea una evaluación para empezar a medir resultados.</p>
-                </div>
-              </div>
+            <div id="teacher-exam-directory">
+              <div class="teacher-section-title"><div><span class="eyebrow">EVALUACIONES</span><h3>Cursos con evaluaciones</h3><p>Abre un curso para entrar a su espacio y administrar su contenido por separado.</p></div><button class="btn primary" id="new-exam-btn" type="button">+ Crear evaluación</button></div>
+              <div id="teacher-exam-course-list" class="exam-course-directory" aria-live="polite"></div>
             </div>
           </div>
           <div id="teacher-grades" class="tab-content">
             <div class="teacher-section-title"><div><span class="eyebrow">SEGUIMIENTO</span><h3>Libro de calificaciones</h3><p>Consulta intentos, desempeño y respuestas de cada alumno.</p></div><div><button class="btn secondary" id="refresh-results">Actualizar</button><button class="btn secondary" id="export-grades">Exportar CSV</button></div></div>
-          <!-- Redesigned Grades top bar + filters (presentational only; IDs unchanged) -->
-          <div class="grades-topbar">
-            <div class="grades-stats" aria-hidden="true">
-              <div class="grades-stat-item">
-                <div class="stat-icon" aria-hidden="true">📚</div>
-                <div class="stat-meta"><small>Cursos</small><strong class="stat-value">—</strong></div>
-              </div>
-              <div class="grades-stat-item">
-                <div class="stat-icon" aria-hidden="true">📝</div>
-                <div class="stat-meta"><small>Exámenes</small><strong id="exams-tab-count" class="stat-value">0</strong></div>
-              </div>
-              <div class="grades-stat-item">
-                <div class="stat-icon" aria-hidden="true">📊</div>
-                <div class="stat-meta"><small>Resultados</small><strong id="grades-tab-count" class="stat-value">0</strong></div>
-              </div>
-            </div>
-
-            <div class="grades-controls">
-              <div class="grades-search">
-                <label for="teacher-search" class="sr-only">Buscar alumno</label>
-                <div class="input-search">
-                  <input id="teacher-search" placeholder="Buscar alumno o correo" type="search" aria-label="Buscar alumno o correo">
-                  <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
-                </div>
-              </div>
-
-              <div class="grades-filters">
-                <label class="sr-only" for="teacher-course-filter">Filtrar por curso</label>
-                <select id="teacher-course-filter" class="compact-select"><option value="">Todos los cursos</option></select>
-                <label class="sr-only" for="teacher-exam-filter">Filtrar por examen</label>
-                <select id="teacher-exam-filter" class="compact-select"><option value="">Todos los exámenes</option></select>
-              </div>
-
-              <div class="grades-actions">
-                <button class="btn secondary" id="refresh-results">Actualizar</button>
-                <button class="btn secondary" id="export-grades">Exportar CSV</button>
-              </div>
-            </div>
-          </div>
-
-          <p id="teacher-results-status" class="muted small" aria-live="polite"></p>
-
-          <!-- The JS renders grade rows inside this container. Keep id and class to preserve behavior. -->
-          <div id="teacher-grades-body" class="student-results-list"></div>
+            <div class="filters"><input id="teacher-search" placeholder="Buscar alumno o correo"><select id="teacher-course-filter"><option value="">Todos los cursos</option></select><select id="teacher-exam-filter"><option value="">Todos los exámenes</option></select></div>
+            <p id="teacher-results-status" class="muted small"></p>
+            <div id="teacher-grades-body" class="student-results-list"></div>
           </div>
         </div>
       </div>
     </section>
 
     <section id="student-view" class="view">
-      <div class="student-dashboard modern-dashboard">
-        <header class="student-dashboard-head dashboard-head">
-          <div><span class="eyebrow">PANEL DEL ALUMNO</span><h2 id="student-welcome">Hola, alumno</h2><p class="muted">Revisa tu avance, continúa aprendiendo y consulta tus próximos objetivos.</p></div>
-          <div class="student-head-actions"><button class="btn ghost" id="student-certificates-btn" type="button">Certificados</button></div>
-        </header>
-
-        <div id="student-stats" class="stats student-stats-modern"></div>
-
-        <main class="student-main-grid">
-          <aside class="student-courses-panel">
-            <div class="student-section-title"><div><span class="eyebrow">MIS CURSOS</span><h3>Biblioteca</h3><p class="muted">Accede a tus cursos y continúa donde lo dejaste.</p></div></div>
-
-            <div id="student-courses" class="tab-content active">
-              <div id="student-overview" class="student-dashboard-overview modern-overview" aria-live="polite"></div>
-              <div id="student-course-list" class="student-course-grid"></div>
-            </div>
-          </aside>
-
-          <section class="student-workspace">
-            <div id="student-course-workspace" class="hidden student-course-workspace modern-workspace" aria-live="polite">
-              <!-- Workspace content (course details, modules, player) rendered by existing JS inside this element -->
-              <div class="workspace-topbar"><div class="workspace-title"><h3 id="workspace-course-title">Curso</h3><small id="workspace-course-status" class="muted">Progreso</small></div><div class="workspace-actions"><button class="btn secondary" id="workspace-back" type="button">Volver</button></div></div>
-              <div class="workspace-content">
-                <aside class="workspace-modules" id="lesson-module-tree-container"><div id="lesson-module-tree" class="lesson-module-tree"></div></aside>
-                <div class="workspace-media"><div id="lesson-media" class="lesson-media modern-media"></div><div id="lesson-description" class="lesson-rich-content modern-rich"></div></div>
-              </div>
-            </div>
-
-            <div id="student-grades" class="tab-content modern-grades">
-              <div class="table-wrap modern-table-wrap"><table><thead><tr><th>Curso</th><th>Examen</th><th>Intento</th><th>Nota</th><th>Aciertos</th><th>Fecha</th><th>Revisión</th></tr></thead><tbody id="student-grades-body"></tbody></table></div>
-            </div>
-          </section>
-        </main>
+      <div class="dashboard-head">
+        <div><span class="eyebrow">PANEL DEL ALUMNO</span><h2 id="student-welcome">Hola, alumno</h2><p class="muted">Revisa tu avance, continúa aprendiendo y consulta tus próximos objetivos.</p></div>
+      </div>
+      <div id="student-stats" class="stats"></div>
+      <div id="student-courses" class="tab-content active"><div id="student-overview" class="student-dashboard-overview" aria-live="polite"></div><div id="student-course-list"></div><div id="student-course-workspace" class="hidden" aria-live="polite"></div></div>
+      <div id="student-grades" class="tab-content">
+        <div class="table-wrap"><table><thead><tr><th>Curso</th><th>Examen</th><th>Intento</th><th>Nota</th><th>Aciertos</th><th>Fecha</th><th>Revisión</th></tr></thead><tbody id="student-grades-body"></tbody></table></div>
       </div>
     </section>
 
@@ -690,7 +140,7 @@
           <div id="lesson-module-tree" class="lesson-module-tree"></div>
         </aside>
         <div class="lesson-main">
-          <header class="lesson-topbar"><button id="lesson-return" class="lesson-return contextual-back" type="button"><span aria-hidden="true">←</span> Volver a módulos</button><button id="lesson-menu-toggle" class="lesson-menu-toggle" type="button" aria-expanded="false" aria-controls="lesson-sidebar"><svg class="lesson-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Ver módulos</span></button></header>
+          <header class="lesson-topbar"><button id="lesson-menu-toggle" class="lesson-menu-toggle" type="button" aria-expanded="false" aria-controls="lesson-sidebar"><svg class="lesson-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Ver módulos</span></button><button id="lesson-return" class="lesson-return" type="button">← Volver al curso</button></header>
           <article class="lesson-content">
             <div id="lesson-media" class="lesson-media"></div>
             <header class="lesson-title-row"><div><span id="lesson-type" class="eyebrow"></span><h1 id="lesson-title"></h1></div><button id="lesson-complete" class="btn primary" type="button">Marcar como completado</button></header>
@@ -711,13 +161,13 @@
     </section>
 
     <section id="result-view" class="view">
-      <div class="result-shell">
-        <header class="result-page-header"><button class="contextual-back" id="return-student" type="button"><span aria-hidden="true">←</span> Volver a calificaciones</button></header>
-        <section class="result-summary-card" aria-labelledby="result-title">
-          <div class="result-summary-copy"><h1 id="result-title">Evaluación completada</h1><p id="result-message"></p></div>
-          <div class="big-score" aria-label="Calificación obtenida"><span id="result-score">0</span><small>/ 20</small></div>
-        </section>
+      <div class="panel narrow result-panel">
+        <div class="result-icon">✓</div><span class="eyebrow">EXAMEN FINALIZADO</span>
+        <h2>Tu resultado</h2><div class="big-score"><span id="result-score">0</span><small>/ 20</small></div>
+        <p id="result-message" class="muted"></p>
+        <p id="result-encouragement" class="encouragement"></p>
         <div id="result-review"></div>
+        <button class="btn primary" id="return-student">← Volver a mis cursos</button>
       </div>
     </section>
   </main>
@@ -860,7 +310,7 @@
   </div>
 
   <div id="exam-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exam-modal-title">
-    <div class="modal-card panel large exam-editor-card modern">
+    <div class="modal-card panel large exam-editor-card">
       <div class="editor-sticky-bar">
         <div><span class="eyebrow">EDITOR DE EXÁMENES</span><h2 id="exam-modal-title">Crear examen</h2></div>
         <div class="exam-editor-header-actions"><button class="btn primary editor-save" type="submit" form="exam-editor-form">Guardar examen</button><button class="modal-close" data-close="exam-modal" type="button" aria-label="Cerrar">×</button></div>
@@ -885,65 +335,39 @@
           <p id="option-count-message" class="sr-only" aria-live="polite"></p>
         </section>
         <section class="editor-section editor-questions-section" aria-labelledby="editor-questions-title">
-          <div class="question-builder-head modern-head">
-            <div><span class="eyebrow">CONTENIDO</span><h3 id="editor-questions-title">Preguntas <span id="builder-count" class="badge">0</span></h3><p class="muted">Elige cómo agregar preguntas al examen: escribe, genera o importa.</p></div>
-            <div class="question-builder-tools">
-              <div class="qb-search">
-                <label class="sr-only" for="qb-search-input">Buscar preguntas</label>
-                <div class="input-group-icon">
-                  <div class="input-icon" aria-hidden="true">🔎</div>
-                  <input id="qb-search-input" type="search" placeholder="Buscar en el banco de preguntas…" aria-label="Buscar preguntas">
-                  <button class="icon-btn search-clear" type="button" aria-label="Limpiar búsqueda">✕</button>
-                </div>
-              </div>
-              <div class="qb-actions">
-                <button class="btn ghost" id="import-questions-btn" type="button" aria-controls="import-questions">Importar</button>
-                <label class="btn secondary file-label small">Importar JSON<input id="import-questions" type="file" accept=".json,application/json" hidden></label>
-                <button class="btn secondary" id="export-questions-btn" type="button">Exportar</button>
-              </div>
-            </div>
+          <div class="question-builder-head">
+            <div><span class="eyebrow">CONTENIDO</span><h3 id="editor-questions-title">Preguntas <span id="builder-count" class="badge">0</span></h3><p>Elige una forma de agregar preguntas al examen.</p></div>
           </div>
-
-          <div class="question-mode-tabs modern-tabs" role="tablist" aria-label="Forma de agregar preguntas">
+          <div class="question-mode-tabs" role="tablist" aria-label="Forma de agregar preguntas">
             <button class="question-mode active" data-question-mode="manual-panel" type="button">Escribir manualmente</button>
             <button class="question-mode" data-question-mode="generator-panel" type="button">Generar preguntas</button>
             <button class="question-mode" data-question-mode="import-panel" type="button">Importar archivo</button>
           </div>
-
-          <div id="manual-panel" class="question-tool-panel modern-panel active">
-            <div class="manual-head"><strong>Nueva pregunta</strong><p class="muted">Crea enunciado, alternativas y marca la respuesta correcta.</p></div>
-            <div class="manual-controls"><button class="btn primary" id="add-question-btn" type="button">Agregar pregunta</button><button class="btn ghost" id="duplicate-question-btn" type="button">Duplicar</button></div>
+          <div id="manual-panel" class="question-tool-panel active">
+            <div><strong>Nueva pregunta</strong><p>Crea el enunciado, las alternativas y selecciona la respuesta correcta.</p></div>
+            <button class="btn primary" id="add-question-btn" type="button">Agregar pregunta</button>
           </div>
-
-          <div id="generator-panel" class="question-tool-panel generator-box modern-panel">
-            <div class="generator-heading"><div><span class="eyebrow">GENERADOR AUTOMÁTICO</span><h3>Crear desde apuntes</h3></div></div>
-            <p class="muted">Escribe una idea por línea usando <strong>concepto: definición</strong>. Ejemplo: <em>Triángulo: figura de tres lados</em>.</p>
-            <label class="modern-label">Apuntes o contenido<textarea id="generator-content" rows="6" placeholder="Triángulo: figura geométrica de tres lados&#10;Cuadrado: figura de cuatro lados iguales&#10;Círculo: figura redonda sin lados&#10;Rectángulo: figura de cuatro lados y ángulos rectos"></textarea></label>
-            <div class="generator-controls modern-controls">
-              <label>Cantidad<input id="generator-count" type="number" min="1" max="20" value="5"></label>
-              <button class="btn primary" id="generate-questions-btn" type="button">Generar preguntas</button>
-            </div>
-            <p id="generator-message" class="error"></p>
+          <div id="generator-panel" class="question-tool-panel generator-box">
+          <div class="generator-heading"><div><span class="eyebrow">GENERADOR AUTOMÁTICO</span><h3>Crear desde apuntes</h3></div></div>
+          <p class="muted">Escribe una idea por línea usando <strong>concepto: definición</strong>. Ejemplo: <em>Triángulo: figura de tres lados</em>.</p>
+          <label>Apuntes o contenido<textarea id="generator-content" rows="6" placeholder="Triángulo: figura geométrica de tres lados&#10;Cuadrado: figura de cuatro lados iguales&#10;Círculo: figura redonda sin lados&#10;Rectángulo: figura de cuatro lados y ángulos rectos"></textarea></label>
+          <div class="generator-controls">
+            <label>Cantidad<input id="generator-count" type="number" min="1" max="20" value="5"></label>
+            <button class="btn primary" id="generate-questions-btn" type="button">Generar preguntas</button>
           </div>
-
-          <div id="import-panel" class="question-tool-panel modern-panel">
-            <div class="import-info modern-import">
-              <strong>Importar desde un archivo</strong>
-              <p class="muted">Acepta campos en español o inglés: <code>pregunta</code>, <code>opciones</code> y <code>respuesta_correcta</code>. La respuesta puede ser letra (A–H), número (1–8) o texto de la alternativa.</p>
-              <p id="import-message" aria-live="polite"></p>
-            </div>
-            <label class="btn primary file-label">Seleccionar archivo JSON<input id="import-questions" type="file" accept=".json,application/json"></label>
+          <p id="generator-message" class="error"></p>
+        </div>
+          <div id="import-panel" class="question-tool-panel">
+          <div class="import-info">
+            <strong>Importar desde un archivo</strong>
+            <p>Acepta campos en español o inglés: <code>pregunta</code>, <code>opciones</code> y <code>respuesta_correcta</code>.</p>
+            <p>La respuesta puede ser una letra (A–H), un número (1–8) o el texto de la alternativa.</p>
+            <p id="import-message" aria-live="polite"></p>
           </div>
-
-          <div id="question-builder" class="question-bank-grid">
-            <!-- Las preguntas se renderizan aquí por el JS existente; cada pregunta mantiene sus clases y atributos. -->
-            <div class="question-bank-empty">
-              <p class="muted">No hay preguntas aún. Añade preguntas manualmente, genera o importa un banco.</p>
-            </div>
+          <label class="btn primary file-label">Seleccionar archivo JSON<input id="import-questions" type="file" accept=".json,application/json"></label>
           </div>
-
+          <div id="question-builder"></div>
           <p id="exam-editor-error" class="error"></p>
-        </section>
         </section>
       </form>
     </div>
@@ -975,6 +399,6 @@
   <footer>Masterfull Academy · Plataforma educativa digital.</footer>
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=20260806-2"></script>
+  <script src="app.js?v=20260803-4"></script>
 </body>
 </html>
