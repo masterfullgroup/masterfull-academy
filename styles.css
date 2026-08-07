@@ -8261,6 +8261,13 @@ body.teacher-course-open .course-workspace-content {
   overscroll-behavior:contain;
   scrollbar-gutter:stable;
 }
+body.teacher-course-open .teacher-lms-shell,
+body.teacher-course-open .course-workspace-page,
+body.teacher-course-open .course-context-bar,
+body.teacher-course-open .course-workspace-sidebar,
+body.teacher-course-open .course-workspace-content {
+  border-radius:0;
+}
 @media (max-width:700px) {
   body.teacher-course-open .course-workspace-layout {
     display:grid;
