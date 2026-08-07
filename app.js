@@ -692,7 +692,6 @@ function bindStaticEvents() {
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));
   $("#publish-course-form").addEventListener("submit", publishSelectedCourseExams);
   $("#exam-editor-form").addEventListener("submit", saveExamDraft);
-  $("#editor-course").addEventListener("change", () => populateEditorModuleOptions());
   $("#editor-option-count").addEventListener("change", changeOptionCount);
   $("#add-question-btn").addEventListener("click", addBuilderQuestion);
   $("#generate-questions-btn").addEventListener("click", generateQuestions);
@@ -1954,7 +1953,7 @@ function renderTeacherCourseWorkspace(course, exams) {
     </header>
     <div class="course-workspace-layout ${isStudentPreview ? "student-preview-active" : ""}">
       <aside class="course-workspace-sidebar">
-        <div class="course-sidebar-heading"><strong>Navegación del curso</strong></div>
+        <div class="course-sidebar-heading"><strong>${esc(course.name)}</strong><small>Navegación del curso</small></div>
         <nav class="course-workspace-nav" aria-label="Secciones de ${esc(course.name)}">${sections.map(([id, label, icon]) => `<button class="course-subpage ${activeTeacherCourseSection === id ? "active" : ""}" data-course-section="${id}" type="button">${modernIcon(icon)}<span>${label}</span></button>`).join("")}</nav>
       </aside>
       <main class="course-workspace-content">${content}</main>
@@ -2051,8 +2050,8 @@ function renderTeacherCourseModulesCanvas(course, exams = []) {
     <div class="course-subpage-head canvas-modules-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>${quantity(modules.length, "módulo")} · ${quantity(totalItems, "elemento")} organizados en el recorrido académico.</p></div></div>
     <div class="canvas-module-toolbar" aria-label="Acciones de módulos"><button class="btn secondary collapse-all-modules" type="button">Contraer todo</button><button class="btn secondary expand-all-modules" type="button">Expandir todo</button><button class="btn secondary view-course-progress" type="button">${modernIcon("progress")} Ver progreso</button><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Módulo</button></div>
     <div class="canvas-module-list">${modules.length ? modules.map((module, moduleIndex) => `<details class="canvas-module-card teacher-module-card" data-course-id="${esc(course.id)}" data-module-drop="${esc(module.id)}" ${moduleIndex < 2 ? "open" : ""}>
-      <summary class="canvas-module-summary"><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence" aria-label="Módulo ${moduleIndex + 1}">${moduleIndex + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, moduleIndex)} · ${quantity(module.activities.length, "elemento", "elementos")} · ${module.published ? "Publicado" : "Borrador"}</small></div><button class="module-quick-add add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button" aria-label="Agregar contenido a ${esc(module.title)}" title="Agregar contenido">+</button>${renderModuleOptions(course, module, moduleIndex, modules.length)}</summary>
-      <div class="canvas-module-items">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="canvas-module-heading" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">⋮</span><strong>${esc(activity.title)}</strong>${renderActivityOptions(course, module, activity, activityIndex)}</div>` : `<div class="canvas-module-item ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar ${esc(activity.title)}">⋮</span><span class="canvas-item-icon">${modernIcon(activity.type)}</span><div class="canvas-item-copy"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` · ${esc(activity.description)}` : ""}</small></div>${renderActivityOptions(course, module, activity, activityIndex)}</div>`).join("") : `<p class="canvas-module-empty">Este módulo todavía no tiene contenido.</p>`}<button class="canvas-add-content add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button"><span aria-hidden="true">＋</span><strong>Agregar contenido</strong><small>Página, archivo, video, tarea, práctica o evaluación</small></button></div>
+      <summary class="canvas-module-summary"><span class="drag-handle module-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" role="button" tabindex="0" aria-label="Arrastrar módulo ${esc(module.title)}">⋮⋮</span><span class="module-sequence" aria-label="Módulo ${moduleIndex + 1}">${moduleIndex + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, moduleIndex)} · ${quantity(module.activities.length, "elemento", "elementos")} · ${module.published ? "Publicado" : "Borrador"}</small></div><span class="module-expand-control" aria-hidden="true"></span><button class="module-quick-add add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button" aria-label="Agregar contenido a ${esc(module.title)}" title="Agregar contenido">+</button>${renderModuleOptions(course, module, moduleIndex, modules.length)}</summary>
+      <div class="canvas-module-items">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="canvas-module-heading" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">⋮</span><span class="activity-sequence">${activityIndex + 1}</span><strong>${esc(activity.title)}</strong>${renderActivityOptions(course, module, activity, activityIndex)}</div>` : `<div class="canvas-module-item ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar ${esc(activity.title)}">⋮</span><span class="activity-sequence" title="${activity.published ? "Publicado" : "Borrador"}">${activityIndex + 1}</span><span class="canvas-item-icon">${modernIcon(activity.type)}</span><div class="canvas-item-copy"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` · ${esc(activity.description)}` : ""}</small></div>${renderActivityOptions(course, module, activity, activityIndex)}</div>`).join("") : `<p class="canvas-module-empty">Este módulo todavía no tiene contenido.</p>`}<button class="canvas-add-content add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button"><span aria-hidden="true">＋</span><strong>Agregar contenido</strong><small>Página, archivo, video, tarea, práctica o evaluación</small></button></div>
     </details>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>Aún no hay módulos</strong><p>Crea el primero para organizar el contenido del curso.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer módulo</button></div>`}</div>
   </div>`;
 }
@@ -3487,40 +3486,6 @@ function deleteCourseDraft(id) {
   saveDrafts();
   renderTeacher();
 }
-function examAssignedModuleId(course, examId) {
-  return normalizeModules(course?.modules).find(module => module.activities.some(activity => activity.type === "quiz" && activity.examId === examId))?.id || "";
-}
-function populateEditorModuleOptions(preferredModuleId = null) {
-  const select = $("#editor-module");
-  const course = findCourse($("#editor-course").value);
-  const modules = normalizeModules(course?.modules);
-  const assignedModuleId = preferredModuleId ?? examAssignedModuleId(course, $("#editor-exam-id").value);
-  select.innerHTML = `<option value="">Sin asignar a un módulo</option>${modules.map(module => `<option value="${esc(module.id)}">${esc(module.title)}</option>`).join("")}`;
-  select.value = modules.some(module => module.id === assignedModuleId) ? assignedModuleId : "";
-  select.disabled = !modules.length;
-  select.closest("label")?.classList.toggle("has-no-modules", !modules.length);
-  $("#editor-module-help").textContent = modules.length
-    ? "La evaluación aparecerá dentro del módulo seleccionado."
-    : "Este curso aún no tiene módulos. Crea uno desde la sección Módulos para poder asignar la evaluación.";
-}
-function applyExamModuleAssignment(rawModules, exam, targetModuleId) {
-  const modules = normalizeModules(rawModules);
-  const linkedActivity = modules.flatMap(module => module.activities).find(activity => activity.type === "quiz" && activity.examId === exam.id);
-  const cleaned = modules.map(module => ({ ...module, activities: module.activities.filter(activity => !(activity.type === "quiz" && activity.examId === exam.id)) }));
-  if (!targetModuleId || !cleaned.some(module => module.id === targetModuleId)) return cleaned;
-  const activity = {
-    ...(linkedActivity || {}),
-    id: linkedActivity?.id || uid(),
-    title: exam.title,
-    type: "quiz",
-    published: exam.published,
-    examId: exam.id,
-    duration: exam.minutes,
-    attempts: exam.attemptsAllowed,
-    completionRule: "pass"
-  };
-  return cleaned.map(module => module.id === targetModuleId ? { ...module, activities: [...module.activities, activity] } : module);
-}
 function openExamModal(id = null, courseId = null) {
   const courses = [...publishedCourses, ...drafts.courses];
   if (!courses.length) { alert("Primero crea un curso local o agrega cursos en data/catalog.json."); openCourseModal(); return; }
@@ -3531,7 +3496,6 @@ function openExamModal(id = null, courseId = null) {
   $("#editor-exam-id").value = exam?.id || "";
   $("#editor-course").innerHTML = courses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("");
   $("#editor-course").value = exam?.courseId || courseId || courses[0].id;
-  populateEditorModuleOptions(examAssignedModuleId(findCourse($("#editor-course").value), exam?.id || ""));
   $("#editor-title").value = exam?.title || "";
   $("#editor-minutes").value = exam?.minutes || 20;
   $("#editor-question-count").value = exam?.questionsToShow || 5;
@@ -3678,14 +3642,6 @@ function validateCurrentExam(showMessage = false) {
     return null;
   }
 }
-function cachePublishedExamAssignment(course, exam, modules) {
-  const courseIndex = publishedCourses.findIndex(item => item.id === course.id);
-  const cachedCourse = { ...(courseIndex >= 0 ? publishedCourses[courseIndex] : course), modules:normalizeModules(modules) };
-  if (courseIndex >= 0) publishedCourses[courseIndex] = cachedCourse; else publishedCourses.push(cachedCourse);
-  const examIndex = publishedExams.findIndex(item => item.id === exam.id);
-  const cachedExam = { ...(examIndex >= 0 ? publishedExams[examIndex] : exam), ...exam, published:true };
-  if (examIndex >= 0) publishedExams[examIndex] = cachedExam; else publishedExams.push(cachedExam);
-}
 async function saveExamDraft(event) {
   event.preventDefault();
   const exam = validateCurrentExam(false);
@@ -3693,7 +3649,6 @@ async function saveExamDraft(event) {
   const id = $("#editor-exam-id").value;
   const publishedExam = publishedExams.find(item => item.id === id);
   const publishedCourse = publishedCourses.find(item => item.id === exam.courseId);
-  const targetModuleId = $("#editor-module").value;
   const shouldPublish = Boolean(publishedExam || (exam.published && publishedCourse));
   if (shouldPublish) {
     const submit = event.submitter || $(".editor-save");
@@ -3706,25 +3661,21 @@ async function saveExamDraft(event) {
     $("#exam-editor-error").className = "muted";
     $("#exam-editor-error").textContent = "Guardando y verificando los cambios...";
     try {
-      const assignedModules = applyExamModuleAssignment(course.modules, { ...exam, published:true }, targetModuleId);
       const payload = {
-        course: { id: course.id, name: course.name, description: course.description || "", teacher_name: course.teacherName || currentUser.name, modules: assignedModules },
+        course: { id: course.id, name: course.name, description: course.description || "", teacher_name: course.teacherName || currentUser.name, modules: normalizeModules(course.modules) },
         exams: [{ ...examToJsonSchema(exam), published: true }]
       };
       const { data, error } = await sb.rpc("publish_academy_course", { payload });
       if (error) throw error;
       if (!data || data.course_id !== course.id || Number(data.exam_count) !== 1) throw new Error("Supabase no confirmó la publicación del examen.");
-      cachePublishedExamAssignment(course, exam, assignedModules);
+      await loadCourseChanges();
+      const verified = publishedExams.find(item => item.id === exam.id && item.courseId === exam.courseId);
+      if (!verified || verified.title !== exam.title || verified.minutes !== exam.minutes || verified.questions.length !== exam.questions.length) {
+        throw new Error("No se pudo verificar el examen publicado completo.");
+      }
       drafts.exams = drafts.exams.filter(item => item.id !== exam.id);
       saveDrafts();
       closeModal("exam-modal");
-      renderTeacher();
-      try {
-        await loadCourseChanges();
-      } catch (syncError) {
-        console.warn("El examen se guardó, pero la recarga de datos se completará en la próxima actualización:", syncError);
-      }
-      cachePublishedExamAssignment(course, exam, assignedModules);
       renderTeacher();
     } catch (error) {
       console.error("Publicar examen:", error);
@@ -3733,12 +3684,6 @@ async function saveExamDraft(event) {
     } finally {
       if (submit) submit.disabled = false;
     }
-    return;
-  }
-  const assignmentSaved = await updateCourseModules(exam.courseId, modules => applyExamModuleAssignment(modules, exam, targetModuleId));
-  if (!assignmentSaved) {
-    $("#exam-editor-error").className = "error";
-    $("#exam-editor-error").textContent = "No se pudo guardar la asignación del módulo.";
     return;
   }
   const draftIndex = drafts.exams.findIndex(item => item.id === exam.id);

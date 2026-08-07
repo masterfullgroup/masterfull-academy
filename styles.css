@@ -2152,16 +2152,6 @@ body.app-shell-mode:has(.shell-teacher-nav) .user-actions .logout-btn { display:
 .editor-settings-section .form-grid label { margin: 0; color: #46576a; font-size: 12px; font-weight: 550; }
 .editor-settings-section .form-grid .field-span-2 { grid-column: span 2; }
 .editor-settings-section input,.editor-settings-section select { min-height: 44px; margin-top: 6px; border-color: #dbe2e9; border-radius: 9px; background: #fbfcfd; }
-.exam-module-assignment-field small {
-  display:block;
-  margin-top:6px;
-  color:#748196;
-  font-size:10.5px;
-  font-weight:500;
-}
-.exam-module-assignment-field.has-no-modules small {
-  color:#9a5a12;
-}
 .editor-questions-section .question-builder-head { margin: 0 0 16px; }
 .editor-questions-section .question-builder-head .badge { margin-left: 5px; color: #0d7187; background: #e8f4f7; font-size: 10px; }
 .exam-editor-card .question-mode-tabs { gap: 4px; margin: 0 0 16px; padding: 4px; border: 0; border-radius: 11px; background: #eef2f5; }
@@ -4695,28 +4685,11 @@ body.result-game-mode #return-student:focus-visible {
 
 .course-context-bar .course-context-title .course-workspace-back {
   width: auto;
-  min-height: 42px;
+  min-height: 36px;
   flex: 0 0 auto;
-  padding: 9px 14px;
-  border-color: rgba(255, 255, 255, 0.32);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.08);
-  font-size: 13.5px;
-  font-weight: 750;
-  line-height: 1;
-  box-shadow: 0 3px 10px rgba(12, 23, 59, 0.12);
-  transition: background .18s ease, border-color .18s ease, transform .18s ease;
-}
-
-.course-context-bar .course-context-title .course-workspace-back span {
-  font-size: 18px;
-}
-
-.course-context-bar .course-context-title .course-workspace-back:hover,
-.course-context-bar .course-context-title .course-workspace-back:focus-visible {
-  border-color: rgba(255, 255, 255, 0.58);
-  background: rgba(255, 255, 255, 0.17);
-  transform: translateY(-1px);
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 11.5px;
 }
 
 .course-context-bar .course-context-divider {
@@ -4735,16 +4708,6 @@ body.result-game-mode #return-student:focus-visible {
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.course-sidebar-heading {
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-}
-
-.course-sidebar-heading strong {
-  font-size: 14px;
-  line-height: 1.35;
 }
 
 .course-context-bar .course-context-actions {
@@ -6415,38 +6378,9 @@ body.student-course-open .student-course-content-head {
 .exam-editor-card .editor-sticky-bar {
   top:0;
   margin:0 -30px;
-  padding:18px 30px 16px;
+  padding:18px 66px 16px 30px;
   border-bottom:1px solid #d9ddea;
   background:#fffefef7;
-}
-.exam-editor-header-actions {
-  display:flex;
-  flex:0 0 auto;
-  align-items:center;
-  gap:12px;
-}
-.exam-editor-card .exam-editor-header-actions .modal-close {
-  position:static;
-  display:grid;
-  width:42px;
-  height:42px;
-  margin:0;
-  padding:0;
-  place-items:center;
-  color:#65758a;
-  border:1px solid #d7dce7;
-  border-radius:10px;
-  background:#fff;
-  font-size:23px;
-  line-height:1;
-  cursor:pointer;
-}
-.exam-editor-card .exam-editor-header-actions .modal-close:hover,
-.exam-editor-card .exam-editor-header-actions .modal-close:focus-visible {
-  color:#4338b8;
-  border-color:#aaa8dc;
-  outline:0;
-  background:#f1f0fa;
 }
 .exam-editor-card .editor-sticky-bar h2 {
   color:var(--mf-ink);
@@ -6562,15 +6496,9 @@ body.student-course-open .student-course-content-head {
   .canvas-module-item > .publish-check { display:none; }
   .course-settings-grid { grid-template-columns:1fr; }
   .exam-editor-card { width:100vw; max-height:100vh; padding:0 16px 25px; border-radius:0; }
-  .exam-editor-card .editor-sticky-bar { margin:0 -16px; padding:15px 16px 13px; }
-  .exam-editor-header-actions { gap:8px; }
-  .exam-editor-card .exam-editor-header-actions .modal-close { width:40px; height:40px; }
+  .exam-editor-card .editor-sticky-bar { margin:0 -16px; padding:15px 50px 13px 16px; }
   .exam-editor-nav { top:74px; margin:0 -16px 18px; padding:0 16px; }
   .exam-editor-card .editor-section { padding:18px 15px; }
-}
-@media (max-width:480px) {
-  .exam-editor-header-actions { width:100%; }
-  .exam-editor-nav { top:137px; }
 }
 
 /* Canvas-like module content editor */
@@ -7768,33 +7696,8 @@ body.teacher-course-open .course-workspace-page {
   line-height:1.15;
 }
 .canvas-module-card > summary {
-  grid-template-columns:32px 36px minmax(0,1fr) 36px 36px;
+  grid-template-columns:20px 36px minmax(0,1fr) 34px 36px 36px;
   min-height:72px;
-}
-.module-disclosure {
-  display:grid;
-  width:32px;
-  height:32px;
-  place-items:center;
-  color:#59647c;
-  border-radius:8px;
-  font-size:30px;
-  font-weight:500;
-  line-height:1;
-  transform:rotate(0deg);
-  transition:color .18s ease,background .18s ease,transform .2s ease;
-}
-.canvas-module-card > summary:hover .module-disclosure {
-  color:#3f4797;
-  background:#ebeaf6;
-}
-.canvas-module-card[open] > summary .module-disclosure {
-  transform:rotate(90deg);
-}
-.canvas-module-card > summary:focus-visible .module-disclosure {
-  color:#3f4797;
-  outline:2px solid #aaa8dc;
-  outline-offset:1px;
 }
 .module-sequence,
 .activity-sequence {
@@ -7841,10 +7744,10 @@ details[open] > summary .module-expand-control:empty::before {
   content:"−";
 }
 .canvas-module-heading {
-  grid-template-columns:20px minmax(0,1fr) auto;
+  grid-template-columns:20px 28px minmax(0,1fr) auto;
 }
 .canvas-module-item {
-  grid-template-columns:20px 36px minmax(0,1fr) 38px;
+  grid-template-columns:20px 28px 36px minmax(0,1fr) 38px;
 }
 .student-activity {
   grid-template-columns:20px 36px minmax(0,1fr);
@@ -7885,13 +7788,13 @@ details[open] > summary .module-expand-control:empty::before {
     justify-content:center;
   }
   .canvas-module-card > summary {
-    grid-template-columns:28px 32px minmax(0,1fr) 34px;
+    grid-template-columns:16px 32px minmax(0,1fr) 32px 34px;
     min-height:68px;
     gap:8px;
     padding:10px;
   }
   .canvas-module-card > summary > .row-action-menu {
-    grid-column:4;
+    grid-column:5;
   }
   .canvas-module-card > summary > .module-quick-add {
     display:none;
@@ -7901,11 +7804,11 @@ details[open] > summary .module-expand-control:empty::before {
     height:32px;
   }
   .canvas-module-item {
-    grid-template-columns:16px 34px minmax(0,1fr) 34px;
+    grid-template-columns:16px 26px 34px minmax(0,1fr) 34px;
     gap:8px;
   }
   .canvas-module-heading {
-    grid-template-columns:16px minmax(0,1fr) 34px;
+    grid-template-columns:16px 26px minmax(0,1fr) 34px;
   }
   .student-module summary {
     grid-template-columns:28px 32px minmax(0,1fr);
