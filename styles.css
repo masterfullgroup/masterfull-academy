@@ -8765,3 +8765,24 @@ body.admin-shell-mode #admin-view {
 .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
 
 /* End admin teachers improved table styles */
+
+/* Editor de exámenes: contenido completo dentro de la ventana disponible. */
+.exam-editor-card {
+  display:flex;
+  flex-direction:column;
+  width:min(980px,calc(100vw - 32px));
+  height:min(820px,calc(100vh - 28px));
+  max-height:calc(100vh - 28px);
+  overflow:hidden;
+}
+.exam-editor-card .editor-sticky-bar,
+.exam-editor-card .exam-editor-nav {
+  flex:0 0 auto;
+}
+.exam-editor-card #exam-editor-form {
+  flex:1 1 auto;
+  min-height:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
