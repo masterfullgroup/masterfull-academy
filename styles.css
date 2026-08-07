@@ -4110,6 +4110,11 @@ body.result-game-mode #return-student:focus-visible {
 .canvas-course-body footer > span { display:flex; align-items:center; gap:3px; font-size:8.5px; }
 .canvas-course-body footer .modern-icon { width:13px; height:13px; }
 .canvas-course-body footer > button { display:flex; align-items:center; gap:4px; margin-left:auto; padding:5px 7px; color:#087d93; border:0; border-radius:6px; background:#eef9fa; font-size:9px; font-weight:650; cursor:pointer; }
+.canvas-course-actions { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:6px; margin-top:auto; padding-top:10px; border-top:1px solid #e9eef2; }
+.canvas-course-actions button { min-height:30px; padding:6px 8px; border:0; border-radius:6px; background:#eef9fa; color:#087d93; font-size:9px; font-weight:650; cursor:pointer; }
+.canvas-course-actions button:hover { background:#d9f0f4; }
+.canvas-course-actions .danger { color:#b42335; background:#fff1f2; }
+.canvas-course-actions .danger:hover { background:#ffe2e6; }
 .canvas-course-group-empty { display:grid; min-height:90px; margin:0; place-items:center; color:#8492a1; border:1px dashed #ccd8e1; border-radius:10px; background:#fbfcfd; font-size:10.5px; }
 
 @media (max-width:1050px) {
