@@ -945,8 +945,8 @@
                 </div>
               </div>
               <div class="qb-actions">
-                <button class="btn ghost" id="import-questions-btn" type="button" aria-controls="import-questions">Importar</button>
-                <label class="btn secondary file-label small">Importar JSON<input id="import-questions" type="file" accept=".json,application/json" hidden></label>
+                <button class="btn secondary" id="import-questions-btn" type="button" aria-controls="import-questions-quick">Importar JSON</button>
+                <input id="import-questions-quick" type="file" accept=".json,application/json" hidden>
                 <button class="btn secondary" id="export-questions-btn" type="button">Exportar</button>
               </div>
             </div>
@@ -980,7 +980,7 @@
               <p class="muted">Acepta campos en español o inglés: <code>pregunta</code>, <code>opciones</code> y <code>respuesta_correcta</code>. La respuesta puede ser letra (A–H), número (1–8) o texto de la alternativa.</p>
               <p id="import-message" aria-live="polite"></p>
             </div>
-            <label class="btn primary file-label">Seleccionar archivo JSON<input id="import-questions" type="file" accept=".json,application/json"></label>
+            <label class="btn primary file-label">Seleccionar archivo JSON<input id="import-questions-panel" type="file" accept=".json,application/json" hidden></label>
           </div>
 
           <div id="question-builder" class="question-bank-grid">
@@ -991,7 +991,6 @@
           </div>
 
           <p id="exam-editor-error" class="error"></p>
-        </section>
         </section>
       </form>
     </div>

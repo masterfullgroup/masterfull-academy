@@ -8786,3 +8786,72 @@ body.admin-shell-mode #admin-view {
   overflow-y:auto;
   overscroll-behavior:contain;
 }
+
+/* Editor de evaluaciones: composición estable y rectangular. */
+.modal:has(.exam-editor-card) {
+  padding: 14px;
+}
+.exam-editor-card,
+.exam-editor-card.modern {
+  width: min(1040px, calc(100vw - 28px));
+  height: min(840px, calc(100vh - 28px));
+  max-height: calc(100vh - 28px);
+  padding: 0;
+  border-radius: 0;
+  background: #f5f7fb;
+}
+.exam-editor-card .editor-sticky-bar {
+  min-width: 0;
+  padding: 20px 26px;
+  background: #ffffff;
+}
+.exam-editor-card .exam-editor-nav {
+  min-width: 0;
+  margin: 0;
+  padding: 0 26px;
+}
+.exam-editor-card #exam-editor-form {
+  gap: 18px;
+  padding: 24px 26px 32px;
+  scrollbar-gutter: stable;
+}
+.exam-editor-card .editor-section {
+  border-radius: 0;
+  border-color: #dce3ed;
+  box-shadow: 0 10px 28px rgba(27, 43, 65, .05);
+}
+.exam-editor-card .question-builder-head {
+  align-items: flex-start;
+}
+.exam-editor-card .question-builder-tools,
+.exam-editor-card .qb-actions {
+  flex-wrap: wrap;
+}
+.exam-editor-card .question-mode-tabs,
+.exam-editor-card .question-tool-panel,
+.exam-editor-card .question-mode,
+.exam-editor-card .editor-save,
+.exam-editor-card .exam-editor-header-actions .modal-close {
+  border-radius: 0;
+}
+.exam-editor-card .question-tool-panel {
+  border: 1px solid #e0e6ee;
+  background: #f8fafc;
+}
+.exam-editor-card .question-mode.active {
+  box-shadow: none;
+}
+@media (max-width: 700px) {
+  .modal:has(.exam-editor-card) { padding: 0; }
+  .exam-editor-card,
+  .exam-editor-card.modern {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+  }
+  .exam-editor-card .editor-sticky-bar { padding: 16px; }
+  .exam-editor-card .exam-editor-nav { padding: 0 16px; }
+  .exam-editor-card #exam-editor-form { padding: 18px 16px 28px; }
+  .exam-editor-card .question-builder-head,
+  .exam-editor-card .question-builder-tools { width: 100%; }
+}

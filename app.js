@@ -698,7 +698,9 @@ function bindStaticEvents() {
   $("#editor-option-count").addEventListener("change", changeOptionCount);
   $("#add-question-btn").addEventListener("click", addBuilderQuestion);
   $("#generate-questions-btn").addEventListener("click", generateQuestions);
-  $("#import-questions").addEventListener("change", importQuestions);
+  $$("[data-question-mode]").forEach(button => button.addEventListener("click", () => setQuestionMode(button.dataset.questionMode)));
+  $("#import-questions-btn").addEventListener("click", () => $("#import-questions-quick").click());
+  $$("#import-questions-quick, #import-questions-panel").forEach(input => input.addEventListener("change", importQuestions));
   $("#take-exam-form").addEventListener("submit", event => {
     event.preventDefault();
     if (confirm("¿Deseas entregar el examen con tus respuestas actuales?")) finishExam(false);
@@ -3631,10 +3633,11 @@ async function importQuestions(event) {
   if (!file) return;
   try {
     const text = await file.text();
-    const cleaned = text.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+    const cleaned = text.replace(/^\uFEFF/, "").replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
     const json = JSON.parse(cleaned);
-    const list = Array.isArray(json) ? json : json.questions || json.preguntas;
+    const list = Array.isArray(json) ? json : json.questions || json.preguntas || json.exam?.questions || json.examen?.preguntas || json.data?.questions || json.data?.preguntas;
     if (!Array.isArray(list)) throw new Error("El archivo no contiene preguntas.");
+    if (!list.length) throw new Error("El archivo no contiene preguntas para importar.");
     const detectedCount = list[0]?.options?.length || list[0]?.opciones?.length || builderOptionCount;
     if (!builderQuestions.length && detectedCount >= 2 && detectedCount <= 8) {
       builderOptionCount = detectedCount;
