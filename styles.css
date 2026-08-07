@@ -7191,7 +7191,7 @@ body.teacher-course-open.app-shell-mode > footer {
 body.teacher-course-open.app-shell-mode > main {
   min-height:100vh;
   margin-left:0;
-  padding:18px;
+  padding:0;
   background:#eef1f6;
 }
 body.teacher-course-open #teacher-view {
@@ -7205,8 +7205,9 @@ body.teacher-course-open .teacher-lms.course-open .teacher-workspace {
 body.teacher-course-open .course-workspace-page {
   width:100%;
   max-width:none;
-  min-height:calc(100vh - 36px);
+  min-height:100vh;
   margin:0;
+  border-radius:0;
   border-color:#d5d9e4;
   box-shadow:0 14px 42px #1b294116;
 }
