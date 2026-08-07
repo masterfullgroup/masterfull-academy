@@ -110,14 +110,10 @@ assert.doesNotMatch(teacherCanvasSource, /module-expand-control/, "El módulo do
 assert.match(cssSource, /\.canvas-module-card\[open\] > summary \.module-disclosure\s*\{[\s\S]*?transform:rotate\(90deg\);/, "La flecha debe cambiar de orientación al desplegar el módulo");
 assert.match(appSource, /class="module-sequence"[^>]*>\$\{moduleIndex \+ 1\}/, "Los módulos docentes deben usar numeración");
 assert.doesNotMatch(teacherCanvasSource, /class="activity-sequence"/, "Las actividades docentes no deben mostrar numeración redundante");
-assert.match(teacherCanvasSource, /class="activity-type-name">\$\{esc\(activityTypeLabel\(activity\.type\)\)\}/, "El profesor debe ver el nombre del tipo junto a cada icono");
-assert.match(teacherCanvasSource, /class="canvas-item-copy preview-activity"/, "El profesor debe poder abrir el contenido sin entrar al editor");
-assert.doesNotMatch(teacherCanvasSource, /Ver progreso|view-course-progress/, "Módulos no debe repetir el acceso al progreso");
 const studentModulesSource = appSource.slice(appSource.indexOf("function renderStudentCourseModules"), appSource.indexOf("function accessibleCourseActivities"));
 assert.match(studentModulesSource, /class="module-disclosure"[^>]*>›<\/span><span class="module-sequence"/, "El alumno debe usar la misma flecha y numeración de módulo que el profesor");
 assert.doesNotMatch(studentModulesSource, /class="activity-sequence"/, "Las actividades del alumno no deben mostrar numeración redundante");
 assert.doesNotMatch(studentModulesSource, /class="module-expand-control"/, "El alumno no debe mostrar el antiguo botón de expansión");
-assert.match(studentModulesSource, /class="activity-type-name">\$\{esc\(activityTypeLabel\(activity\.type\)\)\}/, "El alumno debe ver el nombre del tipo junto a cada icono");
 assert.match(cssSource, /\.student-activity > \.start-exam\s*\{[\s\S]*?border:0;[\s\S]*?background:transparent;/, "Las evaluaciones del módulo y su previsualización no deben convertirse en franjas de color");
 assert.doesNotMatch(appSource, /class="publish-check/, "Los checks de publicación deben sustituirse por numeración y texto");
 assert.doesNotMatch(htmlSource, /class="lesson-tabs"/, "La página de contenido no debe mostrar pestañas vacías o redundantes");
@@ -138,10 +134,6 @@ assert.match(htmlSource, /class="lesson-title-row"[\s\S]*?id="lesson-media"/, "E
 assert.doesNotMatch(appSource, /Abrir recurso/, "El video integrado no debe repetirse como un enlace externo");
 assert.match(appSource, /const externalResource = url && !\["video", "pdf"\]\.includes\(activity\.type\);/, "Los videos y PDF deben permanecer integrados en la página");
 assert.match(cssSource, /\.lesson-tree-module > div\s*\{[\s\S]*?gap:6px;/, "Las opciones laterales deben tener separación visual suficiente");
-assert.match(cssSource, /\.course-workspace-sidebar\s*\{[\s\S]*?position:sticky;[\s\S]*?height:100vh;[\s\S]*?overflow-y:auto;/, "La navegación lateral del profesor debe permanecer fija al desplazar el contenido");
-assert.match(appSource, /function openTeacherActivityPreview[\s\S]*?teacherLessonPreview = true;[\s\S]*?renderLesson\(\);/, "La lectura docente debe reutilizar la página de contenido sin modificarlo");
-assert.match(appSource, /if \(teacherLessonPreview\) return;/, "La vista docente no debe alterar el progreso del alumno");
-assert.match(appSource, /link: `<path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"\/>`/, "El enlace debe usar el icono convencional de cadena");
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 assert.match(appSource, /await loadCourseAccess\(\);[\s\S]*?await loadDynamicCourses\(\);/, "Las matrículas deben cargarse antes que el contenido publicado");
@@ -290,7 +282,6 @@ assert.equal(studentAssignedActivities.some(activity => activity.examId === "exa
 context.publishedExams = [{ id:"exam-2", courseId:"course-1", title:"Examen actualizado" }];
 context.esc = value => String(value);
 context.modernIcon = () => "";
-context.activityTypeLabel = type => type;
 context.unlockRuleLabel = () => "Disponible inmediatamente";
 vm.runInContext(extractFunction("renderStudentCourseModules"), context);
 const studentModuleMarkup = context.renderStudentCourseModules(context.publishedCourses[0], []);

@@ -57,7 +57,6 @@ let activeStudentCourseSection = "modules";
 const savedLesson = load(ACTIVE_LESSON_KEY, { courseId:"", activityId:"" });
 let activeLessonCourseId = savedLesson.courseId || null;
 let activeLessonActivityId = savedLesson.activityId || null;
-let teacherLessonPreview = false;
 let activityEditorRange = null;
 let activityEditorTableCell = null;
 
@@ -154,7 +153,7 @@ function modernIcon(name) {
     ,task: `<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V2.5h6V4M9 10l1.5 1.5L14 8M9 16h6"/>`
     ,practice: `<path d="M8 3h8M10 3v5l-5.5 9.5A2.3 2.3 0 0 0 6.5 21h11a2.3 2.3 0 0 0 2-3.5L14 8V3"/><path d="M7.5 15h9"/>`
     ,quiz: `<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V2.5h6V4M10 10a2 2 0 1 1 2.8 1.8c-.7.4-.8.8-.8 1.4M12 16.5h.01"/>`
-    ,link: `<path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"/>`
+    ,link: `<path d="m9.5 14.5-1 1a4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.7 0"/><path d="m14.5 9.5 1-1a4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.7 0"/><path d="m8.5 15.5 7-7"/>`
     ,file: `<path d="M6 2.75h8.5L19 7.25V21H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/>`
     ,discussion: `<path d="M3 5h14v10H8l-4.5 4v-4H3z"/><path d="M8 9h5M19 8h2v9h-4l-3 3v-3h-2"/>`
     ,live: `<rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="m16 10 5-3v10l-5-3zM7 10.5h.01"/>`
@@ -591,11 +590,10 @@ function renderApp() {
     switchTab("student", button.dataset.studentTab, button);
   }));
   if (isAdmin) renderAdmin();
-else if (resultReviewOpen) show("result-view");
-else if (isTeacher && teacherLessonPreview && activeLessonCourseId && activeLessonActivityId) renderLesson();
-else if (isTeacher) renderTeacher();
-else if (activeLessonCourseId && activeLessonActivityId) renderLesson();
-else renderStudent();
+  else if (resultReviewOpen) show("result-view");
+  else if (isTeacher) renderTeacher();
+  else if (activeLessonCourseId && activeLessonActivityId) renderLesson();
+  else renderStudent();
 }
 
 function bindStaticEvents() {
@@ -686,7 +684,7 @@ function bindStaticEvents() {
     activityEditorTableCell = event.target.closest("td, th");
   });
   document.addEventListener("selectionchange", rememberActivityEditorSelection);
-  $("#lesson-return").addEventListener("click", returnFromLesson);
+  $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; saveActiveLesson(); renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
   $("#lesson-complete").addEventListener("click", completeActiveLesson);
@@ -1721,7 +1719,6 @@ async function logout() {
   activeStudentCourseId = null;
   activeLessonCourseId = null;
   activeLessonActivityId = null;
-  teacherLessonPreview = false;
   courseEnrollments = [];
   studentProfiles = [];
   courseAccessError = "";
@@ -2052,10 +2049,10 @@ function renderTeacherCourseModulesCanvas(course, exams = []) {
   const totalItems = modules.reduce((total, module) => total + module.activities.length, 0);
   return `<div class="canvas-modules-page">
     <div class="course-subpage-head canvas-modules-head"><div><span class="eyebrow">CONTENIDO DEL CURSO</span><h2>Módulos</h2><p>${quantity(modules.length, "módulo")} · ${quantity(totalItems, "elemento")} organizados en el recorrido académico.</p></div></div>
-    <div class="canvas-module-toolbar" aria-label="Acciones de módulos"><button class="btn secondary collapse-all-modules" type="button">Contraer todo</button><button class="btn secondary expand-all-modules" type="button">Expandir todo</button><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Módulo</button></div>
+    <div class="canvas-module-toolbar" aria-label="Acciones de módulos"><button class="btn secondary collapse-all-modules" type="button">Contraer todo</button><button class="btn secondary expand-all-modules" type="button">Expandir todo</button><button class="btn secondary view-course-progress" type="button">${modernIcon("progress")} Ver progreso</button><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Módulo</button></div>
     <div class="canvas-module-list">${modules.length ? modules.map((module, moduleIndex) => `<details class="canvas-module-card teacher-module-card" data-course-id="${esc(course.id)}" data-module-drop="${esc(module.id)}" ${moduleIndex < 2 ? "open" : ""}>
       <summary class="canvas-module-summary"><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence" aria-label="Módulo ${moduleIndex + 1}">${moduleIndex + 1}</span><div><h3>${esc(module.title)}</h3><small>${unlockRuleLabel(module, moduleIndex)} · ${quantity(module.activities.length, "elemento", "elementos")} · ${module.published ? "Publicado" : "Borrador"}</small></div><button class="module-quick-add add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button" aria-label="Agregar contenido a ${esc(module.title)}" title="Agregar contenido">+</button>${renderModuleOptions(course, module, moduleIndex, modules.length)}</summary>
-      <div class="canvas-module-items">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="canvas-module-heading" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">⋮</span><strong>${esc(activity.title)}</strong>${renderActivityOptions(course, module, activity, activityIndex)}</div>` : `<div class="canvas-module-item ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar ${esc(activity.title)}">⋮</span><span class="canvas-item-icon">${modernIcon(activity.type)}</span><span class="activity-type-name">${esc(activityTypeLabel(activity.type))}</span><button class="canvas-item-copy preview-activity" data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}" type="button" aria-label="Ver ${esc(activity.title)}"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` · ${esc(activity.description)}` : ""}</small></button>${renderActivityOptions(course, module, activity, activityIndex)}</div>`).join("") : `<p class="canvas-module-empty">Este módulo todavía no tiene contenido.</p>`}<button class="canvas-add-content add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button"><span aria-hidden="true">＋</span><strong>Agregar contenido</strong><small>Página, archivo, video, tarea, práctica o evaluación</small></button></div>
+      <div class="canvas-module-items">${module.activities.length ? module.activities.map((activity, activityIndex) => activity.type === "heading" ? `<div class="canvas-module-heading" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}">⋮</span><strong>${esc(activity.title)}</strong>${renderActivityOptions(course, module, activity, activityIndex)}</div>` : `<div class="canvas-module-item ${activity.published ? "" : "is-draft"}" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-drop="${esc(activity.id)}"><span class="drag-handle activity-drag-handle" draggable="true" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" data-activity-id="${esc(activity.id)}" role="button" tabindex="0" aria-label="Arrastrar ${esc(activity.title)}">⋮</span><span class="canvas-item-icon">${modernIcon(activity.type)}</span><div class="canvas-item-copy"><strong>${esc(activity.title)}</strong><small>${esc(activityMeta(activity, exams))}${activity.description ? ` · ${esc(activity.description)}` : ""}</small></div>${renderActivityOptions(course, module, activity, activityIndex)}</div>`).join("") : `<p class="canvas-module-empty">Este módulo todavía no tiene contenido.</p>`}<button class="canvas-add-content add-module-activity" data-course-id="${esc(course.id)}" data-module-id="${esc(module.id)}" type="button"><span aria-hidden="true">＋</span><strong>Agregar contenido</strong><small>Página, archivo, video, tarea, práctica o evaluación</small></button></div>
     </details>`).join("") : `<div class="course-workspace-empty module-empty-state"><span>${modernIcon("courses")}</span><strong>Aún no hay módulos</strong><p>Crea el primero para organizar el contenido del curso.</p><button class="btn primary add-course-module" data-course-id="${esc(course.id)}" type="button">+ Crear primer módulo</button></div>`}</div>
   </div>`;
 }
@@ -2238,7 +2235,11 @@ function bindTeacherExamWorkspaceActions() {
   $$("#teacher-course-workspace .expand-all-modules").forEach(button => button.addEventListener("click", () => {
     $$("#teacher-course-workspace .canvas-module-card").forEach(module => { module.open = true; });
   }));
-  $$("#teacher-course-workspace .preview-activity").forEach(button => button.addEventListener("click", () => openTeacherActivityPreview(button.dataset.courseId, button.dataset.activityId)));
+  $$("#teacher-course-workspace .view-course-progress").forEach(button => button.addEventListener("click", () => {
+    activeTeacherCourseSection = "grades";
+    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
+    bindTeacherExamWorkspaceActions();
+  }));
   $$("#teacher-course-workspace .course-access-form").forEach(form => form.addEventListener("submit", authorizeCourseStudent));
   $$("#teacher-course-workspace .revoke-course-access").forEach(button => button.addEventListener("click", () => revokeCourseStudent(button.dataset.courseId, button.dataset.studentId)));
   $$("#teacher-course-workspace .edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
@@ -2490,7 +2491,7 @@ function renderStudentCourseModules(course, myGrades) {
         const exam = activity.examId ? publishedExams.find(item => item.id === activity.examId) : null;
         const actionClass = exam && ["practice","quiz"].includes(activity.type) ? "start-exam" : "open-lesson";
         const actionData = exam ? `data-id="${esc(exam.id)}"` : `data-course-id="${esc(course.id)}" data-activity-id="${esc(activity.id)}"`;
-        return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="student-activity-spacer" aria-hidden="true"></span><span class="activity-type-icon">${modernIcon(activity.type)}</span><span class="activity-type-name">${esc(activityTypeLabel(activity.type))}</span><button class="${actionClass}" ${actionData} type="button"><strong>${esc(activity.title)}</strong></button></div>`;
+        return `<div class="student-activity" id="activity-${esc(activity.id)}"><span class="student-activity-spacer" aria-hidden="true"></span><span class="activity-type-icon">${modernIcon(activity.type)}</span><button class="${actionClass}" ${actionData} type="button"><strong>${esc(activity.title)}</strong></button></div>`;
       }).join("") : `<p class="module-empty">No hay actividades publicadas.</p>`}</div>`}</details>`;
       previousComplete = moduleComplete;
       return markup;
@@ -2526,29 +2527,6 @@ function openLesson(courseId, activityId) {
   saveCourseProgress();
   renderLesson();
 }
-function teacherCourseActivities(course) {
-  return normalizeModules(course.modules).flatMap((module, moduleIndex) => module.activities.filter(activity => activity.type !== "heading").map(activity => ({ ...activity, moduleId:module.id, moduleTitle:module.title, moduleIndex })));
-}
-function lessonActivities(course) {
-  return teacherLessonPreview ? teacherCourseActivities(course) : accessibleCourseActivities(course);
-}
-function openTeacherActivityPreview(courseId, activityId) {
-  const course = getTeacherCourses().find(item => item.id === courseId);
-  if (!course || !teacherCourseActivities(course).some(activity => activity.id === activityId)) return;
-  teacherLessonPreview = true;
-  activeLessonCourseId = courseId;
-  activeLessonActivityId = activityId;
-  renderLesson();
-}
-function returnFromLesson() {
-  const returnToTeacher = teacherLessonPreview;
-  teacherLessonPreview = false;
-  activeLessonCourseId = null;
-  activeLessonActivityId = null;
-  if (!returnToTeacher) saveActiveLesson();
-  if (returnToTeacher) renderTeacher();
-  else renderStudent();
-}
 function safeActivityUrl(value) {
   const url = String(value || "").trim();
   return /^(https?:\/\/|\.\/|\/)/i.test(url) ? url : "";
@@ -2569,15 +2547,14 @@ function lessonMediaMarkup(activity) {
   return "";
 }
 function renderLesson() {
-  const course = (teacherLessonPreview ? getTeacherCourses() : publishedCourses).find(item => item.id === activeLessonCourseId);
-  const activities = course ? lessonActivities(course) : [];
+  const course = publishedCourses.find(item => item.id === activeLessonCourseId);
+  const activities = course ? accessibleCourseActivities(course) : [];
   const activityIndex = activities.findIndex(activity => activity.id === activeLessonActivityId);
   if (!course || activityIndex < 0) {
     activeLessonCourseId = null;
     activeLessonActivityId = null;
-    if (!teacherLessonPreview) saveActiveLesson();
-    if (teacherLessonPreview) { teacherLessonPreview = false; renderTeacher(); }
-    else renderStudent();
+    saveActiveLesson();
+    renderStudent();
     return;
   }
   const activity = activities[activityIndex];
@@ -2589,10 +2566,10 @@ function renderLesson() {
   const mediaMarkup = lessonMediaMarkup(activity);
   $("#lesson-media").innerHTML = mediaMarkup;
   $("#lesson-media").classList.toggle("hidden", !mediaMarkup);
-  const completed = !teacherLessonPreview && Boolean(progress.completed?.[activity.id]);
+  const completed = Boolean(progress.completed?.[activity.id]);
   $("#lesson-complete").textContent = completed ? "Actividad completada" : "Marcar como completado";
   $("#lesson-complete").classList.toggle("completed-button", completed);
-  $("#lesson-complete").classList.toggle("hidden", teacherLessonPreview || activity.completionRule !== "manual");
+  $("#lesson-complete").classList.toggle("hidden", activity.completionRule !== "manual");
   $("#lesson-previous").disabled = activityIndex === 0;
   $("#lesson-next").disabled = activityIndex === activities.length - 1;
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
@@ -2605,16 +2582,15 @@ function renderLesson() {
   closeLessonSidebar();
 }
 function renderLessonTree(course, activeActivityId) {
-  const accessibleIds = new Set(lessonActivities(course).map(activity => activity.id));
+  const accessibleIds = new Set(accessibleCourseActivities(course).map(activity => activity.id));
   const progress = courseProgress[course.id] || { completed:{} };
   $("#lesson-module-tree").innerHTML = normalizeModules(course.modules).map(module => {
     const moduleAccessible = module.activities.some(activity => accessibleIds.has(activity.id)) || !module.activities.length;
-    return `<details class="lesson-tree-module ${moduleAccessible ? "" : "is-locked"}" ${module.activities.some(activity => activity.id === activeActivityId) ? "open" : ""}><summary><strong>${esc(module.title)}</strong><b class="module-expand-control" aria-hidden="true">${moduleAccessible ? "" : "🔒"}</b></summary><div>${moduleAccessible ? module.activities.filter(activity => activity.type !== "heading").map(activity => `<button class="lesson-tree-activity ${activity.id === activeActivityId ? "active" : ""}" data-activity-id="${esc(activity.id)}" type="button" ${accessibleIds.has(activity.id) ? "" : "disabled"}><span class="lesson-tree-activity-copy"><strong>${esc(activity.title)}</strong><small>${teacherLessonPreview ? activityTypeLabel(activity.type) : progress.completed?.[activity.id] ? "Completado" : activity.id === activeActivityId ? "En progreso" : "No iniciado"}</small></span></button>`).join("") : `<p>Completa el requisito anterior para desbloquearlo.</p>`}</div></details>`;
+    return `<details class="lesson-tree-module ${moduleAccessible ? "" : "is-locked"}" ${module.activities.some(activity => activity.id === activeActivityId) ? "open" : ""}><summary><strong>${esc(module.title)}</strong><b class="module-expand-control" aria-hidden="true">${moduleAccessible ? "" : "🔒"}</b></summary><div>${moduleAccessible ? module.activities.map(activity => `<button class="lesson-tree-activity ${activity.id === activeActivityId ? "active" : ""}" data-activity-id="${esc(activity.id)}" type="button" ${accessibleIds.has(activity.id) ? "" : "disabled"}><span class="lesson-tree-activity-copy"><strong>${esc(activity.title)}</strong><small>${progress.completed?.[activity.id] ? "Completado" : activity.id === activeActivityId ? "En progreso" : "No iniciado"}</small></span></button>`).join("") : `<p>Completa el requisito anterior para desbloquearlo.</p>`}</div></details>`;
   }).join("");
-  $$(".lesson-tree-activity:not(:disabled)").forEach(button => button.addEventListener("click", () => teacherLessonPreview ? openTeacherActivityPreview(course.id, button.dataset.activityId) : openLesson(course.id, button.dataset.activityId)));
+  $$(".lesson-tree-activity:not(:disabled)").forEach(button => button.addEventListener("click", () => openLesson(course.id, button.dataset.activityId)));
 }
 function completeActiveLesson() {
-  if (teacherLessonPreview) return;
   const progress = courseProgress[activeLessonCourseId] || { completed:{}, lastActivityId:"" };
   progress.completed = { ...(progress.completed || {}), [activeLessonActivityId]: !progress.completed?.[activeLessonActivityId] };
   progress.lastActivityId = activeLessonActivityId;
@@ -2624,11 +2600,10 @@ function completeActiveLesson() {
 }
 function navigateLesson(direction) {
   const course = publishedCourses.find(item => item.id === activeLessonCourseId);
-  const previewCourse = teacherLessonPreview ? getTeacherCourses().find(item => item.id === activeLessonCourseId) : course;
-  const activities = previewCourse ? lessonActivities(previewCourse) : [];
+  const activities = course ? accessibleCourseActivities(course) : [];
   const index = activities.findIndex(activity => activity.id === activeLessonActivityId);
   const target = activities[index + direction];
-  if (target) teacherLessonPreview ? openTeacherActivityPreview(previewCourse.id, target.id) : openLesson(course.id, target.id);
+  if (target) openLesson(course.id, target.id);
 }
 function toggleLessonSidebar() {
   const open = document.body.classList.toggle("lesson-sidebar-open");
