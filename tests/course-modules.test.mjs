@@ -120,6 +120,10 @@ assert.match(htmlSource, /app\.js\?v=20260808-01/, "El script debe invalidar la 
 assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s\S]*?min-height:100vh;[\s\S]*?margin:0;/, "El espacio del curso del alumno debe conservar una altura visible");
 assert.doesNotMatch(cssSource, /body\.student-course-open \.student-course-page\s*\{[^}]*height:\s*18px/, "El espacio del curso del alumno no debe colapsarse a una altura fija");
 
+assert.match(appSource, /function normalizeRole\(value\)/, "La aplicaciÃ³n debe normalizar roles histÃ³ricos de Supabase");
+assert.match(appSource, /"administraci\\u00f3n":\s*"admin"/, "El rol administraciÃ³n debe abrir el panel administrador");
+assert.match(appSource, /maestro:\s*"teacher"/, "El rol maestro debe abrir el panel docente");
+
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
   assert.notEqual(start, -1, `No se encontró ${name}`);

@@ -180,6 +180,21 @@ function modernIcon(name) {
 function stat(label, value, icon, action = "") { return `<button class="stat-card" type="button" data-stat-action="${action}"><span>${modernIcon(icon)}</span><span><strong>${esc(value)}</strong><small>${esc(label)}</small></span></button>`; }
 function formatDate(value) { return value ? new Date(value).toLocaleString("es-PE") : "-"; }
 function csvCell(value) { return `"${String(value ?? "").replaceAll('"','""')}"`; }
+function normalizeRole(value) {
+  const role = String(value || "").trim().toLocaleLowerCase("es");
+  const aliases = {
+    admin: "admin",
+    administrador: "admin",
+    "administraci\u00f3n": "admin",
+    teacher: "teacher",
+    maestro: "teacher",
+    profesor: "teacher",
+    student: "student",
+    alumno: "student",
+    estudiante: "student"
+  };
+  return aliases[role] || "";
+}
 function slug(value) {
   return String(value || "examen").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70) || "examen";
 }
@@ -308,9 +323,7 @@ async function setSessionFromSupabase(session, shouldRender = true) {
       id: session.user.id,
       name: profile.full_name || session.user.user_metadata?.full_name || session.user.email,
       email: profile.email || session.user.email,
-      role: ["admin", "teacher", "student"].includes(profile.role)
-  ? profile.role
-  : "student"
+      role: normalizeRole(profile.role) || "student"
     };
   } catch (error) {
     console.error("No se pudo recuperar el perfil:", error);
@@ -965,7 +978,10 @@ async function loadAdminDashboardData() {
     );
   }
 
-  adminProfiles = profilesResponse.data || [];
+  adminProfiles = (profilesResponse.data || []).map(profile => ({
+    ...profile,
+    role: normalizeRole(profile.role) || profile.role
+  }));
 
   const teachers = adminProfiles.filter(
     profile => profile.role === "teacher"
