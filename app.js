@@ -280,6 +280,21 @@ async function initApp() {
   renderApp();
 }
 
+function renderStudentFailure(error) {
+  console.error("No se pudo renderizar el panel del alumno:", error);
+  show("student-view");
+  document.body.classList.remove("student-course-open");
+  $("#student-welcome").textContent = `Hola, ${currentUser?.name || "alumno"}`;
+  $("#student-stats").innerHTML = "";
+  $("#student-overview").classList.remove("hidden");
+  $("#student-overview").innerHTML = `<div class="student-library-empty student-load-error"><span>${modernIcon("course")}</span><strong>No se pudo cargar tu plataforma</strong><p>Actualiza la página. Si el problema continúa, solicita al profesor que revise tu acceso al curso.</p></div>`;
+  $("#student-course-list").classList.remove("hidden");
+  $("#student-course-list").innerHTML = "";
+  $("#student-course-workspace").classList.add("hidden");
+  $("#student-course-workspace").innerHTML = "";
+  $("#student-grades-body").innerHTML = empty("No se pudieron cargar tus calificaciones.", 7);
+}
+
 async function setSessionFromSupabase(session, shouldRender = true) {
   if (!session?.user) {
     currentUser = null;
@@ -593,7 +608,10 @@ function renderApp() {
   else if (resultReviewOpen) show("result-view");
   else if (isTeacher) renderTeacher();
   else if (activeLessonCourseId && activeLessonActivityId) renderLesson();
-  else renderStudent();
+  else {
+    try { renderStudent(); }
+    catch (error) { renderStudentFailure(error); }
+  }
 }
 
 function bindStaticEvents() {
@@ -2475,7 +2493,13 @@ function activityCompleted(activity, progress, myGrades = []) {
   return Boolean(progress.completed?.[activity.id]);
 }
 function renderStudentOverview(courses, summaries) {
-  $("#student-overview").innerHTML = "";
+  const container = $("#student-overview");
+  if (courses.length && !courseAccessError) {
+    container.innerHTML = "";
+    return;
+  }
+  const message = courseAccessError || "Cuando un profesor te autorice un curso, aparecerá aquí.";
+  container.innerHTML = `<div class="student-library-empty"><span>${modernIcon("course")}</span><strong>${courses.length ? "Tu plataforma está lista" : "Aún no tienes cursos autorizados"}</strong><p>${esc(message)}</p></div>`;
 }
 function renderStudentCourseModules(course, myGrades) {
   const modules = normalizeModules(course.modules).filter(module => module.published).map(module => ({ ...module, activities:module.activities.filter(activity => activity.published) }));
