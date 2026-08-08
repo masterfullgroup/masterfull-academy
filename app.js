@@ -2275,11 +2275,6 @@ function bindTeacherExamWorkspaceActions() {
   $$("#teacher-course-workspace .expand-all-modules").forEach(button => button.addEventListener("click", () => {
     $$("#teacher-course-workspace .canvas-module-card").forEach(module => { module.open = true; });
   }));
-  $$("#teacher-course-workspace .view-course-progress").forEach(button => button.addEventListener("click", () => {
-    activeTeacherCourseSection = "grades";
-    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
-    bindTeacherExamWorkspaceActions();
-  }));
   $$("#teacher-course-workspace .course-access-form").forEach(form => form.addEventListener("submit", authorizeCourseStudent));
   $$("#teacher-course-workspace .revoke-course-access").forEach(button => button.addEventListener("click", () => revokeCourseStudent(button.dataset.courseId, button.dataset.studentId)));
   $$("#teacher-course-workspace .edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));

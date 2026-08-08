@@ -7765,10 +7765,22 @@ body.teacher-course-open .course-workspace-page {
   line-height:1;
 }
 .module-expand-control:empty::before {
-  content:"+";
+  content:"›";
+  display:block;
+  transition:transform .18s ease;
 }
 details[open] > summary .module-expand-control:empty::before {
-  content:"−";
+  content:"›";
+  transform:rotate(90deg);
+}
+
+/* Los modulos se despliegan con una flecha y se retiran controles redundantes. */
+.canvas-module-summary > .module-drag-handle,
+.teacher-module-card > summary > .module-drag-handle {
+  display:none;
+}
+.view-course-progress {
+  display:none !important;
 }
 .canvas-module-heading {
   grid-template-columns:20px 28px minmax(0,1fr) auto;

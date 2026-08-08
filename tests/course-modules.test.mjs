@@ -94,8 +94,10 @@ assert.match(cssSource, /body\.student-course-open \.student-course-content\s*\{
 assert.doesNotMatch(appSource, /student-activity-action|student-activity-state/, "Los contenidos no deben repetir controles circulares de finalización");
 assert.doesNotMatch(appSource, /continue-course/, "La cabecera de módulos no debe repetir el acceso al contenido");
 assert.match(appSource, /class="module-expand-control"/, "Cada módulo debe ofrecer un control de expansión");
-assert.match(cssSource, /\.module-expand-control:empty::before\s*\{\s*content:"\+";/, "El módulo contraído debe mostrar el control +");
-assert.match(cssSource, /details\[open\] > summary \.module-expand-control:empty::before\s*\{\s*content:"−";/, "El módulo expandido debe mostrar el control −");
+assert.match(cssSource, /\.module-expand-control:empty::before\s*\{\s*content:"›";/, "El módulo debe mostrar una flecha de despliegue");
+assert.match(cssSource, /details\[open\] > summary \.module-expand-control:empty::before\s*\{\s*content:"›";[\s\S]*?transform:rotate\(90deg\);/, "La flecha debe indicar el módulo expandido");
+assert.match(cssSource, /\.canvas-module-summary > \.module-drag-handle[\s\S]*?display:none;/, "Las tres rayas antiguas no deben mostrarse en los módulos");
+assert.doesNotMatch(appSource, /\.view-course-progress\"\)\.forEach/, "El progreso no debe aparecer como acción del listado de módulos");
 assert.match(appSource, /class="module-sequence"[^>]*>\$\{moduleIndex \+ 1\}/, "Los módulos docentes deben usar numeración");
 assert.match(appSource, /class="activity-sequence"[^>]*>\$\{activityIndex \+ 1\}/, "Las actividades deben usar numeración");
 assert.doesNotMatch(appSource, /class="publish-check/, "Los checks de publicación deben sustituirse por numeración y texto");
@@ -115,8 +117,8 @@ assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, 
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
-assert.match(htmlSource, /styles\.css\?v=20260808-04/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
-assert.match(htmlSource, /app\.js\?v=20260808-04/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /styles\.css\?v=20260808-05/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /app\.js\?v=20260808-05/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
 assert.match(cssSource, /\.course-setup-status\s*\{[\s\S]*?position:absolute;[\s\S]*?right:72px;/, "El estado del curso debe quedar anclado junto al cierre");
 assert.match(htmlSource, /course-setup-head[^>]*>[\s\S]*?class="modal-close"/, "El cierre del modal de curso debe pertenecer a la cabecera fija");
 assert.match(cssSource, /\.course-setup-head\s*\{[\s\S]*?position:sticky;[\s\S]*?top:0;/, "La cabecera del modal debe permanecer alineada durante el scroll");
