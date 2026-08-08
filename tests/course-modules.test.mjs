@@ -123,6 +123,9 @@ assert.doesNotMatch(cssSource, /body\.student-course-open \.student-course-page\
 assert.match(appSource, /function normalizeRole\(value\)/, "La aplicaciÃ³n debe normalizar roles histÃ³ricos de Supabase");
 assert.match(appSource, /"administraci\\u00f3n":\s*"admin"/, "El rol administraciÃ³n debe abrir el panel administrador");
 assert.match(appSource, /maestro:\s*"teacher"/, "El rol maestro debe abrir el panel docente");
+assert.match(htmlSource, /id="admin-view" class="view admin-panel"/, "El panel administrador debe tener una vista renderizable");
+assert.match(htmlSource, /id="admin-teachers-table"/, "El panel administrador debe incluir la tabla de profesores");
+assert.match(htmlSource, /id="admin-teacher-modal"/, "El panel administrador debe incluir el modal de edición de profesores");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

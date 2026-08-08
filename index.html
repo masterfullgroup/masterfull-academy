@@ -76,6 +76,49 @@
       </div>
     </section>
 
+    <section id="admin-view" class="view admin-panel">
+      <div class="admin-shell">
+        <aside class="admin-sidebar" aria-label="Navegación del administrador">
+          <div class="admin-brand"><span class="admin-brand-mark">MF</span><strong>Masterfull</strong><small>Administración</small></div>
+          <nav class="admin-navigation">
+            <button class="admin-nav-item active" type="button" data-admin-section="dashboard"><span>⌂</span>Dashboard</button>
+            <button class="admin-nav-item" type="button" data-admin-section="teachers"><span>♙</span>Profesores</button>
+            <button class="admin-nav-item" type="button" data-admin-section="students"><span>♧</span>Alumnos</button>
+            <button class="admin-nav-item" type="button" data-admin-section="courses"><span>▣</span>Cursos</button>
+            <button class="admin-nav-item" type="button" data-admin-section="payments"><span>▤</span>Pagos</button>
+            <button class="admin-nav-item" type="button" data-admin-section="settings"><span>⚙</span>Configuración</button>
+          </nav>
+          <button id="admin-logout" class="admin-logout" type="button">Cerrar sesión</button>
+        </aside>
+        <main class="admin-main">
+          <header class="admin-header"><div><span class="eyebrow">PANEL ADMINISTRADOR</span><h1 id="admin-welcome">Bienvenido</h1><p>Controla usuarios, cursos y actividad de la plataforma.</p></div><span id="admin-session-email" class="muted"></span></header>
+          <section id="admin-dashboard" class="admin-section active" data-admin-page="dashboard">
+            <div class="admin-stat-grid">
+              <article class="admin-stat-card"><span>♙</span><strong id="admin-total-teachers">0</strong><small>Profesores</small></article>
+              <article class="admin-stat-card"><span>✓</span><strong id="admin-active-teachers">0</strong><small>Profesores activos</small></article>
+              <article class="admin-stat-card"><span>!</span><strong id="admin-pending-teachers">0</strong><small>Pendientes</small></article>
+              <article class="admin-stat-card"><span>♧</span><strong id="admin-total-students">0</strong><small>Alumnos</small></article>
+              <article class="admin-stat-card"><span>▣</span><strong id="admin-total-courses">0</strong><small>Cursos</small></article>
+              <article class="admin-stat-card"><span>↔</span><strong id="admin-total-enrollments">0</strong><small>Matrículas</small></article>
+            </div>
+            <section class="admin-panel-card"><header><div><span class="eyebrow">SOLICITUDES</span><h2>Profesores pendientes</h2></div><button class="btn secondary" id="admin-view-all-teachers" type="button">Ver profesores</button></header><div id="admin-pending-teachers-list" class="admin-pending-list"></div></section>
+          </section>
+          <section id="admin-teachers" class="admin-section" data-admin-page="teachers">
+            <header class="admin-section-header"><div><span class="eyebrow">GESTIÓN DE USUARIOS</span><h2>Profesores</h2><p class="muted">Administra el acceso y el estado de los profesores.</p></div><button class="btn secondary" id="admin-export-teachers" type="button">Exportar</button></header>
+            <div class="admin-teacher-tools"><input id="admin-teacher-search" type="search" placeholder="Buscar profesor, correo o institución"><select id="admin-teacher-status-filter"><option value="">Todos los estados</option><option value="pending">Pendiente</option><option value="active">Activo</option><option value="suspended">Suspendido</option><option value="archived">Archivado</option></select><button class="search-clear" type="button" aria-label="Limpiar búsqueda">×</button></div>
+            <div id="admin-teachers-table" class="admin-content-card"></div><div id="admin-teacher-pagination" class="admin-pagination"></div>
+          </section>
+          <section id="admin-students" class="admin-section" data-admin-page="students"><div class="admin-panel-card"><header><h2>Alumnos</h2></header><p class="muted">Los alumnos se gestionan mediante sus matrículas de curso.</p></div></section>
+          <section id="admin-courses" class="admin-section" data-admin-page="courses"><div class="admin-panel-card"><header><h2>Cursos</h2></header><p class="muted">Consulta los cursos publicados por los profesores.</p></div></section>
+          <section id="admin-payments" class="admin-section" data-admin-page="payments"><div class="admin-panel-card"><header><h2>Pagos</h2></header><p class="muted">El módulo de pagos estará disponible cuando se active la suscripción.</p></div></section>
+          <section id="admin-settings" class="admin-section" data-admin-page="settings"><div class="admin-panel-card"><header><h2>Configuración</h2></header><p class="muted">Configura los parámetros generales de la plataforma.</p></div></section>
+        </main>
+      </div>
+    </section>
+    <div id="admin-teacher-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="admin-teacher-modal-title">
+      <div class="modal-card admin-teacher-modal-card"><button id="admin-teacher-modal-close" class="modal-close" type="button" aria-label="Cerrar">×</button><h2 id="admin-teacher-modal-title">Perfil del profesor</h2><p id="admin-teacher-modal-email" class="muted"></p><form id="admin-teacher-form"><input id="admin-teacher-id" type="hidden"><label>Nombre completo<input id="admin-teacher-name" required></label><label>Institución<input id="admin-teacher-institution"></label><label>Teléfono<input id="admin-teacher-phone"></label><label>Estado<select id="admin-teacher-modal-status"><option value="pending">Pendiente</option><option value="active">Activo</option><option value="suspended">Suspendido</option><option value="archived">Archivado</option></select></label><p id="admin-teacher-form-message" class="error"></p><div class="form-actions"><button id="admin-teacher-cancel" class="btn secondary" type="button">Cancelar</button><button class="btn primary" type="submit">Guardar cambios</button></div></form></div>
+    </div>
+
     <section id="teacher-view" class="view teacher-lms">
       <div class="teacher-lms-shell">
         <div class="teacher-workspace">
