@@ -3965,17 +3965,29 @@ body.result-game-mode #return-student:focus-visible {
 .canvas-course-title:hover,.canvas-course-title:focus-visible { color:#075985; }
 .canvas-dashboard-card-body > p { min-height:34px; margin:6px 0 13px; overflow:hidden; color:#687786; font-size:11px; line-height:1.45; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;line-clamp: 2; }
 .canvas-dashboard-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:13px; padding-top:12px; border-top:1px solid #e5e7eb; }
+.canvas-dashboard-overview-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:13px; padding-top:12px; border-top:1px solid #e5e7eb; }
 .canvas-dashboard-actions button { display:inline-flex; min-height:34px; align-items:center; justify-content:center; gap:6px; padding:7px 10px; border:0; border-radius:7px; background:transparent; font-size:11px; font-weight:650; cursor:pointer; }
-.canvas-dashboard-actions .manage-course-content { color:#0b7185; background:#e7f7fa; }
-.canvas-dashboard-actions .manage-course-content:hover { color:#075568; background:#d8f0f4; }
+.canvas-dashboard-overview-actions button { display:inline-flex; min-height:34px; align-items:center; justify-content:center; gap:6px; padding:7px 10px; border:0; border-radius:7px; background:transparent; font-size:11px; font-weight:650; cursor:pointer; }
+.canvas-dashboard-actions .manage-course-content,
+.canvas-dashboard-overview-actions .manage-course-content { color:#0b7185; background:#e7f7fa; }
+.canvas-dashboard-actions .manage-course-content:hover,
+.canvas-dashboard-overview-actions .manage-course-content:hover { color:#075568; background:#d8f0f4; }
 .canvas-dashboard-actions .edit-course,
-.canvas-dashboard-actions .edit-published-course { color:#315b99; background:#edf3ff; }
+.canvas-dashboard-actions .edit-published-course,
+.canvas-dashboard-overview-actions .edit-course,
+.canvas-dashboard-overview-actions .edit-published-course { color:#315b99; background:#edf3ff; }
 .canvas-dashboard-actions .edit-course:hover,
-.canvas-dashboard-actions .edit-published-course:hover { background:#dfeaff; }
+.canvas-dashboard-actions .edit-published-course:hover,
+.canvas-dashboard-overview-actions .edit-course:hover,
+.canvas-dashboard-overview-actions .edit-published-course:hover { background:#dfeaff; }
 .canvas-dashboard-actions .delete-course,
-.canvas-dashboard-actions .delete-published-course { color:#b42335; }
+.canvas-dashboard-actions .delete-published-course,
+.canvas-dashboard-overview-actions .delete-course,
+.canvas-dashboard-overview-actions .delete-published-course { color:#b42335; }
 .canvas-dashboard-actions .delete-course:hover,
-.canvas-dashboard-actions .delete-published-course:hover { background:#fff1f2; }
+.canvas-dashboard-actions .delete-published-course:hover,
+.canvas-dashboard-overview-actions .delete-course:hover,
+.canvas-dashboard-overview-actions .delete-published-course:hover { background:#fff1f2; }
 .canvas-dashboard-actions .modern-icon { width:15px; height:15px; }
 .canvas-dashboard-empty { grid-column:1 / -1; display:grid; min-height:310px; place-content:center; justify-items:center; gap:9px; color:#64748b; border:1px dashed #b9c3cc; border-radius:4px; background:#fff; text-align:center; }
 .canvas-dashboard-empty .modern-icon { width:38px; height:38px; color:#0e7490; }

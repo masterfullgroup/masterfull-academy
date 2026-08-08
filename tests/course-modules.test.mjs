@@ -115,6 +115,11 @@ assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, 
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
+assert.match(htmlSource, /styles\.css\?v=20260808-01/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel del alumno");
+assert.match(htmlSource, /app\.js\?v=20260808-01/, "El script debe invalidar la cachÃ© al publicar cambios del panel del alumno");
+assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s\S]*?min-height:100vh;[\s\S]*?margin:0;/, "El espacio del curso del alumno debe conservar una altura visible");
+assert.doesNotMatch(cssSource, /body\.student-course-open \.student-course-page\s*\{[^}]*height:\s*18px/, "El espacio del curso del alumno no debe colapsarse a una altura fija");
+
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);
   assert.notEqual(start, -1, `No se encontró ${name}`);
