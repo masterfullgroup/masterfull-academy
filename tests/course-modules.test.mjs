@@ -115,8 +115,8 @@ assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, 
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
-assert.match(htmlSource, /styles\.css\?v=20260808-01/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel del alumno");
-assert.match(htmlSource, /app\.js\?v=20260808-01/, "El script debe invalidar la cachÃ© al publicar cambios del panel del alumno");
+assert.match(htmlSource, /styles\.css\?v=20260808-02/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /app\.js\?v=20260808-02/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
 assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s\S]*?min-height:100vh;[\s\S]*?margin:0;/, "El espacio del curso del alumno debe conservar una altura visible");
 assert.doesNotMatch(cssSource, /body\.student-course-open \.student-course-page\s*\{[^}]*height:\s*18px/, "El espacio del curso del alumno no debe colapsarse a una altura fija");
 
@@ -126,6 +126,8 @@ assert.match(appSource, /maestro:\s*"teacher"/, "El rol maestro debe abrir el pa
 assert.match(htmlSource, /id="admin-view" class="view admin-panel"/, "El panel administrador debe tener una vista renderizable");
 assert.match(htmlSource, /id="admin-teachers-table"/, "El panel administrador debe incluir la tabla de profesores");
 assert.match(htmlSource, /id="admin-teacher-modal"/, "El panel administrador debe incluir el modal de edición de profesores");
+assert.match(cssSource, /body\.admin-shell-mode > main\s*\{[\s\S]*?max-width:\s*none;[\s\S]*?padding:\s*0;/, "El panel administrador debe ocupar el área completa");
+assert.match(cssSource, /\.admin-sidebar\s*\{[\s\S]*?background:\s*#071b2b;[\s\S]*?z-index:\s*20;/, "La barra administrativa debe tener una superficie y una capa propias");
 
 function extractFunction(name) {
   const start = appSource.indexOf(`function ${name}(`);

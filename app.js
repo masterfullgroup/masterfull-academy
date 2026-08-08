@@ -592,11 +592,13 @@ function renderApp() {
   }
   const activeStudentTab = $("#student-view .tab-content.active")?.id || "student-courses";
   const teacherNavigation = "";
+  const accountLabel = isAdmin ? "Administrador" : isTeacher ? "Profesor" : "Alumno";
   const studentNavigation = !isTeacher ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
     <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
     <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
   </nav>` : "";
   $("#session-area").innerHTML = `${teacherNavigation}${studentNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions"><button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div></div>`;
+  $("#session-area .user-identity small").textContent = accountLabel;
   $("#profile-btn").addEventListener("click", openProfile);
   $("#logout-btn").addEventListener("click", logout);
   $$("#session-area [data-teacher-tab]").forEach(button => button.addEventListener("click", () => {
@@ -1639,6 +1641,7 @@ function renderAdmin() {
         currentUser?.name || "administrador"
       }`;
   }
+  $("#admin-session-email").textContent = currentUser?.email || "";
 
   bindAdminNavigation();
   openAdminSection(activeAdminSection);

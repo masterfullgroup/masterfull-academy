@@ -7984,6 +7984,12 @@ details[open] > summary .module-expand-control:empty::before {
   width: 250px;
   height: 100vh;
   padding: 24px 18px;
+  overflow-y: auto;
+  background: #071b2b;
+  color: #f8fafc;
+  box-shadow: 12px 0 30px rgba(15, 23, 42, 0.12);
+  z-index: 20;
+}
 
 .admin-brand {
   display: flex;
@@ -8070,6 +8076,29 @@ details[open] > summary .module-expand-control:empty::before {
   font-size: 16px;
 }
 
+.admin-logout {
+  width: 100%;
+  margin-top: auto;
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.05);
+  text-align: left;
+  cursor: pointer;
+}
+.admin-logout:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+
+body.admin-shell-mode > .topbar,
+body.admin-shell-mode > footer { display: none; }
+body.admin-shell-mode > main {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
 .admin-main {
   min-width: 0;
   margin-left: 250px;
@@ -8089,6 +8118,14 @@ details[open] > summary .module-expand-control:empty::before {
   color: #0f172a;
   font-size: clamp(26px, 3vw, 36px);
   line-height: 1.15;
+}
+
+.admin-header h1 {
+  margin: 7px 0 8px;
+  color: #0f172a;
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -.03em;
 }
 
 .admin-header p {
