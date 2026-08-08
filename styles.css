@@ -7723,7 +7723,7 @@ body.teacher-course-open .course-workspace-page {
   line-height:1.15;
 }
 .canvas-module-card > summary {
-  grid-template-columns:20px 36px minmax(0,1fr) 34px 36px 36px;
+  grid-template-columns:36px minmax(0,1fr) 34px 36px 36px;
   min-height:72px;
 }
 .module-sequence,
@@ -7827,13 +7827,13 @@ details[open] > summary .module-expand-control:empty::before {
     justify-content:center;
   }
   .canvas-module-card > summary {
-    grid-template-columns:16px 32px minmax(0,1fr) 32px 34px;
+    grid-template-columns:32px minmax(0,1fr) 32px 34px;
     min-height:68px;
     gap:8px;
     padding:10px;
   }
   .canvas-module-card > summary > .row-action-menu {
-    grid-column:5;
+    grid-column:4;
   }
   .canvas-module-card > summary > .module-quick-add {
     display:none;
