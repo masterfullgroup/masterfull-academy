@@ -54,8 +54,11 @@
             <label>Contraseña
               <span class="password-field"><input id="login-password" type="password" required autocomplete="current-password" placeholder="Tu contraseña"><button class="password-toggle" type="button" data-password="login-password" aria-label="Mostrar contraseña" title="Mostrar contraseña"></button></span>
             </label>
-            <button class="btn primary full" type="submit">Ingresar</button>
-            <p id="login-error" class="error"></p>
+            <div class="auth-form-meta">
+              <button id="forgot-password-link" class="auth-recovery-link" type="button">¿Olvidaste tu contraseña?</button>
+            </div>
+            <button class="btn primary full" type="submit">Iniciar sesión</button>
+            <p id="login-error" class="error" role="alert" aria-live="assertive"></p>
           </form>
 
           <form id="register-form" class="auth-form hidden">
@@ -70,7 +73,7 @@
             </label>
             <p class="notice compact">El registro público crea cuentas de alumno. Para convertir una cuenta en profesor, cambia su rol desde Supabase siguiendo el README.</p>
             <button class="btn primary full" type="submit">Crear cuenta</button>
-            <p id="register-error" class="error"></p>
+            <p id="register-error" class="error" role="alert" aria-live="assertive"></p>
           </form>
         </div>
       </div>

@@ -646,6 +646,7 @@ function bindStaticEvents() {
     $("#register-form").classList.toggle("hidden", !isRegister);
   }));
   bindPasswordToggles();
+  $("#forgot-password-link")?.addEventListener("click", recoverPassword);
   $("#register-form").addEventListener("submit", registerUser);
   $("#login-form").addEventListener("submit", loginUser);
   $("#profile-form").addEventListener("submit", saveProfile);
@@ -1663,6 +1664,38 @@ function bindPasswordToggles(container = document) {
     });
   });
 }
+async function recoverPassword() {
+  const emailInput = $("#login-email");
+  const message = $("#login-error");
+  const button = $("#forgot-password-link");
+  const email = emailInput.value.trim().toLowerCase();
+  if (!email) {
+    message.className = "error";
+    message.textContent = "Escribe tu correo para enviarte las instrucciones.";
+    emailInput.focus();
+    return;
+  }
+  if (!sb) {
+    message.className = "error";
+    message.textContent = "No se configuró la conexión con Supabase. Revisa config.js.";
+    return;
+  }
+  button.disabled = true;
+  message.className = "status";
+  message.textContent = "Enviando instrucciones...";
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+    if (error) throw error;
+    message.className = "success";
+    message.textContent = "Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña.";
+  } catch (error) {
+    console.error("Recuperación de contraseña:", error);
+    message.className = "error";
+    message.textContent = translateError(error);
+  } finally {
+    button.disabled = false;
+  }
+}
 async function registerUser(event) {
   event.preventDefault();
   if (!sb) { $("#register-error").textContent = "No se configuró la conexión con Supabase. Revisa config.js."; return; }
@@ -1712,9 +1745,10 @@ async function registerUser(event) {
 }
 async function loginUser(event) {
   event.preventDefault();
-  if (!sb) { $("#login-error").textContent = "No se configuró la conexión con Supabase. Revisa config.js."; return; }
+  if (!sb) { $("#login-error").className = "error"; $("#login-error").textContent = "No se configuró la conexión con Supabase. Revisa config.js."; return; }
   const button = event.submitter;
   button.disabled = true;
+  $("#login-error").className = "status";
   $("#login-error").textContent = "Ingresando...";
   authTransitionPending = true;
   try {
@@ -1723,6 +1757,7 @@ async function loginUser(event) {
       password: $("#login-password").value
     });
     if (error) throw error;
+    $("#login-error").className = "error";
     $("#login-error").textContent = "";
     await setSessionFromSupabase(data.session, false);
     if (!currentUser) throw new Error("No se pudo cargar el perfil de esta cuenta.");
@@ -1738,6 +1773,7 @@ async function loginUser(event) {
     console.error("Login:", error);
     document.body.classList.remove("auth-galactic-burst");
     $("#auth-view .auth-layout")?.classList.remove("auth-login-exit");
+    $("#login-error").className = "error";
     $("#login-error").textContent = translateError(error);
   } finally {
     authTransitionPending = false;
