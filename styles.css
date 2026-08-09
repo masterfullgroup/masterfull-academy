@@ -1498,6 +1498,56 @@ body.auth-game-mode {
   .auth-game-mode .auth-recovery-link { transition:none; }
 }
 
+/* === Auth viewport fit: keep the full card visible on short screens === */
+body.auth-game-mode { --auth-vertical-gutter: clamp(20px, 4vh, 48px); }
+.auth-game-mode main {
+  min-height:100dvh;
+  padding-top:var(--auth-vertical-gutter);
+  padding-bottom:var(--auth-vertical-gutter);
+  align-content:start;
+  justify-items:center;
+}
+.auth-game-mode .auth-layout,
+.auth-game-mode .auth-layout.register-active,
+.auth-game-mode .auth-layout:has(#register-form:not(.hidden)) {
+  align-items:stretch;
+  min-height:min(640px, calc(100dvh - (2 * var(--auth-vertical-gutter))));
+}
+.auth-game-mode .auth-copy,
+.auth-game-mode .auth-card,
+.auth-game-mode .auth-layout.register-active .auth-copy,
+.auth-game-mode .auth-layout.register-active .auth-card,
+.auth-game-mode .auth-layout:has(#register-form:not(.hidden)) .auth-copy,
+.auth-game-mode .auth-layout:has(#register-form:not(.hidden)) .auth-card {
+  min-height:0;
+}
+@media (max-width:900px) {
+  .auth-game-mode main { min-height:100dvh; }
+  .auth-game-mode .auth-layout,
+  .auth-game-mode .auth-layout.register-active,
+  .auth-game-mode .auth-layout:has(#register-form:not(.hidden)) { min-height:0; }
+}
+@media (min-width:901px) and (max-height:720px) {
+  body.auth-game-mode { --auth-vertical-gutter:16px; }
+  .auth-game-mode .auth-copy,
+  .auth-game-mode .auth-card,
+  .auth-game-mode .auth-layout.register-active .auth-copy,
+  .auth-game-mode .auth-layout.register-active .auth-card,
+  .auth-game-mode .auth-layout:has(#register-form:not(.hidden)) .auth-copy,
+  .auth-game-mode .auth-layout:has(#register-form:not(.hidden)) .auth-card { padding-top:24px; padding-bottom:24px; }
+  .auth-game-mode .auth-form h2 { font-size:30px; }
+  .auth-game-mode .auth-form > .muted { margin-top:8px; margin-bottom:18px; }
+  .auth-game-mode .auth-form label { margin-bottom:12px; }
+  .auth-game-mode .auth-card input,
+  .auth-game-mode .auth-card select { min-height:46px; margin-top:6px; padding-top:11px; padding-bottom:11px; }
+  .auth-game-mode .auth-form-meta { margin-bottom:14px; }
+  .auth-game-mode .auth-card .primary { min-height:46px; }
+  .auth-game-mode .notice.compact { margin-top:2px; margin-bottom:12px; padding-top:8px; padding-bottom:8px; }
+  .auth-game-mode .error,
+  .auth-game-mode .success,
+  .auth-game-mode .status { margin-top:8px; }
+}
+
 /* Espacio docente tipo LMS */
 .app-shell-mode #teacher-view { max-width: 1540px; }
 .teacher-lms-shell { display: grid; grid-template-columns: 230px minmax(0,1fr); min-height: 720px; overflow: hidden; border: 1px solid #dce4ec; border-radius: 20px; background: #fff; box-shadow: 0 20px 55px #1e293b10; }
