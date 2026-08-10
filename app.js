@@ -487,16 +487,19 @@ async function loadCourseAccess() {
 async function loadDynamicCourses() {
   let courseQuery = await sb.from("academy_courses").select("course_id, name, description, teacher_name, modules, updated_at").eq("published", true);
   if (courseQuery.error?.code === "42703") courseQuery = await sb.from("academy_courses").select("course_id, name, description, teacher_name, updated_at").eq("published", true);
+  let examQuery = await sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count, bank_id").eq("published", true);
+  if (examQuery.error?.code === "42703") examQuery = await sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count").eq("published", true);
   const [courseResponse, examResponse, questionResponse, bankResponse, bankQuestionResponse] = await Promise.all([
     Promise.resolve(courseQuery),
-    sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count, bank_id").eq("published", true),
+    Promise.resolve(examQuery),
     sb.from("academy_questions").select("exam_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true }),
     sb.from("academy_question_banks").select("bank_id, course_id, title, option_count, published").eq("published", true),
     sb.from("academy_bank_questions").select("bank_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true })
   ]);
   const normalizedBankError = bankResponse.error && !["42P01","42703"].includes(String(bankResponse.error.code));
   const normalizedBankQuestionError = bankQuestionResponse.error && !["42P01","42703"].includes(String(bankQuestionResponse.error.code));
-  const error = courseResponse.error || examResponse.error || questionResponse.error || (normalizedBankError ? bankResponse.error : null) || (normalizedBankQuestionError ? bankQuestionResponse.error : null);
+  const normalizedExamError = examResponse.error && !["42P01","42703"].includes(String(examResponse.error.code));
+  const error = courseResponse.error || (normalizedExamError ? examResponse.error : null) || questionResponse.error || (normalizedBankError ? bankResponse.error : null) || (normalizedBankQuestionError ? bankQuestionResponse.error : null);
   if (error) {
     if (String(error.code) !== "42P01") console.error("No se pudieron cargar los cursos normalizados desde Supabase:", error);
     dynamicCourses = [];
