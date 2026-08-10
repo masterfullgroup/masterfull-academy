@@ -20,6 +20,8 @@ assert.match(htmlSource, /activity-menu-trigger/, "Los menús del editor deben s
 assert.match(htmlSource, /data-activity-menu-panel="insert"/, "El menú Insertar debe ofrecer acciones reales");
 assert.match(htmlSource, /data-activity-format="table-row"/, "El menú Tabla debe permitir añadir filas");
 assert.match(appSource, /toggleActivityMenu/, "Los menús superiores deben abrirse y cerrarse de forma funcional");
+assert.match(appSource, /\$\$\("\.activity-config-option"\)\.forEach/, "La configuración avanzada debe recorrer todos sus campos");
+assert.doesNotMatch(appSource, /^\s+\$\("\.activity-config-option"\)\.forEach/m, "La configuración avanzada no debe tratar una lista como un elemento único");
 assert.match(appSource, /editActiveActivityTable/, "Las acciones avanzadas de tabla deben modificar la tabla activa");
 assert.match(htmlSource, /data-activity-format="image"/, "El editor debe permitir insertar imágenes");
 assert.match(htmlSource, /data-activity-format="table"/, "El editor debe permitir insertar tablas");

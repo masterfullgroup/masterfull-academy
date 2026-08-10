@@ -3251,7 +3251,7 @@ function toggleActivityFields() {
   $("#activity-exam-field").classList.toggle("hidden", !showExamSettings);
   $("#activity-submission-field").classList.toggle("hidden", type !== "task");
   $(".activity-advanced-settings").classList.toggle("hidden", !advancedTypes.includes(type));
-  $(".activity-config-option").forEach(option => {
+  $$(".activity-config-option").forEach(option => {
     const types = (option.dataset.configTypes || "").split(",");
     option.classList.toggle("hidden", !types.includes(type));
   });
