@@ -6883,9 +6883,11 @@ body.student-course-open .student-course-content-head {
   font-size:11.5px;
 }
 .module-content-step {
-  flex:0 0 auto;
-  margin-left:auto;
-  margin-right:12px;
+  position:absolute;
+  top:18px;
+  right:68px;
+  z-index:8;
+  margin:0;
   padding:7px 11px;
   color:#e4e7f7;
   border:1px solid #ffffff2d;
