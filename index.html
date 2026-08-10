@@ -154,7 +154,7 @@
           </div>
           <div id="teacher-exams" class="tab-content">
             <div id="teacher-exam-directory">
-              <div class="teacher-section-title"><div><span class="eyebrow">EVALUACIONES</span><h3>Cursos con evaluaciones</h3><p>Abre un curso para entrar a su espacio y administrar su contenido por separado.</p></div><button class="btn primary" id="new-exam-btn" type="button">+ Crear evaluación</button></div>
+              <div class="teacher-section-title"><div><span class="eyebrow">EVALUACIONES</span><h3>Cursos con evaluaciones</h3><p>Consulta y administra las evaluaciones creadas desde los módulos.</p></div></div>
               <div id="teacher-exam-course-list" class="exam-course-directory" aria-live="polite"></div>
             </div>
           </div>
@@ -321,17 +321,26 @@
             </div>
           </div>
         </section>
-        <label id="activity-exam-field" class="hidden">Evaluación vinculada<select id="activity-exam-id"><option value="">Selecciona una evaluación</option></select><small>La evaluación se mantiene como una sola entidad y esta fila solo crea su ubicación dentro del módulo.</small></label>
+        <div id="activity-exam-field" class="hidden activity-exam-settings">
+          <input id="activity-exam-id" type="hidden">
+          <label>Banco de preguntas<select id="activity-bank-id"><option value="">Selecciona un banco de preguntas</option></select><small>Las preguntas se toman directamente del banco central y no se copian a otro banco.</small></label>
+          <fieldset id="activity-bank-questions" class="activity-bank-questions"><legend>Preguntas de este banco</legend><p class="muted">Selecciona las preguntas que formarán parte de esta evaluación.</p></fieldset>
+          <div class="activity-exam-config-grid">
+            <label>Preguntas a tomar<input id="activity-question-count" type="number" min="1" max="500" value="5" required></label>
+            <label>Duración (minutos)<input id="activity-minutes" type="number" min="1" max="300" value="20" required></label>
+            <label>Intentos permitidos<input id="activity-exam-attempts" type="number" min="1" max="20" value="1" required></label>
+          </div>
+        </div>
         <fieldset id="activity-submission-field" class="hidden activity-submission-types"><legend>Tipos de entrega permitidos</legend><label><input type="checkbox" name="activity-submission" value="file"> Archivos</label><label><input type="checkbox" name="activity-submission" value="text"> Texto en línea</label><label><input type="checkbox" name="activity-submission" value="url"> Enlace externo</label><label><input type="checkbox" name="activity-submission" value="questions"> Banco de preguntas</label><label><input type="checkbox" name="activity-submission" value="none"> Sin entrega digital</label></fieldset>
-        <details class="activity-advanced-settings">
+        <details class="activity-advanced-settings hidden">
           <summary><span>3</span><div><strong>Configuración avanzada</strong><small>Publicación, finalización, fechas y puntaje.</small></div><b aria-hidden="true">⌄</b></summary>
           <div class="activity-config-grid">
-            <label>Estado<select id="activity-published"><option value="true">Publicado</option><option value="false">Borrador</option></select></label>
-            <label>Finalización<select id="activity-completion-rule"><option value="manual">El alumno marca completado</option><option value="view">Ver el elemento</option><option value="submit">Realizar una entrega</option><option value="pass">Obtener nota aprobatoria</option><option value="none">No genera progreso</option></select></label>
-            <label>Fecha límite<input id="activity-due-at" type="datetime-local"></label>
-            <label>Puntaje<input id="activity-points" type="number" min="0" max="10000" value="0"></label>
-            <label>Duración en minutos<input id="activity-duration" type="number" min="0" max="10000" value="0"></label>
-            <label>Intentos (0 = sin límite)<input id="activity-attempts" type="number" min="0" max="100" value="0"></label>
+            <label class="activity-config-option" data-config-types="practice,task,quiz,discussion,live">Estado<select id="activity-published"><option value="true">Publicado</option><option value="false">Borrador</option></select></label>
+            <label class="activity-config-option" data-config-types="practice,task,quiz,discussion,live">Finalización<select id="activity-completion-rule"><option value="manual">El alumno marca completado</option><option value="view">Ver el elemento</option><option value="submit">Realizar una entrega</option><option value="pass">Obtener nota aprobatoria</option><option value="none">No genera progreso</option></select></label>
+            <label class="activity-config-option" data-config-types="task,quiz,discussion">Fecha límite<input id="activity-due-at" type="datetime-local"></label>
+            <label class="activity-config-option" data-config-types="practice,task,quiz,discussion">Puntaje<input id="activity-points" type="number" min="0" max="10000" value="0"></label>
+            <label class="activity-config-option" data-config-types="quiz,live">Duración en minutos<input id="activity-duration" type="number" min="0" max="10000" value="0"></label>
+            <label class="activity-config-option" data-config-types="task,quiz">Intentos (0 = sin límite)<input id="activity-attempts" type="number" min="0" max="100" value="0"></label>
           </div>
         </details>
         <footer class="module-content-editor-footer"><p id="activity-error" class="error" aria-live="polite"></p><div class="module-content-editor-actions"><button class="btn secondary" data-close="activity-modal" type="button">Cancelar</button><button class="btn primary" type="submit">Agregar al módulo</button></div></footer>
@@ -412,7 +421,7 @@
   <div id="evaluation-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="evaluation-modal-title">
     <div class="modal-card panel large">
       <button class="modal-close" data-close="evaluation-modal" type="button" aria-label="Cerrar">×</button>
-      <div class="editor-sticky-bar"><div><span class="eyebrow">CONFIGURACIÓN DE EVALUACIÓN</span><h2 id="evaluation-modal-title">Crear evaluación</h2></div><button class="btn primary" type="submit" form="evaluation-form">Guardar evaluación</button></div>
+      <div class="editor-sticky-bar"><div><span class="eyebrow">ADMINISTRACIÓN DE EVALUACIÓN</span><h2 id="evaluation-modal-title">Administrar evaluación</h2></div><button class="btn primary" type="submit" form="evaluation-form">Guardar cambios</button></div>
       <form id="evaluation-form"><input type="hidden" id="evaluation-id">
         <div class="editor-section-head"><div><span class="eyebrow">MÓDULO</span><h3>Datos de la evaluación</h3></div><p>Configura cómo se aplicará el banco dentro del recorrido del curso.</p></div>
         <div class="form-grid">

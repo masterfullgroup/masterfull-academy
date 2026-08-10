@@ -96,6 +96,7 @@ function normalizeModules(value) {
       description: String(activity.description || "").trim(),
       published: activity.published !== false,
       examId: String(activity.examId || activity.exam_id || "").trim(),
+      questionIds: Array.isArray(activity.questionIds || activity.question_ids) ? [...new Set(activity.questionIds || activity.question_ids)].map(String) : [],
       dueAt: String(activity.dueAt || activity.due_at || "").trim(),
       points: Math.max(0, Number(activity.points) || 0),
       duration: Math.max(0, Number(activity.duration) || 0),
@@ -126,7 +127,8 @@ function normalizeQuestionBank(raw, source = "Banco", fallbackCourseId = "") {
 }
 function examWithQuestionBank(exam, banks) {
   const bank = banks.find(item => item.id === exam.questionBankId);
-  return { ...exam, questions: bank ? structuredClone(bank.questions) : (exam.questions || []) };
+  const selected = exam.questionIds?.length ? bank?.questions.filter(question => exam.questionIds.includes(question.id)) : bank?.questions;
+  return { ...exam, questions: bank ? structuredClone(selected || []) : (exam.questions || []) };
 }
 function normalizeDraftState(raw) {
   const source = raw && typeof raw === "object" ? raw : emptyDrafts;
@@ -611,7 +613,8 @@ function normalizeExam(raw, source = "JSON", fallbackCourseId = "") {
     return q;
   });
   const questionBankId = String(raw.question_bank_id || raw.questionBankId || raw.bank_id || raw.bankId || "").trim();
-  return { id, courseId, title, minutes, questionsToShow, attemptsAllowed, published: published === true || published === "true", optionCount, questionBankId, questions, source };
+  const selectedQuestionIds = Array.isArray(raw.question_ids || raw.questionIds) ? [...new Set(raw.question_ids || raw.questionIds)].map(String).filter(questionId => questions.some(question => question.id === questionId)) : [];
+  return { id, courseId, title, minutes, questionsToShow, attemptsAllowed, published: published === true || published === "true", optionCount, questionBankId, questionIds:selectedQuestionIds, questions, source };
 }
 function normalizeImportedQuestion(item, index, forcedOptionCount = null) {
   const text = item.text ?? item.pregunta ?? item.enunciado ?? item.question;
@@ -724,7 +727,6 @@ function bindStaticEvents() {
   $("#profile-form").addEventListener("submit", saveProfile);
   $("#new-course-btn").addEventListener("click", () => openCourseModal());
   $("#teacher-head-new-course").addEventListener("click", () => openCourseModal());
-  $("#teacher-head-new-exam")?.addEventListener("click", () => openEvaluationModal());
   $("#course-search").addEventListener("input", renderTeacherCourseList);
   $("#course-quick-toggle").addEventListener("click", () => {
     const directory = $("#teacher-course-directory");
@@ -742,7 +744,6 @@ function bindStaticEvents() {
     $("#teacher-course-directory").classList.remove("quick-panel-open");
     $("#course-quick-toggle").setAttribute("aria-expanded", "false");
   });
-  $("#new-exam-btn").addEventListener("click", () => openEvaluationModal());
   $("#course-form").addEventListener("submit", saveCourseDraft);
   $("#course-name").addEventListener("input", updateCourseSetupPreview);
   $("#course-description").addEventListener("input", updateCourseSetupPreview);
@@ -753,6 +754,12 @@ function bindStaticEvents() {
   $("#evaluation-bank").addEventListener("change", () => { const bank = getQuestionBank($("#evaluation-bank").value); $("#evaluation-question-count").max = String(bank?.questions.length || 1); $("#evaluation-question-count").value = String(Math.min(Number($("#evaluation-question-count").value) || 1, bank?.questions.length || 1)); });
   $("#module-unlock-rule").addEventListener("change", toggleModuleUnlockDetail);
   $("#activity-type").addEventListener("change", toggleActivityFields);
+  $("#activity-bank-id").addEventListener("change", () => {
+    const bank = getQuestionBank($("#activity-bank-id").value);
+    renderActivityBankQuestions(bank);
+    $("#activity-question-count").max = String(bank?.questions.length || 1);
+    if (bank) $("#activity-question-count").value = String(Math.min(Number($("#activity-question-count").value) || 1, bank.questions.length));
+  });
   $$("[data-activity-format]").forEach(button => {
     button.addEventListener("mousedown", event => {
       rememberActivityEditorSelection();
@@ -2031,7 +2038,7 @@ function renderCanvasCourseCard(course, isDraft, index) {
   const editClass = isDraft ? "edit-course" : "edit-published-course";
   const deleteClass = isDraft ? "delete-course" : "delete-published-course";
   return `<article class="canvas-course-card tone-${index % 5} ${isDraft ? "draft" : ""}">
-    <div class="canvas-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><details class="canvas-course-menu"><summary aria-label="Más acciones para ${esc(course.name)}">⋮</summary><div>${isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar curso</button>` : ""}<button class="create-exam-course" data-id="${esc(course.id)}" type="button">Crear evaluación</button></div></details></div>
+    <div class="canvas-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><details class="canvas-course-menu"><summary aria-label="Más acciones para ${esc(course.name)}">⋮</summary><div>${isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar curso</button>` : ""}</div></details></div>
     <div class="canvas-course-body"><strong class="canvas-course-title">${esc(course.name)}</strong><small>${isDraft ? "No publicado" : "Publicado"}</small><footer><span title="Módulos">${modernIcon("page")} ${modules.length}</span><span title="Recursos">${modernIcon("folder")} ${activities}</span><span title="Evaluaciones">${modernIcon("quiz")} ${exams}</span></footer><div class="canvas-course-actions"><button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button><button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar</button><button class="${deleteClass} danger" data-id="${esc(course.id)}" type="button">Eliminar</button></div></div>
   </article>`;
 }
@@ -2235,14 +2242,14 @@ function renderTeacherCourseOverview(course, exams, publishedCount, questionCoun
     <div class="course-subpage-head course-home-heading"><div><span class="eyebrow">INICIO DEL CURSO</span><h2>${esc(course.name)}</h2><p>${esc(course.description || "Administra el contenido, las evaluaciones y el progreso de este curso.")}</p></div><button class="btn primary course-home-open-modules" type="button">${modernIcon("courses")} Gestionar módulos</button></div>
     <section class="course-home-metrics" aria-label="Resumen del curso">${metrics.map(([label, value, icon, detail]) => `<article><span class="course-home-metric-icon">${modernIcon(icon)}</span><div><small>${label}</small><strong>${value}</strong><p>${detail}</p></div></article>`).join("")}</section>
     <section class="course-home-panel">
-      <header class="course-home-panel-head"><div><span class="eyebrow">ACTIVIDAD RECIENTE</span><h3>Evaluaciones del curso</h3><p>Accede rápidamente a las últimas evaluaciones configuradas.</p></div><button class="btn secondary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluación</button></header>
+      <header class="course-home-panel-head"><div><span class="eyebrow">ACTIVIDAD RECIENTE</span><h3>Evaluaciones del curso</h3><p>Accede rápidamente a las evaluaciones configuradas desde Módulos.</p></div></header>
       ${recent.length ? `<div class="course-recent-list">${recent.map(exam => `<button class="course-recent-exam edit-exam" data-id="${esc(exam.id)}" type="button"><span class="course-recent-icon">${modernIcon("quiz")}</span><span class="course-recent-copy"><strong>${esc(exam.title)}</strong><small><b>${exam.minutes} min</b><b>${quantity(exam.questions.length, "pregunta")}</b><b>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento" : "intentos"}</b></small></span><span class="course-recent-action">Editar <b aria-hidden="true">→</b></span></button>`).join("")}</div>` : `<div class="course-workspace-empty course-home-empty"><strong>Aún no hay evaluaciones</strong><p>Crea la primera para comenzar a construir el recorrido del curso.</p></div>`}
     </section>
   </div>`;
 }
 function renderTeacherCourseExams(course, exams) {
   const modules = normalizeModules(course.modules);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Evaluaciones</h2><p>Este listado filtra las evaluaciones del curso. La ubicación pedagógica se administra en Módulos.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear evaluación</button></div>
+  return `<div class="course-subpage-head"><div><span class="eyebrow">VISTA GLOBAL</span><h2>Evaluaciones</h2><p>Este listado consulta las evaluaciones creadas desde Módulos. La ubicación pedagógica se administra allí.</p></div></div>
     <div class="course-exam-list">${exams.length ? exams.map(exam => {
       const module = modules.find(item => item.activities.some(activity => activity.examId === exam.id && activity.type === "quiz"));
       return renderTeacherExamRow(exam, module?.title || "");
@@ -2262,14 +2269,14 @@ function renderTeacherCourseQuestions(course) {
   </div>`;
   /* Legacy markup retained below until the editor migration is complete. */
   return `<div class="question-bank-page">
-    <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">CONTENIDO EVALUATIVO</span><h2>Banco de preguntas</h2><p>Organiza y administra las preguntas de cada evaluación desde una biblioteca centralizada.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluación</button></div>
+    <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">CONTENIDO EVALUATIVO</span><h2>Banco de preguntas</h2><p>Administra las preguntas desde una biblioteca centralizada para reutilizarlas en evaluaciones creadas en Módulos.</p></div></div>
     <section class="question-bank-summary" aria-label="Resumen del banco"><article><span>${modernIcon("practice")}</span><div><small>Preguntas totales</small><strong>${questionCount}</strong></div></article><article><span>${modernIcon("quiz")}</span><div><small>Bancos activos</small><strong>${exams.length}</strong></div></article><article><span>${modernIcon("results")}</span><div><small>Publicados</small><strong>${publishedCount}</strong></div></article><article><span>${modernIcon("progress")}</span><div><small>Promedio por banco</small><strong>${average}</strong></div></article></section>
     <div class="question-bank-toolbar"><label><span>${modernIcon("courses")}</span><input id="question-bank-search" type="search" placeholder="Buscar una evaluación o banco…" autocomplete="off"></label><span>${quantity(exams.length, "banco disponible", "bancos disponibles")}</span></div>
     <div class="course-question-banks question-bank-grid">${exams.length ? exams.map(exam => {
       const isPublished = publishedExams.some(item => item.id === exam.id);
       const searchText = `${exam.title} ${isPublished ? "publicado" : "borrador"}`.toLocaleLowerCase("es");
       return `<article class="course-question-bank" data-bank-search="${esc(searchText)}"><header><span class="question-bank-icon">${modernIcon("quiz")}</span><span class="status ${isPublished ? "published" : "draft"}">${isPublished ? "Publicado" : "Borrador"}</span></header><div class="question-bank-card-copy"><h3>${esc(exam.title)}</h3><p>Banco vinculado a esta evaluación.</p></div><div class="question-bank-card-metrics"><span><b>${exam.questions.length}</b><small>Preguntas</small></span><span><b>${exam.optionCount}</b><small>Opciones</small></span><span><b>${exam.minutes}</b><small>Minutos</small></span></div><footer><small>${exam.attemptsAllowed} ${exam.attemptsAllowed === 1 ? "intento permitido" : "intentos permitidos"}</small><button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Administrar banco <span aria-hidden="true">→</span></button></footer></article>`;
-    }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea una evaluación para comenzar a construir su banco.</p><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Crear primera evaluación</button></div>`}</div>
+    }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea un banco desde esta sección para utilizarlo al crear una evaluación en Módulos.</p></div>`}</div>
     <div id="question-bank-filter-empty" class="course-workspace-empty question-bank-filter-empty hidden"><strong>No hay coincidencias</strong><p>Prueba con otro nombre de evaluación.</p></div>
   </div>`;
 }
@@ -2290,9 +2297,7 @@ function renderTeacherExamRow(exam, moduleTitle = "") {
 function bindTeacherActions() {
   $$("[data-overview-tab]").forEach(button => button.addEventListener("click", () => switchTab("teacher", button.dataset.overviewTab, $(`[data-teacher-tab="${button.dataset.overviewTab}"]`))));
   $$(".overview-new-course-dynamic").forEach(button => button.addEventListener("click", () => openCourseModal()));
-  $$(".overview-new-exam-dynamic").forEach(button => button.addEventListener("click", () => openEvaluationModal()));
   $$(".view-course").forEach(button => button.addEventListener("click", () => switchTab("teacher", "teacher-exams", $('[data-teacher-tab="teacher-exams"]'))));
-  $$(".create-exam-course").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => openEvaluationModal(null, button.dataset.id)));
   $$(".edit-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$(".delete-course").forEach(button => button.addEventListener("click", () => deleteCourseDraft(button.dataset.id)));
   $$(".edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
@@ -2397,7 +2402,6 @@ function bindTeacherExamWorkspaceActions() {
     });
     $("#question-bank-filter-empty")?.classList.toggle("hidden", visible > 0 || !cards.length);
   });
-  $$("#teacher-course-workspace .create-exam-course").forEach(button => button.addEventListener("click", () => openEvaluationModal(null, button.dataset.id)));
   $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openEvaluationModal(button.dataset.id)));
   $$("#teacher-course-workspace .delete-exam").forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
   $$("#teacher-course-workspace .export-draft").forEach(button => button.addEventListener("click", () => { openEvaluationModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
@@ -3169,7 +3173,7 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   const modules = normalizeModules(findCourse(courseId)?.modules);
   const module = modules.find(item => item.id === moduleId);
   const activity = module?.activities.find(item => item.id === activityId);
-  const exams = getTeacherExams().filter(exam => exam.courseId === courseId);
+  const banks = getTeacherQuestionBanks(courseId);
   $("#activity-modal-title").textContent = activity ? "Editar contenido" : "Agregar contenido";
   $("#activity-editor-context").textContent = activity ? `Actualiza “${activity.title}” sin alterar su ubicación en el recorrido.` : `Agrega un nuevo elemento a ${module?.title || "este módulo"}.`;
   $("#activity-course-id").value = courseId;
@@ -3190,13 +3194,19 @@ function openActivityModal(courseId, moduleId, activityId = "") {
   $("#activity-points").value = activity?.points || 0;
   $("#activity-duration").value = activity?.duration || 0;
   $("#activity-attempts").value = activity?.attempts || 0;
-  $("#activity-exam-id").innerHTML = `<option value="">${exams.length ? "Selecciona una evaluación" : "Primero crea una evaluación en este curso"}</option>${exams.map(exam => `<option value="${esc(exam.id)}">${esc(exam.title)}</option>`).join("")}`;
+  const linkedExam = getTeacherExams().find(exam => exam.id === activity?.examId);
   $("#activity-exam-id").value = activity?.examId || "";
+  $("#activity-bank-id").innerHTML = banks.length ? `<option value="">Selecciona un banco de preguntas</option>${banks.map(bank => `<option value="${esc(bank.id)}">${esc(bank.title)} · ${bank.questions.length} preguntas</option>`).join("")}` : `<option value="">Primero crea un banco de preguntas</option>`;
+  $("#activity-bank-id").value = linkedExam?.questionBankId || banks[0]?.id || "";
+  renderActivityBankQuestions(getQuestionBank($("#activity-bank-id").value), linkedExam?.questionIds || linkedExam?.questions?.map(question => question.id) || []);
+  $("#activity-question-count").value = linkedExam?.questionsToShow || Math.min(5, banks[0]?.questions.length || 5);
+  $("#activity-minutes").value = linkedExam?.minutes || 20;
+  $("#activity-exam-attempts").value = linkedExam?.attemptsAllowed || 1;
   $$('input[name="activity-submission"]').forEach(input => { input.checked = activity?.submissionTypes?.includes(input.value) || false; });
   toggleActivityFields();
   $("#activity-error").textContent = "";
   $(".module-content-editor-footer .btn.primary").textContent = activity ? "Guardar cambios" : "Agregar al módulo";
-  $(".activity-advanced-settings").open = Boolean(activity);
+  $(".activity-advanced-settings").open = Boolean(activity && ["practice","task","quiz","discussion","live"].includes(activity.type));
   $("#activity-modal").classList.remove("hidden");
   $("#activity-title").focus();
 }
@@ -3212,7 +3222,7 @@ function toggleActivityFields() {
     link: ["Enlace externo", "Comparte un recurso externo con contexto para el alumno."],
     practice: ["Práctica", "Vincula un banco de preguntas y explica el objetivo de la práctica."],
     task: ["Tarea", "Describe la entrega esperada y configura sus condiciones."],
-    quiz: ["Evaluación", "Vincula una evaluación existente y agrega instrucciones breves."],
+    quiz: ["Evaluación", "Crea la evaluación en este módulo y selecciona preguntas del banco central."],
     discussion: ["Foro o discusión", "Formula la pregunta y las pautas de participación."],
     live: ["Videoclase", "Incluye el enlace de acceso y la agenda de la sesión."],
     heading: ["Encabezado", "Crea un separador visual dentro del módulo."],
@@ -3224,10 +3234,28 @@ function toggleActivityFields() {
   $("#activity-title").placeholder = `Título de ${label.toLocaleLowerCase("es")}`;
   $("#activity-url-field").classList.toggle("hidden", !resourceTypes.includes(type));
   $("#activity-description-field").classList.toggle("hidden", isHeading);
-  $("#activity-exam-field").classList.toggle("hidden", !["practice","quiz"].includes(type));
+  const advancedTypes = ["practice","task","quiz","discussion","live"];
+  const showExamSettings = type === "quiz";
+  $("#activity-exam-field").classList.toggle("hidden", !showExamSettings);
   $("#activity-submission-field").classList.toggle("hidden", type !== "task");
+  $(".activity-advanced-settings").classList.toggle("hidden", !advancedTypes.includes(type));
+  $(".activity-config-option").forEach(option => {
+    const types = (option.dataset.configTypes || "").split(",");
+    option.classList.toggle("hidden", !types.includes(type));
+  });
   $("#activity-completion-rule").disabled = isHeading;
   if (isHeading) $("#activity-completion-rule").value = "none";
+  if (showExamSettings) {
+    const bank = getQuestionBank($("#activity-bank-id").value);
+    $("#activity-question-count").max = String(bank?.questions.length || 1);
+    if (bank) $("#activity-question-count").value = String(Math.min(Number($("#activity-question-count").value) || 1, bank.questions.length));
+  }
+}
+function renderActivityBankQuestions(bank, selectedIds = []) {
+  const container = $("#activity-bank-questions");
+  if (!container) return;
+  const selected = new Set(selectedIds);
+  container.innerHTML = bank?.questions?.length ? `<legend>Preguntas de este banco</legend><p class="muted">Selecciona las preguntas que formarán parte de esta evaluación.</p>${bank.questions.map((question, index) => `<label class="activity-bank-question"><input type="checkbox" name="activity-question" value="${esc(question.id)}" ${selected.size ? (selected.has(question.id) ? "checked" : "") : "checked"}><span><strong>Pregunta ${index + 1}</strong><small>${esc(question.text)}</small></span></label>`).join("")}` : `<legend>Preguntas de este banco</legend><p class="muted">Selecciona un banco con preguntas para continuar.</p>`;
 }
 function safeRichContentUrl(value) {
   const url = String(value || "").trim();
@@ -3456,6 +3484,7 @@ async function saveActivity(event) {
   const targetModuleId = $("#activity-target-module").value;
   const activityId = $("#activity-id").value;
   const type = $("#activity-type").value;
+  const bank = type === "quiz" ? getQuestionBank($("#activity-bank-id").value) : null;
   const activity = {
     id: activityId || uid(),
     title: $("#activity-title").value.trim(),
@@ -3473,16 +3502,51 @@ async function saveActivity(event) {
   };
   if (!activity.title) { $("#activity-error").textContent = "Escribe un nombre para la actividad."; return; }
   if (activity.url && !safeActivityUrl(activity.url)) { $("#activity-error").textContent = "Usa una URL https:// o una ruta local que empiece con ./ o /."; return; }
-  if (["practice","quiz"].includes(type) && !activity.examId) { $("#activity-error").textContent = "Selecciona la evaluación o banco que utilizará este elemento."; return; }
+  if (type === "quiz" && !bank) { $("#activity-error").textContent = "Selecciona un banco de preguntas existente."; return; }
   if (type === "task" && !activity.submissionTypes.length) { $("#activity-error").textContent = "Selecciona al menos un tipo de entrega para la tarea."; return; }
-  const saved = await updateCourseModules(courseId, modules => {
+  let exam = null;
+  if (type === "quiz") {
+    const examId = activity.examId || slug(`${courseId}-${activity.title || "evaluacion"}`);
+    const existingExam = getTeacherExams().find(item => item.id === examId);
+    const selectedQuestionIds = $$('input[name="activity-question"]:checked').map(input => input.value);
+    if (!selectedQuestionIds.length) { $("#activity-error").textContent = "Selecciona al menos una pregunta del banco."; return; }
+    const questionCount = Number($("#activity-question-count").value);
+    if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > selectedQuestionIds.length) { $("#activity-error").textContent = `La cantidad debe estar entre 1 y ${selectedQuestionIds.length} preguntas seleccionadas.`; return; }
+    activity.questionIds = selectedQuestionIds;
+    exam = { id:examId, courseId, title:activity.title, minutes:Number($("#activity-minutes").value), questionsToShow:questionCount, attemptsAllowed:Number($("#activity-exam-attempts").value), optionCount:bank.optionCount, questionBankId:bank.id, questionIds:selectedQuestionIds, published:activity.published, questions:structuredClone(bank.questions.filter(question => selectedQuestionIds.includes(question.id))) };
+    if (!Number.isInteger(exam.minutes) || exam.minutes < 1 || exam.minutes > 300) { $("#activity-error").textContent = "La duración debe estar entre 1 y 300 minutos."; return; }
+    if (!Number.isInteger(exam.attemptsAllowed) || exam.attemptsAllowed < 1 || exam.attemptsAllowed > 20) { $("#activity-error").textContent = "Los intentos deben estar entre 1 y 20."; return; }
+    activity.examId = exam.id;
+    if (existingExam && existingExam.questionBankId !== bank.id) activity.examId = existingExam.id;
+  }
+  const nextModules = normalizeModules((() => {
+    const modules = normalizeModules(findCourse(courseId)?.modules);
     if (!activityId || targetModuleId === moduleId) return modules.map(module => module.id === moduleId ? { ...module, activities:activityId ? module.activities.map(item => item.id === activityId ? activity : item) : [...module.activities, activity] } : module);
     return modules.map(module => {
       if (module.id === moduleId) return { ...module, activities:module.activities.filter(item => item.id !== activityId) };
       if (module.id === targetModuleId) return { ...module, activities:[...module.activities, activity] };
       return module;
     });
-  });
+  })());
+  if (exam) {
+    const examIndex = drafts.exams.findIndex(item => item.id === exam.id);
+    if (examIndex >= 0) drafts.exams[examIndex] = exam; else drafts.exams.push(exam);
+    saveDrafts();
+    if (isPublishedCourse(courseId) && exam.published) {
+      const course = findCourse(courseId);
+      if (!sb || !course) { $("#activity-error").textContent = "No se pudo conectar la evaluación con su curso publicado."; return; }
+      const publishedExamsForCourse = getTeacherExams().filter(item => item.courseId === courseId && item.id !== exam.id).map(examToJsonSchema);
+      const { error } = await sb.rpc("publish_academy_course", { payload:{ course:{ id:course.id, name:course.name, description:course.description || "", teacher_name:course.teacherName || currentUser.name, modules:nextModules }, banks:[bank], exams:[...publishedExamsForCourse, examToJsonSchema(exam)] } });
+      if (error) { $("#activity-error").textContent = error.message || translateError(error); return; }
+      drafts.exams = drafts.exams.filter(item => item.id !== exam.id);
+      await loadDynamicCourses();
+      await loadCourseChanges();
+      closeModal("activity-modal");
+      renderTeacher();
+      return;
+    }
+  }
+  const saved = await updateCourseModules(courseId, () => nextModules);
   if (saved) closeModal("activity-modal");
 }
 async function deleteModule(courseId, moduleId) {
@@ -3678,13 +3742,14 @@ function openExamModal(id = null, courseId = null) {
   $("#exam-modal").classList.remove("hidden");
 }
 function openEvaluationModal(id = null, courseId = null) {
+  if (!id) return;
   const courses = getTeacherCourses();
   const localExam = drafts.exams.find(item => item.id === id);
   const publishedExam = publishedExams.find(item => item.id === id);
   const exam = publishedExam || localExam;
   const banks = getTeacherQuestionBanks(exam?.courseId || courseId || courses[0]?.id || "");
   if (!courses.length) { alert("Primero crea un curso para agregar una evaluación."); openCourseModal(); return; }
-  $("#evaluation-modal-title").textContent = publishedExam ? "Modificar evaluación publicada" : localExam ? "Editar evaluación" : "Crear evaluación";
+  $("#evaluation-modal-title").textContent = publishedExam ? "Modificar evaluación publicada" : "Editar evaluación";
   $("#evaluation-id").value = exam?.id || "";
   $("#evaluation-course").innerHTML = courses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("");
   $("#evaluation-course").value = exam?.courseId || courseId || courses[0].id;
@@ -3970,6 +4035,7 @@ function examToJsonSchema(exam) {
     minutes: exam.minutes,
     questions_to_show: exam.questionsToShow,
     attempts_allowed: exam.attemptsAllowed,
+    question_ids: exam.questionIds || exam.questions.map(question => question.id),
     published: exam.published,
     option_count: exam.optionCount,
     questions: exam.questions.map(q => ({ id: q.id, text: q.text, image: q.image || "", options: q.options, correct: q.correct }))
