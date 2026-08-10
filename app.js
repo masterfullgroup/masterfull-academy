@@ -1887,7 +1887,12 @@ function renderTeacher() {
   bindTeacherExamWorkspaceActions();
 }
 function getTeacherCourses() {
-  return [...new Map([...publishedCourses, ...drafts.courses].map(course => [course.id, course])).values()];
+  // A published course is authoritative when an old local draft with the same
+  // id remains in localStorage after the publication was completed.
+  return [...new Map([...drafts.courses, ...publishedCourses].map(course => [course.id, course])).values()];
+}
+function isPublishedCourse(courseId) {
+  return publishedCourses.some(course => course.id === courseId);
 }
 function getTeacherExams() {
   return [...new Map([...publishedExams, ...drafts.exams].map(exam => [exam.id, exam])).values()];
@@ -1895,7 +1900,7 @@ function getTeacherExams() {
 function renderTeacherOverview() {
   const allCourses = getTeacherCourses();
   const courseCards = allCourses.length ? allCourses.map(course => {
-    const isDraft = drafts.courses.some(item => item.id === course.id);
+    const isDraft = !isPublishedCourse(course.id);
     const editClass = isDraft ? "edit-course" : "edit-published-course";
     const deleteClass = isDraft ? "delete-course" : "delete-published-course";
     return `<article class="canvas-dashboard-card">
@@ -1926,7 +1931,7 @@ function renderTeacherCourses() {
   const query = ($("#course-search")?.value || "").trim().toLocaleLowerCase("es");
   const matches = (course, state) => !query || `${course.name} ${state}`.toLocaleLowerCase("es").includes(query);
   const published = publishedCourses.filter(course => matches(course, "publicado"));
-  const local = drafts.courses.filter(course => matches(course, "borrador"));
+  const local = drafts.courses.filter(course => !isPublishedCourse(course.id)).filter(course => matches(course, "borrador"));
   if (!published.length && !local.length) return `<div class="course-directory-empty">${modernIcon("course")}<strong>No se encontraron cursos</strong><small>Prueba con otro nombre o crea un curso nuevo.</small></div>`;
   return `${renderCanvasCourseGroup("Cursos publicados", published, false)}${renderCanvasCourseGroup("Cursos no publicados", local, true)}`;
 }
@@ -1952,7 +1957,7 @@ function renderTeacherQuickCourses() {
   if (!target) return;
   const groups = [
     ["Cursos publicados", publishedCourses],
-    ["Cursos no publicados", drafts.courses]
+    ["Cursos no publicados", drafts.courses.filter(course => !isPublishedCourse(course.id))]
   ];
   target.innerHTML = groups.map(([label, courses]) => `<section><strong>${label}</strong>${courses.length ? courses.map(course => `<button class="manage-course-content" data-course-id="${esc(course.id)}" type="button"><i aria-hidden="true"></i><span>${esc(course.name)}</span></button>`).join("") : `<small>Sin cursos</small>`}</section>`).join("");
 }
@@ -3478,7 +3483,7 @@ function switchTab(prefix, id, button) {
 function openCourseModal(id = "") {
   const localCourse = drafts.courses.find(item => item.id === id);
   const publishedCourse = publishedCourses.find(item => item.id === id);
-  const course = localCourse || publishedCourse;
+  const course = publishedCourse || localCourse;
   $("#course-modal-title").textContent = publishedCourse ? "Editar curso publicado" : localCourse ? "Editar curso local" : "Crear curso local";
   $("#course-breadcrumb-current").textContent = course ? "Editar curso" : "Nuevo curso";
   $("#course-setup-status").textContent = publishedCourse ? "Curso publicado" : "Borrador local";
