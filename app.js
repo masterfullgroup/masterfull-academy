@@ -499,7 +499,8 @@ async function loadDynamicCourses() {
   const normalizedBankError = bankResponse.error && !["42P01","42703"].includes(String(bankResponse.error.code));
   const normalizedBankQuestionError = bankQuestionResponse.error && !["42P01","42703"].includes(String(bankQuestionResponse.error.code));
   const normalizedExamError = examResponse.error && !["42P01","42703"].includes(String(examResponse.error.code));
-  const error = courseResponse.error || (normalizedExamError ? examResponse.error : null) || questionResponse.error || (normalizedBankError ? bankResponse.error : null) || (normalizedBankQuestionError ? bankQuestionResponse.error : null);
+  const normalizedQuestionError = questionResponse.error && !["42P01","42703"].includes(String(questionResponse.error.code));
+  const error = courseResponse.error || (normalizedExamError ? examResponse.error : null) || (normalizedQuestionError ? questionResponse.error : null) || (normalizedBankError ? bankResponse.error : null) || (normalizedBankQuestionError ? bankQuestionResponse.error : null);
   if (error) {
     if (String(error.code) !== "42P01") console.error("No se pudieron cargar los cursos normalizados desde Supabase:", error);
     dynamicCourses = [];
