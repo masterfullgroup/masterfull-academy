@@ -350,7 +350,7 @@
   <div id="exam-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="exam-modal-title">
     <div class="modal-card panel large exam-editor-card"><button class="modal-close" data-close="exam-modal" type="button" aria-label="Cerrar">×</button>
       <div class="editor-sticky-bar">
-        <div><span class="eyebrow">EDITOR DE EXÁMENES</span><h2 id="exam-modal-title">Crear examen</h2></div>
+        <div><span class="eyebrow">EDITOR DEL BANCO</span><h2 id="exam-modal-title">Crear banco de preguntas</h2></div>
         <button class="btn primary editor-save" type="submit" form="exam-editor-form">Guardar examen</button>
       </div>
       <nav class="exam-editor-nav" aria-label="Secciones del editor">
@@ -362,12 +362,12 @@
           <div class="editor-section-head"><div><span class="eyebrow">CONFIGURACIÓN</span><h3 id="editor-settings-title">Datos del examen</h3></div><p>Define cómo se presentará la evaluación al alumno.</p></div>
           <div class="form-grid">
             <label>Curso<select id="editor-course" required></select></label>
-            <label class="field-span-2">Nombre del examen<input id="editor-title" required maxlength="80" placeholder="Ej. Examen parcial"></label>
-            <label>Tiempo (minutos)<input id="editor-minutes" type="number" min="1" max="180" value="20" required></label>
-            <label>Preguntas del examen<input id="editor-question-count" type="number" min="1" max="500" value="5" required></label>
-            <label>Intentos permitidos<input id="editor-attempts" type="number" min="1" max="20" value="1" required></label>
+            <label class="field-span-2">Nombre del tema o banco<input id="editor-title" required maxlength="80" placeholder="Ej. Cinemática: MRU y MRUV"></label>
+            <label class="bank-editor-hidden">Tiempo (minutos)<input id="editor-minutes" type="number" min="1" max="180" value="20"></label>
+            <label class="bank-editor-hidden">Preguntas del examen<input id="editor-question-count" type="number" min="1" max="500" value="5"></label>
+            <label class="bank-editor-hidden">Intentos permitidos<input id="editor-attempts" type="number" min="1" max="20" value="1"></label>
             <label>Opciones por pregunta<select id="editor-option-count"><option value="2">2 opciones</option><option value="3">3 opciones</option><option value="4">4 opciones</option><option value="5" selected>5 opciones</option><option value="6">6 opciones</option><option value="7">7 opciones</option><option value="8">8 opciones</option></select></label>
-            <label class="field-span-2">Estado al publicar<select id="editor-published"><option value="true">Disponible para alumnos</option><option value="false">Mantener como borrador</option></select></label>
+            <label class="field-span-2 bank-editor-hidden">Estado al publicar<select id="editor-published"><option value="true">Disponible para alumnos</option><option value="false">Mantener como borrador</option></select></label>
           </div>
           <p id="option-count-message" class="sr-only" aria-live="polite"></p>
         </section>
@@ -409,6 +409,26 @@
       </form>
     </div>
   </div>
+  <div id="evaluation-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="evaluation-modal-title">
+    <div class="modal-card panel large">
+      <button class="modal-close" data-close="evaluation-modal" type="button" aria-label="Cerrar">×</button>
+      <div class="editor-sticky-bar"><div><span class="eyebrow">CONFIGURACIÓN DE EVALUACIÓN</span><h2 id="evaluation-modal-title">Crear evaluación</h2></div><button class="btn primary" type="submit" form="evaluation-form">Guardar evaluación</button></div>
+      <form id="evaluation-form"><input type="hidden" id="evaluation-id">
+        <div class="editor-section-head"><div><span class="eyebrow">MÓDULO</span><h3>Datos de la evaluación</h3></div><p>Configura cómo se aplicará el banco dentro del recorrido del curso.</p></div>
+        <div class="form-grid">
+          <label>Curso<select id="evaluation-course" required></select></label>
+          <label class="field-span-2">Nombre de la evaluación<input id="evaluation-title" required maxlength="80" placeholder="Ej. Evaluación parcial 1"></label>
+          <label class="field-span-2">Banco de preguntas<select id="evaluation-bank" required></select><small id="evaluation-bank-help">Las preguntas se tomarán del banco seleccionado.</small></label>
+          <label>Preguntas a tomar<input id="evaluation-question-count" type="number" min="1" max="500" value="5" required></label>
+          <label>Duración (minutos)<input id="evaluation-minutes" type="number" min="1" max="300" value="20" required></label>
+          <label>Intentos permitidos<input id="evaluation-attempts" type="number" min="1" max="20" value="1" required></label>
+          <label>Estado<select id="evaluation-published"><option value="true">Disponible para alumnos</option><option value="false">Mantener como borrador</option></select></label>
+        </div>
+        <p id="evaluation-error" class="error" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
   <div id="profile-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
     <div class="modal-card panel profile-modal-card">
       <button class="modal-close" data-close="profile-modal" type="button" aria-label="Cerrar">×</button>

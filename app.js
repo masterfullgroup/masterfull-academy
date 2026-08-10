@@ -7,16 +7,18 @@ const ACTIVE_LESSON_KEY = "masterfull_active_lesson_v1";
 const CATALOG_URL = "./data/catalog.json";
 const LEGACY_MODULE_ROW_PREFIX = "__mfmod__:";
 
-const emptyDrafts = { courses: [], exams: [] };
-let drafts = load(DRAFT_KEY, emptyDrafts);
+const emptyDrafts = { courses: [], exams: [], banks: [] };
+let drafts = normalizeDraftState(load(DRAFT_KEY, emptyDrafts));
 let pendingResults = load(PENDING_RESULTS_KEY, []);
 let sb = null;
 let currentUser = null;
 let catalog = null;
 let catalogCourses = [];
 let catalogExams = [];
+let catalogQuestionBanks = [];
 let dynamicCourses = [];
 let dynamicExams = [];
+let dynamicQuestionBanks = [];
 let courseChanges = [];
 let legacyCourseModules = new Map();
 let courseEnrollments = [];
@@ -30,6 +32,7 @@ const ADMIN_TEACHERS_PER_PAGE = 10;
 let courseAccessError = "";
 let publishedCourses = [];
 let publishedExams = [];
+let publishedQuestionBanks = [];
 let results = [];
 let activeExam = null;
 let activeCourse = null;
@@ -101,6 +104,45 @@ function normalizeModules(value) {
       submissionTypes: Array.isArray(activity.submissionTypes || activity.submission_types) ? [...new Set(activity.submissionTypes || activity.submission_types)].filter(type => ["file","text","url","questions","none"].includes(type)) : []
     }))
   }));
+}
+function normalizeQuestionBank(raw, source = "Banco", fallbackCourseId = "") {
+  const list = Array.isArray(raw?.questions) ? raw.questions : [];
+  const id = String(raw?.id || raw?.bank_id || slug(raw?.title || raw?.name || "banco-preguntas")).trim();
+  const courseId = String(raw?.course_id || raw?.courseId || fallbackCourseId || "").trim();
+  const title = String(raw?.title || raw?.name || "Banco de preguntas").trim();
+  const optionCount = Number(raw?.option_count ?? raw?.optionCount ?? raw?.opciones_por_pregunta ?? list[0]?.options?.length ?? 5);
+  if (!id) throw new Error(`${source}: falta id.`);
+  if (!courseId) throw new Error(`${source}: falta curso.`);
+  if (!title) throw new Error(`${source}: falta nombre.`);
+  if (!Number.isInteger(optionCount) || optionCount < 2 || optionCount > 8) throw new Error(`${source}: option_count debe estar entre 2 y 8.`);
+  const questionIds = new Set();
+  const questions = list.map((item, index) => {
+    const question = normalizeImportedQuestion(item, index, optionCount);
+    if (questionIds.has(question.id)) throw new Error(`${source}: ID de pregunta duplicado (${question.id}).`);
+    questionIds.add(question.id);
+    return question;
+  });
+  return { id, courseId, title, optionCount, questions, published: raw?.published !== false, source };
+}
+function examWithQuestionBank(exam, banks) {
+  const bank = banks.find(item => item.id === exam.questionBankId);
+  return { ...exam, questions: bank ? structuredClone(bank.questions) : (exam.questions || []) };
+}
+function normalizeDraftState(raw) {
+  const source = raw && typeof raw === "object" ? raw : emptyDrafts;
+  const banks = (Array.isArray(source.banks) ? source.banks : []).map((bank, index) => normalizeQuestionBank(bank, `Banco local ${index + 1}`));
+  const exams = (Array.isArray(source.exams) ? source.exams : []).map((rawExam, index) => {
+    const exam = normalizeExam(rawExam, `Evaluación local ${index + 1}`, rawExam.courseId || rawExam.course_id || "");
+    let bank = exam.questionBankId ? banks.find(item => item.id === exam.questionBankId) : null;
+    if (!bank && exam.questions?.length) {
+      const bankId = `${exam.id}-bank`;
+      bank = normalizeQuestionBank({ id:bankId, course_id:exam.courseId, title:`${exam.title} · Banco`, option_count:exam.optionCount, questions:exam.questions }, `Banco heredado de ${exam.title}`);
+      banks.push(bank);
+      exam.questionBankId = bankId;
+    }
+    return examWithQuestionBank(exam, banks);
+  });
+  return { courses: Array.isArray(source.courses) ? source.courses : [], exams, banks };
 }
 function legacyModuleHash(value) {
   let first = 2166136261;
@@ -348,6 +390,7 @@ async function loadCatalogSafe() {
     catalog = raw;
     catalogCourses = loaded.courses;
     catalogExams = loaded.exams;
+    catalogQuestionBanks = loaded.banks;
     applyCourseChanges();
   } catch (error) {
     console.error("Error cargando catálogo:", error);
@@ -356,6 +399,7 @@ async function loadCatalogSafe() {
     catalogExams = [];
     publishedCourses = [];
     publishedExams = [];
+    publishedQuestionBanks = [];
   }
 }
 
@@ -377,6 +421,9 @@ function applyCourseChanges() {
   const examsById = new Map(catalogExams.map(exam => [exam.id, exam]));
   dynamicExams.forEach(exam => examsById.set(exam.id, exam));
   publishedExams = [...examsById.values()].filter(exam => visibleCourseIds.has(exam.courseId));
+  const banksById = new Map(catalogQuestionBanks.map(bank => [bank.id, bank]));
+  dynamicQuestionBanks.forEach(bank => banksById.set(bank.id, bank));
+  publishedQuestionBanks = [...banksById.values()].filter(bank => visibleCourseIds.has(bank.courseId));
 }
 function menuIcon(name) {
   const paths = {
@@ -438,28 +485,41 @@ async function loadCourseAccess() {
 async function loadDynamicCourses() {
   let courseQuery = await sb.from("academy_courses").select("course_id, name, description, teacher_name, modules, updated_at").eq("published", true);
   if (courseQuery.error?.code === "42703") courseQuery = await sb.from("academy_courses").select("course_id, name, description, teacher_name, updated_at").eq("published", true);
-  const [courseResponse, examResponse, questionResponse] = await Promise.all([
+  const [courseResponse, examResponse, questionResponse, bankResponse, bankQuestionResponse] = await Promise.all([
     Promise.resolve(courseQuery),
-    sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count").eq("published", true),
-    sb.from("academy_questions").select("exam_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true })
+    sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count, bank_id").eq("published", true),
+    sb.from("academy_questions").select("exam_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true }),
+    sb.from("academy_question_banks").select("bank_id, course_id, title, option_count, published").eq("published", true),
+    sb.from("academy_bank_questions").select("bank_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true })
   ]);
-  const error = courseResponse.error || examResponse.error || questionResponse.error;
+  const normalizedBankError = bankResponse.error && !["42P01","42703"].includes(String(bankResponse.error.code));
+  const normalizedBankQuestionError = bankQuestionResponse.error && !["42P01","42703"].includes(String(bankQuestionResponse.error.code));
+  const error = courseResponse.error || examResponse.error || questionResponse.error || (normalizedBankError ? bankResponse.error : null) || (normalizedBankQuestionError ? bankQuestionResponse.error : null);
   if (error) {
     if (String(error.code) !== "42P01") console.error("No se pudieron cargar los cursos normalizados desde Supabase:", error);
     dynamicCourses = [];
     dynamicExams = [];
+    dynamicQuestionBanks = [];
     return;
   }
   dynamicCourses = (courseResponse.data || []).map(row => ({ id: row.course_id, name: row.name, description: row.description || "", teacherName: row.teacher_name || "Profesor", modules: normalizeModules(row.modules), updatedAt: row.updated_at, dynamic: true }));
-  const questionsByExam = new Map();
+  const legacyQuestionsByExam = new Map();
   (questionResponse.data || []).forEach(row => {
-    if (!questionsByExam.has(row.exam_id)) questionsByExam.set(row.exam_id, []);
-    questionsByExam.get(row.exam_id).push({ id: row.question_id, text: row.text, image: row.image || "", options: row.options, correct: row.correct });
+    if (!legacyQuestionsByExam.has(row.exam_id)) legacyQuestionsByExam.set(row.exam_id, []);
+    legacyQuestionsByExam.get(row.exam_id).push({ id: row.question_id, text: row.text, image: row.image || "", options: row.options, correct: row.correct });
   });
+  const questionsByBank = new Map();
+  (bankQuestionResponse.data || []).forEach(row => {
+    if (!questionsByBank.has(row.bank_id)) questionsByBank.set(row.bank_id, []);
+    questionsByBank.get(row.bank_id).push({ id: row.question_id, text: row.text, image: row.image || "", options: row.options, correct: row.correct });
+  });
+  dynamicQuestionBanks = (bankResponse.data || []).map(row => normalizeQuestionBank({ id:row.bank_id, course_id:row.course_id, title:row.title, option_count:row.option_count, published:true, questions:questionsByBank.get(row.bank_id) || [] }, `Supabase: ${row.title}`, row.course_id));
+  const questionsByExam = new Map();
   dynamicExams = (examResponse.data || []).map(row => normalizeExam({
     id: row.exam_id, course_id: row.course_id, title: row.title, minutes: row.minutes,
     questions_to_show: row.questions_to_show, attempts_allowed: row.attempts_allowed,
-    option_count: row.option_count, published: true, questions: questionsByExam.get(row.exam_id) || []
+    option_count: row.option_count, question_bank_id: row.bank_id || "", published: true,
+    questions: questionsByBank.get(row.bank_id)?.length ? questionsByBank.get(row.bank_id) : legacyQuestionsByExam.get(row.exam_id) || []
   }, `Supabase: ${row.title}`, row.course_id));
 }
 
@@ -498,7 +558,18 @@ async function normalizeCatalog(raw) {
       }
     }
   }
-  return { courses, exams };
+  const banks = exams.map(exam => {
+    exam.questionBankId = exam.questionBankId || `${exam.id}-bank`;
+    return normalizeQuestionBank({
+    id: exam.questionBankId,
+    course_id: exam.courseId,
+    title: `${exam.title} · Banco`,
+    option_count: exam.optionCount,
+    questions: exam.questions,
+    published: exam.published
+    }, `Banco de ${exam.title}`);
+  });
+  return { courses, exams, banks };
 }
 
 function normalizeQuestionImage(value, questionNumber = "") {
@@ -539,7 +610,8 @@ function normalizeExam(raw, source = "JSON", fallbackCourseId = "") {
     questionIds.add(q.id);
     return q;
   });
-  return { id, courseId, title, minutes, questionsToShow, attemptsAllowed, published: published === true || published === "true", optionCount, questions, source };
+  const questionBankId = String(raw.question_bank_id || raw.questionBankId || raw.bank_id || raw.bankId || "").trim();
+  return { id, courseId, title, minutes, questionsToShow, attemptsAllowed, published: published === true || published === "true", optionCount, questionBankId, questions, source };
 }
 function normalizeImportedQuestion(item, index, forcedOptionCount = null) {
   const text = item.text ?? item.pregunta ?? item.enunciado ?? item.question;
@@ -652,7 +724,7 @@ function bindStaticEvents() {
   $("#profile-form").addEventListener("submit", saveProfile);
   $("#new-course-btn").addEventListener("click", () => openCourseModal());
   $("#teacher-head-new-course").addEventListener("click", () => openCourseModal());
-  $("#teacher-head-new-exam")?.addEventListener("click", () => openExamModal());
+  $("#teacher-head-new-exam")?.addEventListener("click", () => openEvaluationModal());
   $("#course-search").addEventListener("input", renderTeacherCourseList);
   $("#course-quick-toggle").addEventListener("click", () => {
     const directory = $("#teacher-course-directory");
@@ -670,12 +742,15 @@ function bindStaticEvents() {
     $("#teacher-course-directory").classList.remove("quick-panel-open");
     $("#course-quick-toggle").setAttribute("aria-expanded", "false");
   });
-  $("#new-exam-btn").addEventListener("click", () => openExamModal());
+  $("#new-exam-btn").addEventListener("click", () => openEvaluationModal());
   $("#course-form").addEventListener("submit", saveCourseDraft);
   $("#course-name").addEventListener("input", updateCourseSetupPreview);
   $("#course-description").addEventListener("input", updateCourseSetupPreview);
   $("#module-form").addEventListener("submit", saveModule);
   $("#activity-form").addEventListener("submit", saveActivity);
+  $("#evaluation-form").addEventListener("submit", saveEvaluation);
+  $("#evaluation-course").addEventListener("change", refreshEvaluationBanks);
+  $("#evaluation-bank").addEventListener("change", () => { const bank = getQuestionBank($("#evaluation-bank").value); $("#evaluation-question-count").max = String(bank?.questions.length || 1); $("#evaluation-question-count").value = String(Math.min(Number($("#evaluation-question-count").value) || 1, bank?.questions.length || 1)); });
   $("#module-unlock-rule").addEventListener("change", toggleModuleUnlockDetail);
   $("#activity-type").addEventListener("change", toggleActivityFields);
   $$("[data-activity-format]").forEach(button => {
@@ -725,7 +800,7 @@ function bindStaticEvents() {
   $("#lesson-previous").addEventListener("click", () => navigateLesson(-1));
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));
   $("#publish-course-form").addEventListener("submit", publishSelectedCourseExams);
-  $("#exam-editor-form").addEventListener("submit", saveExamDraft);
+  $("#exam-editor-form").addEventListener("submit", saveQuestionBank);
   $("#editor-option-count").addEventListener("change", changeOptionCount);
   $("#add-question-btn").addEventListener("click", addBuilderQuestion);
   $("#generate-questions-btn").addEventListener("click", generateQuestions);
@@ -1895,7 +1970,15 @@ function isPublishedCourse(courseId) {
   return publishedCourses.some(course => course.id === courseId);
 }
 function getTeacherExams() {
-  return [...new Map([...publishedExams, ...drafts.exams].map(exam => [exam.id, exam])).values()];
+  return [...new Map([...drafts.exams, ...publishedExams].map(exam => [exam.id, exam])).values()];
+}
+function getTeacherQuestionBanks(courseId = "") {
+  const banks = [...drafts.banks, ...publishedQuestionBanks];
+  const byId = new Map(banks.map(bank => [bank.id, bank]));
+  return [...byId.values()].filter(bank => !courseId || bank.courseId === courseId);
+}
+function getQuestionBank(questionBankId) {
+  return getTeacherQuestionBanks().find(bank => bank.id === questionBankId) || null;
 }
 function renderTeacherOverview() {
   const allCourses = getTeacherCourses();
@@ -1990,7 +2073,7 @@ function renderTeacherExamWorkspace(courses, exams) {
 function renderTeacherExamCourseLink(course, exams) {
   const courseExams = exams.filter(exam => exam.courseId === course.id);
   const questionCount = courseExams.reduce((total, exam) => total + exam.questions.length, 0);
-  const isDraftCourse = drafts.courses.some(item => item.id === course.id);
+  const isDraftCourse = !isPublishedCourse(course.id);
   return `<button class="exam-course-link open-course-workspace" data-course-id="${esc(course.id)}" type="button">
     <span class="exam-course-link-icon">${modernIcon("course")}</span>
     <span class="exam-course-link-copy"><small>CURSO</small><strong>${esc(course.name)}</strong><span>${esc(course.description || "Sin descripción registrada")}</span></span>
@@ -2000,7 +2083,7 @@ function renderTeacherExamCourseLink(course, exams) {
   </button>`;
 }
 function renderTeacherCourseWorkspace(course, exams) {
-  const isDraftCourse = drafts.courses.some(item => item.id === course.id);
+  const isDraftCourse = !isPublishedCourse(course.id);
   const isStudentPreview = activeTeacherCourseSection === "student-preview";
   const publishedCount = exams.filter(exam => publishedExams.some(item => item.id === exam.id)).length;
   const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
@@ -2165,10 +2248,19 @@ function renderTeacherCourseExams(course, exams) {
       return renderTeacherExamRow(exam, module?.title || "");
     }).join("") : `<div class="course-workspace-empty"><strong>Este curso todavía no tiene evaluaciones</strong><p>Crea la primera y después ubícala dentro de un módulo.</p></div>`}</div>`;
 }
-function renderTeacherCourseQuestions(course, exams) {
-  const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
-  const publishedCount = exams.filter(exam => publishedExams.some(item => item.id === exam.id)).length;
-  const average = exams.length ? Math.round(questionCount / exams.length) : 0;
+function renderTeacherCourseQuestions(course) {
+  const banks = getTeacherQuestionBanks(course.id);
+  const questionCount = banks.reduce((total, bank) => total + bank.questions.length, 0);
+  const publishedCount = banks.filter(bank => publishedQuestionBanks.some(item => item.id === bank.id)).length;
+  const average = banks.length ? Math.round(questionCount / banks.length) : 0;
+  return `<div class="question-bank-page">
+    <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">BIBLIOTECA CENTRAL</span><h2>Banco de preguntas</h2><p>Crea temas independientes y reutilízalos en una o varias evaluaciones.</p></div><button class="btn primary create-question-bank" data-course-id="${esc(course.id)}" type="button">+ Nuevo banco</button></div>
+    <section class="question-bank-summary" aria-label="Resumen del banco"><article><span>${modernIcon("practice")}</span><div><small>Preguntas totales</small><strong>${questionCount}</strong></div></article><article><span>${modernIcon("quiz")}</span><div><small>Bancos activos</small><strong>${banks.length}</strong></div></article><article><span>${modernIcon("results")}</span><div><small>Publicados</small><strong>${publishedCount}</strong></div></article><article><span>${modernIcon("progress")}</span><div><small>Promedio por banco</small><strong>${average}</strong></div></article></section>
+    <div class="question-bank-toolbar"><label><span>${modernIcon("courses")}</span><input id="question-bank-search" type="search" placeholder="Buscar un tema o banco…" autocomplete="off"></label><span>${quantity(banks.length, "banco disponible", "bancos disponibles")}</span></div>
+    <div class="course-question-banks question-bank-grid">${banks.length ? banks.map(bank => { const isPublished = publishedQuestionBanks.some(item => item.id === bank.id); const searchText = `${bank.title} ${isPublished ? "publicado" : "borrador"}`.toLocaleLowerCase("es"); return `<article class="course-question-bank" data-bank-search="${esc(searchText)}"><header><span class="question-bank-icon">${modernIcon("quiz")}</span><span class="status ${isPublished ? "published" : "draft"}">${isPublished ? "Publicado" : "Borrador"}</span></header><div class="question-bank-card-copy"><h3>${esc(bank.title)}</h3><p>Banco reutilizable para las evaluaciones del curso.</p></div><div class="question-bank-card-metrics"><span><b>${bank.questions.length}</b><small>Preguntas</small></span><span><b>${bank.optionCount}</b><small>Opciones por pregunta</small></span></div><footer><small>Curso: ${esc(course.name)}</small><button class="btn secondary edit-question-bank" data-id="${esc(bank.id)}" type="button">Administrar banco <span aria-hidden="true">→</span></button></footer></article>`; }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea el primer banco temático para reutilizar sus preguntas.</p><button class="btn primary create-question-bank" data-course-id="${esc(course.id)}" type="button">+ Crear primer banco</button></div>`}</div>
+    <div id="question-bank-filter-empty" class="course-workspace-empty question-bank-filter-empty hidden"><strong>No hay coincidencias</strong><p>Prueba con otro nombre de tema.</p></div>
+  </div>`;
+  /* Legacy markup retained below until the editor migration is complete. */
   return `<div class="question-bank-page">
     <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">CONTENIDO EVALUATIVO</span><h2>Banco de preguntas</h2><p>Organiza y administra las preguntas de cada evaluación desde una biblioteca centralizada.</p></div><button class="btn primary create-exam-course" data-id="${esc(course.id)}" type="button">+ Nueva evaluación</button></div>
     <section class="question-bank-summary" aria-label="Resumen del banco"><article><span>${modernIcon("practice")}</span><div><small>Preguntas totales</small><strong>${questionCount}</strong></div></article><article><span>${modernIcon("quiz")}</span><div><small>Bancos activos</small><strong>${exams.length}</strong></div></article><article><span>${modernIcon("results")}</span><div><small>Publicados</small><strong>${publishedCount}</strong></div></article><article><span>${modernIcon("progress")}</span><div><small>Promedio por banco</small><strong>${average}</strong></div></article></section>
@@ -2198,16 +2290,16 @@ function renderTeacherExamRow(exam, moduleTitle = "") {
 function bindTeacherActions() {
   $$("[data-overview-tab]").forEach(button => button.addEventListener("click", () => switchTab("teacher", button.dataset.overviewTab, $(`[data-teacher-tab="${button.dataset.overviewTab}"]`))));
   $$(".overview-new-course-dynamic").forEach(button => button.addEventListener("click", () => openCourseModal()));
-  $$(".overview-new-exam-dynamic").forEach(button => button.addEventListener("click", () => openExamModal()));
+  $$(".overview-new-exam-dynamic").forEach(button => button.addEventListener("click", () => openEvaluationModal()));
   $$(".view-course").forEach(button => button.addEventListener("click", () => switchTab("teacher", "teacher-exams", $('[data-teacher-tab="teacher-exams"]'))));
-  $$(".create-exam-course").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => openExamModal(null, button.dataset.id)));
+  $$(".create-exam-course").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => openEvaluationModal(null, button.dataset.id)));
   $$(".edit-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$(".delete-course").forEach(button => button.addEventListener("click", () => deleteCourseDraft(button.dataset.id)));
   $$(".edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$(".delete-published-course").forEach(button => button.addEventListener("click", () => deletePublishedCourse(button.dataset.id)));
-  $$(".edit-exam").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id)));
+  $$(".edit-exam").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => openEvaluationModal(button.dataset.id)));
   $$(".delete-exam").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
-  $$(".export-draft").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => { openExamModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
+  $$(".export-draft").filter(button => !button.closest("#teacher-course-workspace")).forEach(button => button.addEventListener("click", () => { openEvaluationModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
   $$(".export-course").forEach(button => button.addEventListener("click", () => exportCourseDraft(button.dataset.id)));
   $$(".publish-course").forEach(button => button.addEventListener("click", () => openPublishCourseModal(button.dataset.id)));
   $$(".manage-course-content").forEach(button => button.addEventListener("click", () => openTeacherCourseWorkspace(button.dataset.courseId, "modules", "courses")));
@@ -2305,10 +2397,12 @@ function bindTeacherExamWorkspaceActions() {
     });
     $("#question-bank-filter-empty")?.classList.toggle("hidden", visible > 0 || !cards.length);
   });
-  $$("#teacher-course-workspace .create-exam-course").forEach(button => button.addEventListener("click", () => openExamModal(null, button.dataset.id)));
-  $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id)));
+  $$("#teacher-course-workspace .create-exam-course").forEach(button => button.addEventListener("click", () => openEvaluationModal(null, button.dataset.id)));
+  $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openEvaluationModal(button.dataset.id)));
   $$("#teacher-course-workspace .delete-exam").forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
-  $$("#teacher-course-workspace .export-draft").forEach(button => button.addEventListener("click", () => { openExamModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
+  $$("#teacher-course-workspace .export-draft").forEach(button => button.addEventListener("click", () => { openEvaluationModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
+  $$("#teacher-course-workspace .create-question-bank").forEach(button => button.addEventListener("click", () => openExamModal(null, button.dataset.courseId)));
+  $$("#teacher-course-workspace .edit-question-bank").forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id)));
   $$("#teacher-course-workspace .add-course-module").forEach(button => button.addEventListener("click", () => openModuleModal(button.dataset.courseId)));
   $$("#teacher-course-workspace .collapse-all-modules").forEach(button => button.addEventListener("click", () => {
     $$("#teacher-course-workspace .canvas-module-card").forEach(module => { module.open = false; });
@@ -2382,7 +2476,8 @@ async function publishSelectedCourseExams(event) {
   try {
     const payload = {
       course: { id: course.id, name: course.name, description: course.description || "", teacher_name: course.teacherName || currentUser.name, modules: normalizeModules(course.modules) },
-      exams: exams.map(exam => ({ ...examToJsonSchema(exam), published: true }))
+      banks: drafts.banks.filter(bank => exams.some(exam => exam.questionBankId === bank.id)),
+      exams: exams.map(exam => ({ ...examToJsonSchema(exam), question_bank_id: exam.questionBankId || `${exam.id}-bank`, published: true }))
     };
     const { data, error } = await sb.rpc("publish_academy_course", { payload });
     if (error) throw error;
@@ -3564,26 +3659,50 @@ function deleteCourseDraft(id) {
 function openExamModal(id = null, courseId = null) {
   const courses = [...publishedCourses, ...drafts.courses];
   if (!courses.length) { alert("Primero crea un curso local o agrega cursos en data/catalog.json."); openCourseModal(); return; }
-  const localExam = drafts.exams.find(item => item.id === id);
-  const publishedExam = publishedExams.find(item => item.id === id);
-  const exam = localExam || publishedExam;
-  $("#exam-modal-title").textContent = publishedExam ? "Modificar examen publicado" : localExam ? "Editar borrador de examen" : "Crear borrador de examen";
-  $("#editor-exam-id").value = exam?.id || "";
+  const localBank = drafts.banks.find(item => item.id === id);
+  const publishedBank = publishedQuestionBanks.find(item => item.id === id);
+  const bank = publishedBank || localBank;
+  $("#exam-modal-title").textContent = publishedBank ? "Modificar banco publicado" : localBank ? "Editar banco de preguntas" : "Crear banco de preguntas";
+  $("#editor-exam-id").value = bank?.id || "";
   $("#editor-course").innerHTML = courses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("");
-  $("#editor-course").value = exam?.courseId || courseId || courses[0].id;
-  $("#editor-title").value = exam?.title || "";
-  $("#editor-minutes").value = exam?.minutes || 20;
-  $("#editor-question-count").value = exam?.questionsToShow || 5;
-  $("#editor-attempts").value = exam?.attemptsAllowed || 1;
-  builderOptionCount = exam?.optionCount || exam?.questions?.[0]?.options?.length || 5;
+  $("#editor-course").value = bank?.courseId || courseId || courses[0].id;
+  $("#editor-title").value = bank?.title || "";
+  builderOptionCount = bank?.optionCount || bank?.questions?.[0]?.options?.length || 5;
   $("#editor-option-count").value = String(builderOptionCount);
-  $("#editor-published").value = String(exam?.published ?? true);
-  builderQuestions = structuredClone(exam?.questions || []);
+  $("#editor-published").value = String(bank?.published ?? false);
+  builderQuestions = structuredClone(bank?.questions || []);
   renderBuilder();
   setQuestionMode("manual-panel");
   $("#exam-editor-error").textContent = "";
   selectExamEditorSection("editor-settings-section");
   $("#exam-modal").classList.remove("hidden");
+}
+function openEvaluationModal(id = null, courseId = null) {
+  const courses = getTeacherCourses();
+  const localExam = drafts.exams.find(item => item.id === id);
+  const publishedExam = publishedExams.find(item => item.id === id);
+  const exam = publishedExam || localExam;
+  const banks = getTeacherQuestionBanks(exam?.courseId || courseId || courses[0]?.id || "");
+  if (!courses.length) { alert("Primero crea un curso para agregar una evaluación."); openCourseModal(); return; }
+  $("#evaluation-modal-title").textContent = publishedExam ? "Modificar evaluación publicada" : localExam ? "Editar evaluación" : "Crear evaluación";
+  $("#evaluation-id").value = exam?.id || "";
+  $("#evaluation-course").innerHTML = courses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("");
+  $("#evaluation-course").value = exam?.courseId || courseId || courses[0].id;
+  $("#evaluation-title").value = exam?.title || "";
+  $("#evaluation-bank").innerHTML = banks.length ? banks.map(bank => `<option value="${esc(bank.id)}">${esc(bank.title)} · ${bank.questions.length} preguntas</option>`).join("") : `<option value="">Primero crea un banco de preguntas</option>`;
+  $("#evaluation-bank").value = exam?.questionBankId || banks[0]?.id || "";
+  $("#evaluation-question-count").value = exam?.questionsToShow || Math.min(5, banks[0]?.questions.length || 5);
+  $("#evaluation-minutes").value = exam?.minutes || 20;
+  $("#evaluation-attempts").value = exam?.attemptsAllowed || 1;
+  $("#evaluation-published").value = String(exam?.published ?? false);
+  $("#evaluation-error").textContent = "";
+  $("#evaluation-modal").classList.remove("hidden");
+}
+function refreshEvaluationBanks() {
+  const banks = getTeacherQuestionBanks($("#evaluation-course").value);
+  $("#evaluation-bank").innerHTML = banks.length ? banks.map(bank => `<option value="${esc(bank.id)}">${esc(bank.title)} · ${bank.questions.length} preguntas</option>`).join("") : `<option value="">Primero crea un banco de preguntas</option>`;
+  $("#evaluation-question-count").max = String(banks[0]?.questions.length || 1);
+  if (banks[0]) $("#evaluation-question-count").value = String(Math.min(Number($("#evaluation-question-count").value) || 1, banks[0].questions.length));
 }
 function changeOptionCount() {
   collectBuilder();
@@ -3717,6 +3836,74 @@ function validateCurrentExam(showMessage = false) {
     return null;
   }
 }
+function buildQuestionBankFromEditor() {
+  collectBuilder();
+  return normalizeQuestionBank({
+    id: $("#editor-exam-id").value || slug(`${$("#editor-course").value}-${$("#editor-title").value || "banco"}`),
+    course_id: $("#editor-course").value,
+    title: $("#editor-title").value.trim(),
+    option_count: builderOptionCount,
+    questions: builderQuestions,
+    published: false
+  }, "borrador del banco", $("#editor-course").value);
+}
+async function saveQuestionBank(event) {
+  event.preventDefault();
+  let bank;
+  try { bank = buildQuestionBankFromEditor(); } catch (error) { $("#exam-editor-error").className = "error"; $("#exam-editor-error").textContent = error.message; return; }
+  if (!bank.questions.length) { $("#exam-editor-error").textContent = "Agrega al menos una pregunta al banco."; return; }
+  const publishedBank = publishedQuestionBanks.find(item => item.id === bank.id);
+  if (publishedBank) {
+    const course = publishedCourses.find(item => item.id === bank.courseId);
+    if (!sb || !course) { $("#exam-editor-error").textContent = "No se pudo conectar el banco con su curso publicado."; return; }
+    const submit = event.submitter || $(".editor-save");
+    if (submit) submit.disabled = true;
+    try {
+      const linkedExams = publishedExams.filter(exam => exam.questionBankId === bank.id);
+      const { error } = await sb.rpc("publish_academy_course", { payload: { course:{ id:course.id, name:course.name, description:course.description || "", teacher_name:course.teacherName || currentUser.name, modules:normalizeModules(course.modules) }, banks:[bank], exams:linkedExams.map(exam => ({ ...examToJsonSchema(exam), question_bank_id:bank.id, published:true })) } });
+      if (error) throw error;
+      await loadDynamicCourses(); await applyCourseChanges();
+      closeModal("exam-modal"); renderTeacher();
+    } catch (error) { $("#exam-editor-error").textContent = error.message || translateError(error); }
+    finally { if (submit) submit.disabled = false; }
+    return;
+  }
+  const bankIndex = drafts.banks.findIndex(item => item.id === bank.id);
+  if (bankIndex >= 0) drafts.banks[bankIndex] = bank; else drafts.banks.push(bank);
+  drafts.exams = drafts.exams.map(exam => exam.questionBankId === bank.id ? examWithQuestionBank(exam, drafts.banks) : exam);
+  saveDrafts(); closeModal("exam-modal"); renderTeacher();
+}
+async function saveEvaluation(event) {
+  event.preventDefault();
+  const id = $("#evaluation-id").value;
+  const courseId = $("#evaluation-course").value;
+  const bankId = $("#evaluation-bank").value;
+  const bank = getQuestionBank(bankId);
+  const questionCount = Number($("#evaluation-question-count").value);
+  if (!bank) { $("#evaluation-error").textContent = "Selecciona un banco de preguntas válido."; return; }
+  if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > bank.questions.length) { $("#evaluation-error").textContent = `La cantidad debe estar entre 1 y ${bank.questions.length} preguntas.`; return; }
+  const exam = { id:id || slug(`${courseId}-${$("#evaluation-title").value || "evaluacion"}`), courseId, title:$("#evaluation-title").value.trim(), minutes:Number($("#evaluation-minutes").value), questionsToShow:questionCount, attemptsAllowed:Number($("#evaluation-attempts").value), optionCount:bank.optionCount, questionBankId:bank.id, published:$("#evaluation-published").value === "true", questions:structuredClone(bank.questions) };
+  if (!exam.title) { $("#evaluation-error").textContent = "Escribe un nombre para la evaluación."; return; }
+  if (!Number.isInteger(exam.minutes) || exam.minutes < 1 || exam.minutes > 300) { $("#evaluation-error").textContent = "La duración debe estar entre 1 y 300 minutos."; return; }
+  if (!Number.isInteger(exam.attemptsAllowed) || exam.attemptsAllowed < 1 || exam.attemptsAllowed > 20) { $("#evaluation-error").textContent = "Los intentos deben estar entre 1 y 20."; return; }
+  const publishedExam = publishedExams.find(item => item.id === id);
+  const publishedCourse = publishedCourses.find(item => item.id === courseId);
+  if (publishedExam || (exam.published && publishedCourse)) {
+    if (!sb || !publishedCourse) { $("#evaluation-error").textContent = "No se pudo conectar la evaluación con su curso publicado."; return; }
+    const submit = event.submitter;
+    if (submit) submit.disabled = true;
+    try {
+      const { error } = await sb.rpc("publish_academy_course", { payload:{ course:{ id:publishedCourse.id, name:publishedCourse.name, description:publishedCourse.description || "", teacher_name:publishedCourse.teacherName || currentUser.name, modules:normalizeModules(publishedCourse.modules) }, banks:[bank], exams:[{ ...examToJsonSchema(exam), question_bank_id:bank.id, questions:bank.questions, published:true }] } });
+      if (error) throw error;
+      await loadDynamicCourses(); await loadCourseChanges(); closeModal("evaluation-modal"); renderTeacher();
+    } catch (error) { $("#evaluation-error").textContent = error.message || translateError(error); }
+    finally { if (submit) submit.disabled = false; }
+    return;
+  }
+  const index = drafts.exams.findIndex(item => item.id === exam.id);
+  if (index >= 0) drafts.exams[index] = exam; else drafts.exams.push(exam);
+  saveDrafts(); closeModal("evaluation-modal"); renderTeacher();
+}
 async function saveExamDraft(event) {
   event.preventDefault();
   const exam = validateCurrentExam(false);
@@ -3778,6 +3965,7 @@ function examToJsonSchema(exam) {
     schema_version: 1,
     id: exam.id,
     course_id: exam.courseId,
+    question_bank_id: exam.questionBankId || "",
     title: exam.title,
     minutes: exam.minutes,
     questions_to_show: exam.questionsToShow,
