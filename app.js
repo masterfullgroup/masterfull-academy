@@ -3521,11 +3521,11 @@ async function saveActivity(event) {
     const examId = activity.examId || slug(`${courseId}-${activity.title || "evaluacion"}`);
     const existingExam = getTeacherExams().find(item => item.id === examId);
     const selectedQuestionIds = $$('input[name="activity-question"]:checked').map(input => input.value);
-    if (!selectedQuestionIds.length) { $("#activity-error").textContent = "Selecciona al menos una pregunta del banco."; return; }
+    const questionPoolIds = selectedQuestionIds.length ? selectedQuestionIds : bank.questions.map(question => question.id);
     const questionCount = Number($("#activity-question-count").value);
-    if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > selectedQuestionIds.length) { $("#activity-error").textContent = `La cantidad debe estar entre 1 y ${selectedQuestionIds.length} preguntas seleccionadas.`; return; }
-    activity.questionIds = selectedQuestionIds;
-    exam = { id:examId, courseId, title:activity.title, minutes:Number($("#activity-minutes").value), questionsToShow:questionCount, attemptsAllowed:Number($("#activity-exam-attempts").value), optionCount:bank.optionCount, questionBankId:bank.id, questionIds:selectedQuestionIds, published:activity.published, questions:structuredClone(bank.questions.filter(question => selectedQuestionIds.includes(question.id))) };
+    if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > questionPoolIds.length) { $("#activity-error").textContent = `La cantidad debe estar entre 1 y ${questionPoolIds.length} preguntas.`; return; }
+    activity.questionIds = questionPoolIds;
+    exam = { id:examId, courseId, title:activity.title, minutes:Number($("#activity-minutes").value), questionsToShow:questionCount, attemptsAllowed:Number($("#activity-exam-attempts").value), optionCount:bank.optionCount, questionBankId:bank.id, questionIds:questionPoolIds, published:activity.published, questions:structuredClone(bank.questions.filter(question => questionPoolIds.includes(question.id))) };
     if (!Number.isInteger(exam.minutes) || exam.minutes < 1 || exam.minutes > 300) { $("#activity-error").textContent = "La duración debe estar entre 1 y 300 minutos."; return; }
     if (!Number.isInteger(exam.attemptsAllowed) || exam.attemptsAllowed < 1 || exam.attemptsAllowed > 20) { $("#activity-error").textContent = "Los intentos deben estar entre 1 y 20."; return; }
     activity.examId = exam.id;
