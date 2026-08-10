@@ -760,12 +760,18 @@ function bindStaticEvents() {
     $("#activity-question-count").max = String(bank?.questions.length || 1);
     if (bank) $("#activity-question-count").value = String(Math.min(Number($("#activity-question-count").value) || 1, bank.questions.length));
   });
-  $("#teacher-course-workspace")?.addEventListener("click", event => {
+  document.addEventListener("click", event => {
     const button = event.target.closest?.(".add-module-activity");
     if (!button) return;
     event.preventDefault();
     event.stopPropagation();
-    openActivityModal(button.dataset.courseId, button.dataset.moduleId);
+    try {
+      openActivityModal(button.dataset.courseId, button.dataset.moduleId);
+    } catch (error) {
+      console.error("No se pudo abrir el editor de contenido:", error);
+      const status = $("#activity-error");
+      if (status) status.textContent = "No se pudo abrir el editor. Recarga la página e inténtalo nuevamente.";
+    }
   }, true);
   $$("[data-activity-format]").forEach(button => {
     button.addEventListener("mousedown", event => {
