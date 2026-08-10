@@ -754,12 +754,19 @@ function bindStaticEvents() {
   $("#evaluation-bank").addEventListener("change", () => { const bank = getQuestionBank($("#evaluation-bank").value); $("#evaluation-question-count").max = String(bank?.questions.length || 1); $("#evaluation-question-count").value = String(Math.min(Number($("#evaluation-question-count").value) || 1, bank?.questions.length || 1)); });
   $("#module-unlock-rule").addEventListener("change", toggleModuleUnlockDetail);
   $("#activity-type").addEventListener("change", toggleActivityFields);
-  $("#activity-bank-id").addEventListener("change", () => {
+  $("#activity-bank-id")?.addEventListener("change", () => {
     const bank = getQuestionBank($("#activity-bank-id").value);
     renderActivityBankQuestions(bank);
     $("#activity-question-count").max = String(bank?.questions.length || 1);
     if (bank) $("#activity-question-count").value = String(Math.min(Number($("#activity-question-count").value) || 1, bank.questions.length));
   });
+  $("#teacher-course-workspace")?.addEventListener("click", event => {
+    const button = event.target.closest?.(".add-module-activity");
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openActivityModal(button.dataset.courseId, button.dataset.moduleId);
+  }, true);
   $$("[data-activity-format]").forEach(button => {
     button.addEventListener("mousedown", event => {
       rememberActivityEditorSelection();
@@ -2349,7 +2356,7 @@ document.addEventListener("keydown", event => {
   if (event.key === "Escape") closeRowActionMenus();
 });
 function bindTeacherExamWorkspaceActions() {
-  $$(".teacher-module-card > summary button").forEach(button => button.addEventListener("click", event => event.stopPropagation()));
+  $$(".teacher-module-card > summary button:not(.add-module-activity)").forEach(button => button.addEventListener("click", event => event.stopPropagation()));
   $$(".row-action-menu").forEach(menu => menu.addEventListener("click", event => event.stopPropagation()));
   $$(".row-action-toggle").forEach(toggle => toggle.addEventListener("click", event => {
     event.stopPropagation();
@@ -2418,11 +2425,6 @@ function bindTeacherExamWorkspaceActions() {
   $$("#teacher-course-workspace .revoke-course-access").forEach(button => button.addEventListener("click", () => revokeCourseStudent(button.dataset.courseId, button.dataset.studentId)));
   $$("#teacher-course-workspace .edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$("#teacher-course-workspace .edit-module").forEach(button => button.addEventListener("click", () => openModuleModal(button.dataset.courseId, button.dataset.moduleId)));
-  $$("#teacher-course-workspace .add-module-activity").forEach(button => button.addEventListener("click", event => {
-    event.preventDefault();
-    event.stopPropagation();
-    openActivityModal(button.dataset.courseId, button.dataset.moduleId);
-  }));
   $$("#teacher-course-workspace .edit-activity").forEach(button => button.addEventListener("click", () => openActivityModal(button.dataset.courseId, button.dataset.moduleId, button.dataset.activityId)));
   $$("#teacher-course-workspace .delete-module").forEach(button => button.addEventListener("click", () => deleteModule(button.dataset.courseId, button.dataset.moduleId)));
   $$("#teacher-course-workspace .delete-activity").forEach(button => button.addEventListener("click", () => deleteActivity(button.dataset.courseId, button.dataset.moduleId, button.dataset.activityId)));
