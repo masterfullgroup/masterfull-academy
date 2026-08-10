@@ -2418,7 +2418,11 @@ function bindTeacherExamWorkspaceActions() {
   $$("#teacher-course-workspace .revoke-course-access").forEach(button => button.addEventListener("click", () => revokeCourseStudent(button.dataset.courseId, button.dataset.studentId)));
   $$("#teacher-course-workspace .edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$("#teacher-course-workspace .edit-module").forEach(button => button.addEventListener("click", () => openModuleModal(button.dataset.courseId, button.dataset.moduleId)));
-  $$("#teacher-course-workspace .add-module-activity").forEach(button => button.addEventListener("click", () => openActivityModal(button.dataset.courseId, button.dataset.moduleId)));
+  $$("#teacher-course-workspace .add-module-activity").forEach(button => button.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    openActivityModal(button.dataset.courseId, button.dataset.moduleId);
+  }));
   $$("#teacher-course-workspace .edit-activity").forEach(button => button.addEventListener("click", () => openActivityModal(button.dataset.courseId, button.dataset.moduleId, button.dataset.activityId)));
   $$("#teacher-course-workspace .delete-module").forEach(button => button.addEventListener("click", () => deleteModule(button.dataset.courseId, button.dataset.moduleId)));
   $$("#teacher-course-workspace .delete-activity").forEach(button => button.addEventListener("click", () => deleteActivity(button.dataset.courseId, button.dataset.moduleId, button.dataset.activityId)));
