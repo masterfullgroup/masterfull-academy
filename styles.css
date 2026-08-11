@@ -8887,6 +8887,120 @@ body.teacher-course-open .canvas-module-item {
   }
 }
 
+/* La vista del alumno comparte el lenguaje visual del recorrido docente. */
+body.student-course-open .student-course-content {
+  background:#fff;
+}
+body.student-course-open .student-module-space {
+  margin:0;
+}
+body.student-course-open .student-module-list {
+  display:grid;
+  gap:22px;
+}
+body.student-course-open .student-module {
+  overflow:hidden;
+  border:1px solid #d8dce7;
+  border-top:4px solid #3e496f;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 10px 28px #1b29410d;
+}
+body.student-course-open .student-module:hover {
+  border-color:#cbd0df;
+  border-top-color:#333e66;
+  box-shadow:0 15px 36px #1b294115;
+}
+body.student-course-open .student-module summary {
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr) 32px;
+  min-height:76px;
+  align-items:center;
+  gap:12px;
+  padding:13px 17px;
+  background:linear-gradient(180deg,#fafafd,#f5f6fa);
+}
+body.student-course-open .student-module[open] summary {
+  border-bottom:1px solid #e0e3eb;
+}
+body.student-course-open .student-module summary .module-disclosure {
+  display:none;
+}
+body.student-course-open .student-module summary::after {
+  content:"›";
+  display:grid;
+  width:28px;
+  height:28px;
+  place-items:center;
+  color:#59647c;
+  border:1px solid #d1d6e4;
+  border-radius:7px;
+  background:#fff;
+  font-size:22px;
+  line-height:1;
+  transform:none;
+}
+body.student-course-open .student-module[open] summary::after {
+  transform:rotate(90deg);
+}
+body.student-course-open .student-module summary strong {
+  color:#222e48;
+  font-size:15px;
+  font-weight:760;
+}
+body.student-course-open .student-module summary small {
+  margin-top:5px;
+  color:#7b8498;
+  font-size:10.5px;
+}
+body.student-course-open .student-activity-list {
+  background:#fff;
+}
+body.student-course-open .student-activity {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  min-height:58px;
+  align-items:center;
+  gap:0;
+  padding:7px 17px;
+  border-bottom:1px solid #e8eaf0;
+  background:#fff;
+}
+body.student-course-open .student-activity:last-child {
+  border-bottom:0;
+}
+body.student-course-open .student-activity:hover {
+  background:#f9f9fc;
+}
+body.student-course-open .student-activity-spacer,
+body.student-course-open .student-activity .activity-type-icon {
+  display:none;
+}
+body.student-course-open .student-activity > .open-lesson,
+body.student-course-open .student-activity > .start-exam {
+  min-height:36px;
+  padding:6px 0;
+}
+body.student-course-open .student-activity strong {
+  color:#202c45;
+  font-size:13px;
+  font-weight:720;
+}
+body.student-course-open .student-module-heading {
+  margin:0;
+  padding:12px 17px;
+  border-bottom:1px solid #e5e7ed;
+  background:#f7f7fa;
+  box-shadow:inset 3px 0 0 #727b98;
+}
+body.student-course-open .module-lock-message,
+body.student-course-open .module-empty {
+  margin:0;
+  padding:18px 17px;
+  color:#7b8498;
+  font-size:11px;
+}
+
 @media (max-width:820px) {
   body.teacher-course-open.app-shell-mode {
     overflow:auto;
