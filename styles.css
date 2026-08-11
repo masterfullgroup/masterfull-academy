@@ -8828,59 +8828,61 @@ body.teacher-course-open .canvas-module-item {
 /* El curso se comporta como una aplicación: solo el lienzo central tiene scroll. */
 @media (min-width:821px) {
   body.teacher-course-open.app-shell-mode {
-    overflow:hidden;
+    overflow-y:scroll !important;
+    overflow-x:hidden;
   }
   body.teacher-course-open.app-shell-mode > main {
-    height:100vh;
-    min-height:0;
-    overflow:hidden;
+    height:auto;
+    min-height:100vh;
+    overflow:visible;
   }
   body.teacher-course-open #teacher-view,
   body.teacher-course-open #teacher-course-workspace {
-    height:100%;
-    min-height:0;
+    height:auto;
+    min-height:100vh;
   }
   body.teacher-course-open .course-workspace-page {
-    display:grid;
-    height:100%;
-    min-height:0;
-    grid-template-rows:auto minmax(0,1fr);
+    display:block;
+    height:auto;
+    min-height:100vh;
   }
   body.teacher-course-open .course-context-bar {
-    position:relative;
+    position:sticky;
+    top:0;
     z-index:5;
   }
   body.teacher-course-open .course-workspace-layout {
-    min-height:0;
+    min-height:calc(100vh - 78px);
     height:auto;
-    overflow:hidden;
+    overflow:visible;
   }
   body.teacher-course-open .course-workspace-sidebar {
+    position:sticky;
+    top:78px;
+    align-self:start;
+    height:calc(100vh - 78px);
     min-height:0;
     overflow-y:auto;
     overscroll-behavior:contain;
   }
   body.teacher-course-open .course-workspace-content {
-    min-height:0;
-    overflow-y:scroll !important;
+    min-height:calc(100vh - 78px);
+    overflow:visible;
     overscroll-behavior:contain;
-    scrollbar-gutter:stable;
-    scrollbar-width:auto;
-    scrollbar-color:#8d99b2 #edf1f6;
   }
-  body.teacher-course-open .course-workspace-content::-webkit-scrollbar {
-    width:12px;
+  body.teacher-course-open.app-shell-mode::-webkit-scrollbar {
+    width:14px;
   }
-  body.teacher-course-open .course-workspace-content::-webkit-scrollbar-track {
+  body.teacher-course-open.app-shell-mode::-webkit-scrollbar-track {
     background:#edf1f6;
   }
-  body.teacher-course-open .course-workspace-content::-webkit-scrollbar-thumb {
-    min-height:44px;
+  body.teacher-course-open.app-shell-mode::-webkit-scrollbar-thumb {
+    min-height:48px;
     border:3px solid #edf1f6;
     border-radius:8px;
     background:#8d99b2;
   }
-  body.teacher-course-open .course-workspace-content::-webkit-scrollbar-thumb:hover {
+  body.teacher-course-open.app-shell-mode::-webkit-scrollbar-thumb:hover {
     background:#687694;
   }
 }
