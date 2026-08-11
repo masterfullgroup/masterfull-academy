@@ -2316,7 +2316,7 @@ function renderTeacherExamRow(exam, moduleTitle = "") {
   const isDraft = !publishedExams.some(item => item.id === exam.id);
   const actions = isDraft
     ? `<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Editar</button><button class="btn secondary export-draft" data-id="${esc(exam.id)}" type="button">Exportar JSON</button><button class="icon-btn delete delete-exam" data-id="${esc(exam.id)}" type="button">Eliminar</button>`
-    : `<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Modificar</button>`;
+    : `<button class="btn secondary edit-exam" data-id="${esc(exam.id)}" type="button">Modificar</button><button class="icon-btn delete delete-published-exam" data-id="${esc(exam.id)}" type="button">Eliminar</button>`;
   return `<article class="exam-module-item ${isDraft ? "is-draft" : ""}">
     <span class="exam-module-type-icon">${modernIcon("exams")}</span>
     <div class="exam-module-item-main">
@@ -2459,6 +2459,7 @@ function bindTeacherExamWorkspaceActions() {
   });
   $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openEvaluationModal(button.dataset.id)));
   $$("#teacher-course-workspace .delete-exam").forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
+  $$("#teacher-course-workspace .delete-published-exam").forEach(button => button.addEventListener("click", () => deletePublishedExam(button.dataset.id)));
   $$("#teacher-course-workspace .export-draft").forEach(button => button.addEventListener("click", () => { openEvaluationModal(button.dataset.id); setTimeout(exportCurrentExam, 50); }));
   $$("#teacher-course-workspace .create-question-bank").forEach(button => button.addEventListener("click", () => openExamModal(null, button.dataset.courseId)));
   $$("#teacher-course-workspace .edit-question-bank").forEach(button => button.addEventListener("click", () => openExamModal(button.dataset.id)));
@@ -4168,6 +4169,29 @@ function deleteExamDraft(id) {
   drafts.exams = drafts.exams.filter(exam => exam.id !== id);
   saveDrafts();
   renderTeacher();
+}
+async function deletePublishedExam(id) {
+  const exam = publishedExams.find(item => item.id === id);
+  if (!exam) return;
+  if (!confirm(`¿Eliminar la evaluación “${exam.title}”? Esta acción no se puede deshacer.`)) return;
+  if (!sb) { alert("No se pudo conectar con Supabase."); return; }
+  const course = publishedCourses.find(item => item.id === exam.courseId);
+  try {
+    if (course) {
+      const modules = normalizeModules(course.modules).map(module => ({
+        ...module,
+        activities: module.activities.filter(activity => activity.examId !== exam.id)
+      }));
+      const { error: courseError } = await sb.from("academy_courses").update({ modules, updated_by: currentUser.id, updated_at: nowIso() }).eq("course_id", course.id);
+      if (courseError) throw courseError;
+    }
+    const { error } = await sb.from("academy_exams").delete().eq("exam_id", exam.id);
+    if (error) throw error;
+    await loadCourseChanges();
+    renderTeacher();
+  } catch (error) {
+    alert(`No se pudo eliminar la evaluación: ${supabaseErrorDetail(error)}`);
+  }
 }
 function examToJsonSchema(exam) {
   return {
