@@ -73,6 +73,16 @@ function load(key, fallback) {
   catch { return structuredClone(fallback); }
 }
 function saveDrafts() { localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }
+function removePublishedLocalCopies() {
+  const courseIds = new Set(publishedCourses.map(course => course.id));
+  const examIds = new Set(publishedExams.map(exam => exam.id));
+  const bankIds = new Set(publishedQuestionBanks.map(bank => bank.id));
+  const before = JSON.stringify(drafts);
+  drafts.courses = drafts.courses.filter(course => !courseIds.has(course.id));
+  drafts.exams = drafts.exams.filter(exam => !examIds.has(exam.id) && !courseIds.has(exam.courseId));
+  drafts.banks = drafts.banks.filter(bank => !bankIds.has(bank.id) && !courseIds.has(bank.courseId));
+  if (JSON.stringify(drafts) !== before) saveDrafts();
+}
 function savePending() { localStorage.setItem(PENDING_RESULTS_KEY, JSON.stringify(pendingResults)); }
 function saveCourseProgress() { localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(courseProgress)); }
 function saveActiveLesson() {
@@ -406,26 +416,22 @@ async function loadCatalogSafe() {
 }
 
 function applyCourseChanges() {
-  const changes = new Map(courseChanges.map(change => [change.course_id, change]));
-  const coursesById = new Map(catalogCourses.map(course => [course.id, course]));
-  dynamicCourses.forEach(course => coursesById.set(course.id, course));
-  const mergedCourses = [...coursesById.values()].filter(course => !changes.get(course.id)?.deleted).map(course => {
-    const change = changes.get(course.id);
+  // Supabase academy_courses is the only source of truth for publication.
+  // course_changes is retained only as a legacy modules compatibility layer.
+  const mergedCourses = dynamicCourses.map(course => {
     const compatibleModules = legacyCourseModules.get(course.id);
-    const changedModules = change?.modules === null || change?.modules === undefined ? compatibleModules : normalizeModules(change.modules);
-    return change || compatibleModules ? { ...course, name: change?.name || course.name, description: change?.description ?? course.description, modules: changedModules ?? course.modules } : course;
+    return compatibleModules && !normalizeModules(course.modules).length
+      ? { ...course, modules: compatibleModules }
+      : course;
   });
   const enrolledCourseIds = new Set(courseEnrollments
     .filter(enrollment => enrollment.status === "active" && enrollment.student_id === currentUser?.id)
     .map(enrollment => enrollment.course_id));
   publishedCourses = currentUser?.role === "teacher" ? mergedCourses : currentUser?.role === "student" ? mergedCourses.filter(course => enrolledCourseIds.has(course.id)) : [];
   const visibleCourseIds = new Set(publishedCourses.map(course => course.id));
-  const examsById = new Map(catalogExams.map(exam => [exam.id, exam]));
-  dynamicExams.forEach(exam => examsById.set(exam.id, exam));
-  publishedExams = [...examsById.values()].filter(exam => visibleCourseIds.has(exam.courseId));
-  const banksById = new Map(catalogQuestionBanks.map(bank => [bank.id, bank]));
-  dynamicQuestionBanks.forEach(bank => banksById.set(bank.id, bank));
-  publishedQuestionBanks = [...banksById.values()].filter(bank => visibleCourseIds.has(bank.courseId));
+  publishedExams = dynamicExams.filter(exam => visibleCourseIds.has(exam.courseId));
+  publishedQuestionBanks = dynamicQuestionBanks.filter(bank => visibleCourseIds.has(bank.courseId));
+  removePublishedLocalCopies();
 }
 function menuIcon(name) {
   const paths = {
@@ -485,43 +491,44 @@ async function loadCourseAccess() {
   courseEnrollments = enrollmentResponse.data || [];
 }
 async function loadDynamicCourses() {
-  let courseQuery = await sb.from("academy_courses").select("course_id, name, description, teacher_name, modules, updated_at").eq("published", true);
-  if (courseQuery.error?.code === "42703") courseQuery = await sb.from("academy_courses").select("course_id, name, description, teacher_name, updated_at").eq("published", true);
-  let examQuery = await sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count, bank_id").eq("published", true);
-  if (examQuery.error?.code === "42703") examQuery = await sb.from("academy_exams").select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count").eq("published", true);
-  const [courseResponse, examResponse, questionResponse, bankResponse, bankQuestionResponse] = await Promise.all([
-    Promise.resolve(courseQuery),
-    Promise.resolve(examQuery),
+  const query = async (table, columns) => {
+    let response = await sb.from(table).select(columns).eq("published", true);
+    if (response.error?.code === "42703" && table === "academy_courses") response = await sb.from(table).select("course_id, name, description, teacher_name, updated_at").eq("published", true);
+    if (response.error?.code === "42703" && table === "academy_exams") response = await sb.from(table).select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count").eq("published", true);
+    return response;
+  };
+  const responses = await Promise.all([
+    query("academy_courses", "course_id, name, description, teacher_name, modules, published, updated_by, created_at, updated_at"),
+    query("academy_exams", "exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count, bank_id, published, updated_at"),
     sb.from("academy_questions").select("exam_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true }),
-    sb.from("academy_question_banks").select("bank_id, course_id, title, option_count, published").eq("published", true),
+    sb.from("academy_question_banks").select("bank_id, course_id, title, option_count, published, created_at, updated_at").eq("published", true),
     sb.from("academy_bank_questions").select("bank_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true })
   ]);
-  const normalizedBankError = bankResponse.error && !["42P01","42703"].includes(String(bankResponse.error.code));
-  const normalizedBankQuestionError = bankQuestionResponse.error && !["42P01","42703"].includes(String(bankQuestionResponse.error.code));
-  const normalizedExamError = examResponse.error && !["42P01","42703"].includes(String(examResponse.error.code));
-  const normalizedQuestionError = questionResponse.error && !["42P01","42703"].includes(String(questionResponse.error.code));
-  const error = courseResponse.error || (normalizedExamError ? examResponse.error : null) || (normalizedQuestionError ? questionResponse.error : null) || (normalizedBankError ? bankResponse.error : null) || (normalizedBankQuestionError ? bankQuestionResponse.error : null);
-  if (error) {
-    if (String(error.code) !== "42P01") console.error("No se pudieron cargar los cursos normalizados desde Supabase:", error);
+  const [courseResponse, examResponse, questionResponse, bankResponse, bankQuestionResponse] = responses;
+  if (courseResponse.error) {
+    console.error("No se pudieron cargar los cursos publicados desde Supabase:", courseResponse.error);
     dynamicCourses = [];
-    dynamicExams = [];
-    dynamicQuestionBanks = [];
-    return;
   }
-  dynamicCourses = (courseResponse.data || []).map(row => ({ id: row.course_id, name: row.name, description: row.description || "", teacherName: row.teacher_name || "Profesor", modules: normalizeModules(row.modules), updatedAt: row.updated_at, dynamic: true }));
+  if (examResponse.error && !["42P01","42703"].includes(String(examResponse.error.code))) console.error("Evaluaciones publicadas:", examResponse.error);
+  if (questionResponse.error && !["42P01","42703"].includes(String(questionResponse.error.code))) console.error("Preguntas históricas:", questionResponse.error);
+  if (bankResponse.error && !["42P01","42703"].includes(String(bankResponse.error.code))) console.error("Bancos publicados:", bankResponse.error);
+  if (bankQuestionResponse.error && !["42P01","42703"].includes(String(bankQuestionResponse.error.code))) console.error("Preguntas de bancos:", bankQuestionResponse.error);
+  const rows = response => response.error && !["42P01","42703"].includes(String(response.error.code)) ? [] : (response.data || []);
+  if (courseResponse.error) return;
+  dynamicCourses = rows(courseResponse).map(row => ({ id: row.course_id, name: row.name, description: row.description || "", teacherName: row.teacher_name || "Profesor", modules: normalizeModules(row.modules), updatedAt: row.updated_at, dynamic: true }));
   const legacyQuestionsByExam = new Map();
-  (questionResponse.data || []).forEach(row => {
+  rows(questionResponse).forEach(row => {
     if (!legacyQuestionsByExam.has(row.exam_id)) legacyQuestionsByExam.set(row.exam_id, []);
     legacyQuestionsByExam.get(row.exam_id).push({ id: row.question_id, text: row.text, image: row.image || "", options: row.options, correct: row.correct });
   });
   const questionsByBank = new Map();
-  (bankQuestionResponse.data || []).forEach(row => {
+  rows(bankQuestionResponse).forEach(row => {
     if (!questionsByBank.has(row.bank_id)) questionsByBank.set(row.bank_id, []);
     questionsByBank.get(row.bank_id).push({ id: row.question_id, text: row.text, image: row.image || "", options: row.options, correct: row.correct });
   });
-  dynamicQuestionBanks = (bankResponse.data || []).map(row => normalizeQuestionBank({ id:row.bank_id, course_id:row.course_id, title:row.title, option_count:row.option_count, published:true, questions:questionsByBank.get(row.bank_id) || [] }, `Supabase: ${row.title}`, row.course_id));
+  dynamicQuestionBanks = rows(bankResponse).map(row => normalizeQuestionBank({ id:row.bank_id, course_id:row.course_id, title:row.title, option_count:row.option_count, published:true, questions:questionsByBank.get(row.bank_id) || [] }, `Supabase: ${row.title}`, row.course_id));
   const questionsByExam = new Map();
-  dynamicExams = (examResponse.data || []).map(row => normalizeExam({
+  dynamicExams = rows(examResponse).map(row => normalizeExam({
     id: row.exam_id, course_id: row.course_id, title: row.title, minutes: row.minutes,
     questions_to_show: row.questions_to_show, attempts_allowed: row.attempts_allowed,
     option_count: row.option_count, question_bank_id: row.bank_id || "", published: true,
@@ -1986,18 +1993,22 @@ function renderTeacher() {
   bindTeacherExamWorkspaceActions();
 }
 function getTeacherCourses() {
-  // A published course is authoritative when an old local draft with the same
-  // id remains in localStorage after the publication was completed.
-  return [...new Map([...drafts.courses, ...publishedCourses].map(course => [course.id, course])).values()];
+  const publishedIds = new Set(publishedCourses.map(course => course.id));
+  return [...new Map([
+    ...drafts.courses.filter(course => !publishedIds.has(course.id)),
+    ...publishedCourses
+  ].map(course => [course.id, course])).values()];
 }
 function isPublishedCourse(courseId) {
-  return publishedCourses.some(course => course.id === courseId);
+  return publishedCourses.some(course => course.id === courseId && course.dynamic === true);
 }
 function getTeacherExams() {
-  return [...new Map([...drafts.exams, ...publishedExams].map(exam => [exam.id, exam])).values()];
+  const publishedIds = new Set(publishedExams.map(exam => exam.id));
+  return [...new Map([...drafts.exams.filter(exam => !publishedIds.has(exam.id)), ...publishedExams].map(exam => [exam.id, exam])).values()];
 }
 function getTeacherQuestionBanks(courseId = "") {
-  const banks = [...drafts.banks, ...publishedQuestionBanks];
+  const publishedIds = new Set(publishedQuestionBanks.map(bank => bank.id));
+  const banks = [...drafts.banks.filter(bank => !publishedIds.has(bank.id)), ...publishedQuestionBanks];
   const byId = new Map(banks.map(bank => [bank.id, bank]));
   return [...byId.values()].filter(bank => !courseId || bank.courseId === courseId);
 }
@@ -2528,6 +2539,8 @@ async function publishSelectedCourseExams(event) {
 
     drafts.courses = drafts.courses.filter(item => item.id !== courseId);
     drafts.exams = drafts.exams.filter(exam => !selectedIds.has(exam.id));
+    const publishedBankIds = new Set((payload.banks || []).map(bank => bank.id));
+    drafts.banks = drafts.banks.filter(bank => !publishedBankIds.has(bank.id));
     saveDrafts();
     closeModal("publish-course-modal");
     publishingCourseId = null;
@@ -3711,7 +3724,7 @@ async function saveCourseDraft(event) {
     const submit = event.submitter;
     if (submit) submit.disabled = true;
     $("#course-error").textContent = "";
-    const { error } = await sb.from("course_changes").upsert({ course_id: id, name: course.name, description: course.description, modules: course.modules, deleted: false, updated_by: currentUser.id }, { onConflict: "course_id" });
+    const { error } = await sb.from("academy_courses").update({ name: course.name, description: course.description, modules: course.modules, published: true, updated_by: currentUser.id, updated_at: nowIso() }).eq("course_id", id);
     if (submit) submit.disabled = false;
     if (error) {
       console.error("Editar curso publicado:", error);
@@ -3736,7 +3749,7 @@ async function deletePublishedCourse(id) {
   if (!course) return;
   const examCount = publishedExams.filter(exam => exam.courseId === id).length;
   if (!confirm(`¿Deseas eliminar el curso ${course.name}?\nEl curso dejará de mostrarse a los alumnos${examCount ? ` junto con ${quantity(examCount, "examen", "exámenes")}` : ""}, pero las notas anteriores y los resultados existentes se conservarán.`)) return;
-  const { error } = await sb.from("course_changes").upsert({ course_id: id, name: course.name, description: course.description || "", deleted: true, updated_by: currentUser.id }, { onConflict: "course_id" });
+  const { error } = await sb.from("academy_courses").update({ published: false, updated_by: currentUser.id, updated_at: nowIso() }).eq("course_id", id);
   if (error) {
     console.error("Eliminar curso publicado:", error);
     alert(translateError(error));
