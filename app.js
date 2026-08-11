@@ -4029,15 +4029,21 @@ async function saveQuestionBankToSupabase(bank) {
   if (questionsError) throw questionsError;
   return true;
 }
+function showQuestionBankEditorError(message) {
+  const error = $("#exam-editor-error");
+  if (!error) return;
+  error.className = "error";
+  error.textContent = message || "No se pudo guardar el banco de preguntas.";
+}
 async function saveQuestionBank(event) {
   event.preventDefault();
   let bank;
-  try { bank = buildQuestionBankFromEditor(); } catch (error) { $("#exam-editor-error").className = "error"; $("#exam-editor-error").textContent = error.message; return; }
-  if (!bank.questions.length) { $("#exam-editor-error").textContent = "Agrega al menos una pregunta al banco."; return; }
+  try { bank = buildQuestionBankFromEditor(); } catch (error) { showQuestionBankEditorError(error.message); return; }
+  if (!bank.questions.length) { showQuestionBankEditorError("Agrega al menos una pregunta al banco."); return; }
   const publishedBank = publishedQuestionBanks.find(item => item.id === bank.id);
   if (publishedBank) {
     const course = publishedCourses.find(item => item.id === bank.courseId);
-    if (!sb || !course) { $("#exam-editor-error").textContent = "No se pudo conectar el banco con su curso publicado."; return; }
+    if (!sb || !course) { showQuestionBankEditorError("No se pudo conectar el banco con su curso publicado."); return; }
     const submit = event.submitter || $(".editor-save");
     if (submit) submit.disabled = true;
     try {
@@ -4070,8 +4076,7 @@ async function saveQuestionBank(event) {
     closeModal("exam-modal");
     renderTeacher();
   } catch (error) {
-    $("#exam-editor-error").className = "error";
-    $("#exam-editor-error").textContent = supabaseErrorDetail(error);
+    showQuestionBankEditorError(supabaseErrorDetail(error));
   } finally {
     if (submit) submit.disabled = false;
   }
