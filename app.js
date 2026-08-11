@@ -839,9 +839,6 @@ function bindStaticEvents() {
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));
   $("#publish-course-form").addEventListener("submit", publishSelectedCourseExams);
   $("#exam-editor-form").addEventListener("submit", saveQuestionBank);
-  $("#editor-save-button").addEventListener("click", event => {
-    saveQuestionBank({ preventDefault() {}, submitter:event.currentTarget });
-  });
   $("#editor-option-count").addEventListener("change", changeOptionCount);
   $("#add-question-btn").addEventListener("click", addBuilderQuestion);
   $("#generate-questions-btn").addEventListener("click", generateQuestions);
