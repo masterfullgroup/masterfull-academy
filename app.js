@@ -53,7 +53,7 @@ let authTransitionPending = false;
 let minuteWarningPlayed = false;
 let appReady = false;
 let activeTeacherCourseId = null;
-let activeTeacherCourseSection = "overview";
+let activeTeacherCourseSection = "modules";
 let activeTeacherWorkspaceOrigin = "exams";
 let activeStudentCourseId = null;
 let activeStudentCourseSection = "modules";
@@ -683,7 +683,7 @@ function renderApp() {
   $$("#session-area [data-teacher-tab]").forEach(button => button.addEventListener("click", () => {
     if (button.dataset.teacherTab === "teacher-exams" || button.dataset.teacherTab === "teacher-courses") {
       activeTeacherCourseId = null;
-      activeTeacherCourseSection = "overview";
+      activeTeacherCourseSection = "modules";
       renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     }
     switchTab("teacher", button.dataset.teacherTab, button);
@@ -2109,10 +2109,7 @@ function renderTeacherExamCourseLink(course, exams) {
 function renderTeacherCourseWorkspace(course, exams) {
   const isDraftCourse = !isPublishedCourse(course.id);
   const isStudentPreview = activeTeacherCourseSection === "student-preview";
-  const publishedCount = exams.filter(exam => publishedExams.some(item => item.id === exam.id)).length;
-  const questionCount = exams.reduce((total, exam) => total + exam.questions.length, 0);
   const sections = [
-    ["overview", "Inicio", "home"],
     ["modules", "Módulos", "modules"],
     ["tasks", "Tareas", "clipboard"],
     ["exams", "Evaluaciones", "quiz"],
@@ -2134,7 +2131,7 @@ function renderTeacherCourseWorkspace(course, exams) {
   else if (activeTeacherCourseSection === "files") content = renderTeacherCourseResources(course, ["file","pdf","download","video","link"], "Archivos y recursos", "file");
   else if (activeTeacherCourseSection === "questions") content = renderTeacherCourseQuestions(course, exams);
   else if (activeTeacherCourseSection === "settings") content = renderTeacherCourseSettings(course);
-  else content = renderTeacherCourseOverview(course, exams, publishedCount, questionCount);
+  else content = renderTeacherCourseModulesCanvas(course, exams);
   return `<div class="course-workspace-page">
     <header class="course-context-bar">
       <div class="course-context-title"><button class="course-workspace-back contextual-back" id="back-to-exam-courses" type="button"><span aria-hidden="true">←</span> Cursos</button><span class="course-context-divider" aria-hidden="true"></span><div class="course-context-copy"><span>CURSO ACTUAL</span><h1>${esc(course.name)}</h1></div></div>
@@ -2326,7 +2323,7 @@ function bindTeacherActions() {
   $$(".publish-course").forEach(button => button.addEventListener("click", () => openPublishCourseModal(button.dataset.id)));
   $$(".manage-course-content").forEach(button => button.addEventListener("click", () => openTeacherCourseWorkspace(button.dataset.courseId, "modules", "courses")));
 }
-function openTeacherCourseWorkspace(courseId, section = "overview", origin = "exams") {
+function openTeacherCourseWorkspace(courseId, section = "modules", origin = "exams") {
   activeTeacherCourseId = courseId;
   activeTeacherCourseSection = section;
   activeTeacherWorkspaceOrigin = origin;
@@ -2408,11 +2405,11 @@ function bindTeacherExamWorkspaceActions() {
     }
   }));
   $$(".open-course-workspace").forEach(button => button.addEventListener("click", () => {
-    openTeacherCourseWorkspace(button.dataset.courseId, "overview", "exams");
+    openTeacherCourseWorkspace(button.dataset.courseId, "modules", "exams");
   }));
   $("#back-to-exam-courses")?.addEventListener("click", () => {
     activeTeacherCourseId = null;
-    activeTeacherCourseSection = "overview";
+    activeTeacherCourseSection = "modules";
     activeTeacherWorkspaceOrigin = "courses";
     switchTab("teacher", "teacher-home", $('[data-teacher-tab="teacher-home"]'));
     renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
@@ -2426,11 +2423,6 @@ function bindTeacherExamWorkspaceActions() {
   });
   $$(".course-subpage").forEach(button => button.addEventListener("click", () => {
     activeTeacherCourseSection = button.dataset.courseSection;
-    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
-    bindTeacherExamWorkspaceActions();
-  }));
-  $$(".course-home-open-modules").forEach(button => button.addEventListener("click", () => {
-    activeTeacherCourseSection = "modules";
     renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     bindTeacherExamWorkspaceActions();
   }));

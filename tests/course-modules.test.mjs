@@ -37,8 +37,7 @@ assert.match(appSource, /teacher-course-open/, "Al abrir un curso debe activarse
 assert.match(appSource, /document\.body\.classList\.toggle\("teacher-course-open"/, "El modo de enfoque debe sincronizarse con el curso activo");
 assert.match(appSource, /document\.body\.classList\.toggle\("student-course-open"/, "El alumno debe recibir el mismo modo de curso");
 assert.doesNotMatch(appSource, /scrollIntoView|window\.scrollTo/, "Los botones no deben desplazar automáticamente la página");
-assert.match(appSource, /course-home-metrics/, "El inicio del curso debe presentar métricas ordenadas");
-assert.match(appSource, /course-home-open-modules/, "El inicio debe ofrecer acceso directo a los módulos");
+assert.match(appSource, /const sections = \[[\s\S]*?\["modules",/, "La navegación del curso debe comenzar en Módulos");
 assert.doesNotMatch(appSource, /\["modules", `Módulos \(\$\{/, "La navegación no debe mostrar el total de módulos");
 assert.doesNotMatch(appSource, /\["exams", `Evaluaciones \(\$\{/, "La navegación no debe mostrar el total de evaluaciones");
 assert.match(appSource, /question-bank-search/, "El banco de preguntas debe incluir búsqueda");
@@ -48,7 +47,7 @@ assert.match(cssSource, /\.student-activity small\s*\{\s*display:none/, "Los mó
 assert.doesNotMatch(htmlSource, /class="brand-mark"/, "La cabecera no debe mostrar el antiguo icono de libro");
 assert.doesNotMatch(cssSource, /\.dashboard-course-cover::after\s*,\s*\.student-course-cover::after/, "Las tarjetas no deben incluir círculos decorativos");
 assert.match(cssSource, /\.canvas-add-content\s*\{\s*display:none/, "La acción inferior redundante para agregar contenido debe permanecer oculta");
-assert.match(appSource, /\["overview", "Inicio", "home"\]/, "La navegación debe usar iconos específicos y profesionales");
+assert.doesNotMatch(appSource, /\["overview", "Inicio", "home"\]/, "La navegación no debe incluir una página de inicio separada");
 assert.match(appSource, /stroke-width="1\.75"/, "Los iconos deben compartir un trazo visual consistente");
 assert.match(appSource, /document\.addEventListener\("click", closeRowActionMenus\)/, "Los menús de tres puntos deben cerrarse al pulsar fuera");
 assert.match(appSource, /menu\.classList\.add\("is-open"\)/, "El menú abierto debe elevarse sobre las demás filas");
@@ -119,8 +118,8 @@ assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, 
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
-assert.match(htmlSource, /styles\.css\?v=20260810-06/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
-assert.match(htmlSource, /app\.js\?v=20260810-06/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /styles\.css\?v=20260810-07/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /app\.js\?v=20260810-07/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
 assert.match(cssSource, /\.course-setup-status\s*\{[\s\S]*?position:absolute;[\s\S]*?right:72px;/, "El estado del curso debe quedar anclado junto al cierre");
 assert.match(htmlSource, /course-setup-head[^>]*>[\s\S]*?class="modal-close"/, "El cierre del modal de curso debe pertenecer a la cabecera fija");
 assert.match(cssSource, /\.course-setup-head\s*\{[\s\S]*?position:sticky;[\s\S]*?top:0;/, "La cabecera del modal debe permanecer alineada durante el scroll");
