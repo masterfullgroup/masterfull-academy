@@ -143,7 +143,7 @@ Los alumnos solo ven lo publicado en `data/catalog.json` y `data/exams/`.
 Ejemplo de ruta:
 
 ```json
-"./data/exams/fisica-mru.json"
+"./data/exams/ejemplo-examen.json"
 ```
 
 ## Esquema del examen JSON
@@ -151,9 +151,9 @@ Ejemplo de ruta:
 ```json
 {
   "schema_version": 1,
-  "id": "fisica-mru-01",
-  "course_id": "fisica",
-  "title": "Movimiento Rectilíneo Uniforme",
+  "id": "ejemplo-examen",
+  "course_id": "matematica",
+  "title": "Evaluación de ejemplo",
   "minutes": 20,
   "questions_to_show": 5,
   "attempts_allowed": 2,
@@ -161,7 +161,7 @@ Ejemplo de ruta:
   "option_count": 5,
   "questions": [
     {
-      "id": "mru-001",
+      "id": "pregunta-001",
       "text": "¿Cuál es la unidad de velocidad en el SI?",
       "image": "",
       "options": ["m", "m/s", "m/s²", "kg", "N"],

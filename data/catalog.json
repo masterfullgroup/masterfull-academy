@@ -7,9 +7,7 @@
       "name": "Física",
       "description": "Curso de Física",
       "teacher_name": "Profesor",
-      "exams": [
-        "./data/exams/fisica-mru.json"
-      ]
+      "exams": []
     },
     {
       "id": "matematica",

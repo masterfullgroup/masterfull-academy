@@ -2353,7 +2353,8 @@ function openPublishCourseModal(id) {
   $("#publish-course-modal").classList.remove("hidden");
 }
 function buildCoursePublicationPayload(course, exams) {
-  const banksById = new Map(drafts.banks.filter(bank => bank.courseId === course.id).map(bank => [bank.id, bank]));
+  const extraBanks = arguments[2] || [];
+  const banksById = new Map([...getTeacherQuestionBanks(course.id), ...extraBanks].map(bank => [bank.id, bank]));
   exams.forEach(exam => {
     const bankId = exam.questionBankId || `${exam.id}-bank`;
     if (!banksById.has(bankId) && exam.questions?.length) {
@@ -3566,8 +3567,9 @@ async function saveActivity(event) {
     if (isPublishedCourse(courseId) && exam.published) {
       const course = findCourse(courseId);
       if (!sb || !course) { $("#activity-error").textContent = "No se pudo conectar la evaluación con su curso publicado."; return; }
-      const publishedExamsForCourse = getTeacherExams().filter(item => item.courseId === courseId && item.id !== exam.id).map(examToJsonSchema);
-      const { error } = await sb.rpc("publish_academy_course", { payload:{ course:{ id:course.id, name:course.name, description:course.description || "", teacher_name:course.teacherName || currentUser.name, modules:nextModules }, banks:[bank], exams:[...publishedExamsForCourse, examToJsonSchema(exam)] } });
+      const examsForCourse = getTeacherExams().filter(item => item.courseId === courseId && item.id !== exam.id);
+      const payload = buildCoursePublicationPayload({ ...course, modules: nextModules }, [...examsForCourse, exam], [bank]);
+      const { error } = await sb.rpc("publish_academy_course", { payload });
       if (error) { $("#activity-error").textContent = error.message || translateError(error); return; }
       drafts.exams = drafts.exams.filter(item => item.id !== exam.id);
       await loadDynamicCourses();
@@ -3956,7 +3958,8 @@ async function saveQuestionBank(event) {
     if (submit) submit.disabled = true;
     try {
       const linkedExams = publishedExams.filter(exam => exam.questionBankId === bank.id);
-      const { error } = await sb.rpc("publish_academy_course", { payload: { course:{ id:course.id, name:course.name, description:course.description || "", teacher_name:course.teacherName || currentUser.name, modules:normalizeModules(course.modules) }, banks:[bank], exams:linkedExams.map(exam => ({ ...examToJsonSchema(exam), question_bank_id:bank.id, published:true })) } });
+      const payload = buildCoursePublicationPayload(course, linkedExams, [bank]);
+      const { error } = await sb.rpc("publish_academy_course", { payload });
       if (error) throw error;
       await loadDynamicCourses(); await applyCourseChanges();
       closeModal("exam-modal"); renderTeacher();
@@ -3989,7 +3992,8 @@ async function saveEvaluation(event) {
     const submit = event.submitter;
     if (submit) submit.disabled = true;
     try {
-      const { error } = await sb.rpc("publish_academy_course", { payload:{ course:{ id:publishedCourse.id, name:publishedCourse.name, description:publishedCourse.description || "", teacher_name:publishedCourse.teacherName || currentUser.name, modules:normalizeModules(publishedCourse.modules) }, banks:[bank], exams:[{ ...examToJsonSchema(exam), question_bank_id:bank.id, questions:bank.questions, published:true }] } });
+      const payload = buildCoursePublicationPayload(publishedCourse, [exam], [bank]);
+      const { error } = await sb.rpc("publish_academy_course", { payload });
       if (error) throw error;
       await loadDynamicCourses(); await loadCourseChanges(); closeModal("evaluation-modal"); renderTeacher();
     } catch (error) { $("#evaluation-error").textContent = error.message || translateError(error); }
@@ -4019,10 +4023,7 @@ async function saveExamDraft(event) {
     $("#exam-editor-error").className = "muted";
     $("#exam-editor-error").textContent = "Guardando y verificando los cambios...";
     try {
-      const payload = {
-        course: { id: course.id, name: course.name, description: course.description || "", teacher_name: course.teacherName || currentUser.name, modules: normalizeModules(course.modules) },
-        exams: [{ ...examToJsonSchema(exam), published: true }]
-      };
+      const payload = buildCoursePublicationPayload(course, [exam]);
       const { data, error } = await sb.rpc("publish_academy_course", { payload });
       if (error) throw error;
       if (!data || data.course_id !== course.id || Number(data.exam_count) !== 1) throw new Error("Supabase no confirmó la publicación del examen.");
