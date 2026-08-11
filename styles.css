@@ -8835,6 +8835,11 @@ body.teacher-course-open .canvas-module-item {
     min-height:0;
     overflow:hidden;
   }
+  body.teacher-course-open #teacher-view,
+  body.teacher-course-open #teacher-course-workspace {
+    height:100%;
+    min-height:0;
+  }
   body.teacher-course-open .course-workspace-page {
     display:grid;
     height:100%;
@@ -8857,7 +8862,7 @@ body.teacher-course-open .canvas-module-item {
   }
   body.teacher-course-open .course-workspace-content {
     min-height:0;
-    overflow-y:auto;
+    overflow-y:scroll !important;
     overscroll-behavior:contain;
     scrollbar-gutter:stable;
     scrollbar-width:auto;
