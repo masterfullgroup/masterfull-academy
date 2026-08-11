@@ -2971,6 +2971,10 @@ function gradeExam(questions, answers) {
   const total = questions.length;
   return { correct, total, score: Math.round((correct / total) * 200) / 10, review };
 }
+function formatExamDuration(seconds) {
+  const elapsed = Math.max(0, Number(seconds) || 0);
+  return `${String(Math.floor(elapsed / 60)).padStart(2, "0")}:${String(elapsed % 60).padStart(2, "0")}`;
+}
 async function finishExam(timeExpired, reason = "", silent = false) {
   if (!activeExam || finishingExam || !currentUser) return;
   finishingExam = true;
@@ -3074,6 +3078,12 @@ function renderExamResult(grade, includeReview = false) {
   resultCourseId = grade.courseId || activeExam?.courseId || activeCourse?.id || activeStudentCourseId || "";
   $("#result-title").textContent = grade.examTitle || "Evaluación completada";
   $("#result-score").textContent = grade.score;
+  const incorrect = Math.max(0, grade.total - grade.correct);
+  $("#result-correct").textContent = grade.correct;
+  $("#result-incorrect").textContent = incorrect;
+  $("#result-time").textContent = formatExamDuration(grade.secondsUsed);
+  $("#result-attempt").textContent = grade.attempt || 1;
+  $("#result-encouragement").textContent = grade.score >= 11 ? "¡Buen trabajo! Has aprobado esta evaluación." : "Revisa las respuestas y vuelve a intentarlo para mejorar tu resultado.";
   $("#result-message").textContent = `${grade.correct} de ${grade.total} respuestas correctas · Intento ${grade.attempt || 1}`;
   $("#result-review").innerHTML = includeReview ? reviewSectionMarkup([grade]) : "";
   show("result-view");

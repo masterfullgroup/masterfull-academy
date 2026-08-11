@@ -209,8 +209,14 @@
     <section id="result-view" class="view">
       <div class="panel narrow result-panel">
         <div class="result-icon">✓</div><span class="eyebrow">EXAMEN FINALIZADO</span>
-        <h2>Tu resultado</h2><div class="big-score"><span id="result-score">0</span><small>/ 20</small></div>
+        <h2 id="result-title">Tu resultado</h2><div class="big-score"><span id="result-score">0</span><small>/ 20</small></div>
         <p id="result-message" class="muted"></p>
+        <div class="result-details" aria-label="Detalles del resultado">
+          <div><small>Correctas</small><strong id="result-correct">0</strong></div>
+          <div><small>Incorrectas</small><strong id="result-incorrect">0</strong></div>
+          <div><small>Tiempo empleado</small><strong id="result-time">00:00</strong></div>
+          <div><small>Intento</small><strong id="result-attempt">1</strong></div>
+        </div>
         <p id="result-encouragement" class="encouragement"></p>
         <div id="result-review"></div>
         <button class="btn primary" id="return-student">← Volver a mis cursos</button>
