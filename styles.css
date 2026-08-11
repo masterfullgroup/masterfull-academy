@@ -8887,6 +8887,86 @@ body.teacher-course-open .canvas-module-item {
   }
 }
 
+/* Banco de preguntas: biblioteca compacta, legible y orientada a la acción. */
+.question-bank-page {
+  gap:18px;
+}
+.question-bank-summary {
+  gap:10px;
+}
+.question-bank-summary article {
+  min-height:76px;
+  padding:12px 14px;
+  box-shadow:0 4px 14px #1b294106;
+}
+.question-bank-toolbar {
+  min-height:68px;
+  padding:11px 14px;
+  background:#fbfbfd;
+}
+.question-bank-toolbar label {
+  width:min(350px,100%);
+}
+.question-bank-toolbar input {
+  min-height:38px;
+  background:#fff;
+}
+.course-question-banks.question-bank-grid {
+  grid-template-columns:repeat(auto-fill,minmax(260px,340px));
+  gap:14px;
+  justify-content:start;
+}
+.question-bank-grid .course-question-bank {
+  min-height:224px;
+  border-radius:11px;
+  box-shadow:0 6px 18px #1b294108;
+}
+.question-bank-grid .course-question-bank:hover {
+  box-shadow:0 10px 24px #1b294110;
+  transform:translateY(-1px);
+}
+.question-bank-grid .course-question-bank > header {
+  min-height:56px;
+  padding:9px 13px;
+}
+.question-bank-icon {
+  width:34px !important;
+  height:34px !important;
+  border-radius:9px !important;
+}
+.question-bank-card-copy {
+  padding:13px 14px 10px;
+}
+.question-bank-card-copy h3 {
+  font-size:14px;
+}
+.question-bank-card-copy p {
+  margin-top:4px;
+  font-size:10px;
+}
+.question-bank-card-metrics {
+  grid-template-columns:repeat(auto-fit,minmax(80px,1fr));
+  margin:0 14px;
+}
+.question-bank-card-metrics span {
+  padding:8px 6px;
+}
+.question-bank-card-metrics b {
+  font-size:15px;
+}
+.question-bank-grid .course-question-bank > footer {
+  padding:10px 14px;
+}
+
+@media (max-width:700px) {
+  .question-bank-toolbar label {
+    width:100%;
+  }
+  .course-question-banks.question-bank-grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+
 /* La vista del alumno comparte el lenguaje visual del recorrido docente. */
 body.student-course-open .student-course-content {
   background:#fff;
