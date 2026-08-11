@@ -2528,6 +2528,40 @@ async function publishSelectedCourseExams(event) {
   $("#publish-course-error").textContent = "Publicando y verificando...";
   try {
     if (!sb) throw new Error("No se configuró la conexión con Supabase. Revisa config.js.");
+    const emptyCourse = !exams.length && !normalizeModules(course.modules).length;
+    if (emptyCourse) {
+      let emptyResponse = await sb.from("academy_courses").upsert({
+        course_id: course.id,
+        name: course.name,
+        description: course.description || "",
+        teacher_name: course.teacherName || currentUser.name,
+        modules: [],
+        published: true,
+        updated_by: currentUser.id,
+        updated_at: nowIso()
+      }, { onConflict: "course_id" });
+      if (emptyResponse.error?.code === "42703") {
+        emptyResponse = await sb.from("academy_courses").upsert({
+          course_id: course.id,
+          name: course.name,
+          description: course.description || "",
+          teacher_name: course.teacherName || currentUser.name,
+          published: true,
+          updated_by: currentUser.id
+        }, { onConflict: "course_id" });
+      }
+      if (emptyResponse.error) throw emptyResponse.error;
+      await loadCourseChanges();
+      if (!publishedCourses.some(item => item.id === course.id && item.dynamic)) throw new Error("Supabase no confirmÃ³ el curso vacÃ­o como publicado.");
+      drafts.courses = drafts.courses.filter(item => item.id !== course.id);
+      saveDrafts();
+      closeModal("publish-course-modal");
+      publishingCourseId = null;
+      renderTeacher();
+      status.className = "course-publish-status success";
+      status.textContent = `${course.name} se publicÃ³ y verificÃ³ correctamente.`;
+      return;
+    }
     const payload = buildCoursePublicationPayload(course, exams);
     const { data, error } = await sb.rpc("publish_academy_course", { payload });
     if (error) throw error;

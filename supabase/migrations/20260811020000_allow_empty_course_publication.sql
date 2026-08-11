@@ -66,9 +66,7 @@ begin
   end loop;
 
   update public.academy_courses set published = true, updated_at = now() where course_id = stable_course_id;
-  insert into public.course_changes(course_id, name, description, modules, deleted, updated_by)
-  values (stable_course_id, course_data ->> 'name', coalesce(course_data ->> 'description', ''), coalesce(course_data -> 'modules', '[]'::jsonb), false, auth.uid())
-  on conflict (course_id) do update set deleted = false, name = excluded.name, description = excluded.description, updated_by = auth.uid();
+  -- course_changes es legacy y no decide el estado de publicaciÃ³n.
   return jsonb_build_object('course_id', stable_course_id, 'bank_count', published_bank_count, 'exam_count', published_exam_count, 'question_count', published_question_count);
 end;
 $$;
