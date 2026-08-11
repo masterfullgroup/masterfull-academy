@@ -8824,3 +8824,66 @@ body.teacher-course-open .canvas-module-item .canvas-item-icon {
 body.teacher-course-open .canvas-module-item {
   grid-template-columns:20px minmax(0,1fr) auto auto;
 }
+
+/* El curso se comporta como una aplicación: solo el lienzo central tiene scroll. */
+@media (min-width:821px) {
+  body.teacher-course-open.app-shell-mode {
+    overflow:hidden;
+  }
+  body.teacher-course-open.app-shell-mode > main {
+    height:100vh;
+    min-height:0;
+    overflow:hidden;
+  }
+  body.teacher-course-open .course-workspace-page {
+    display:grid;
+    height:100%;
+    min-height:0;
+    grid-template-rows:auto minmax(0,1fr);
+  }
+  body.teacher-course-open .course-context-bar {
+    position:relative;
+    z-index:5;
+  }
+  body.teacher-course-open .course-workspace-layout {
+    min-height:0;
+    height:auto;
+    overflow:hidden;
+  }
+  body.teacher-course-open .course-workspace-sidebar {
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  body.teacher-course-open .course-workspace-content {
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+  }
+}
+
+@media (max-width:820px) {
+  body.teacher-course-open.app-shell-mode {
+    overflow:auto;
+  }
+  body.teacher-course-open.app-shell-mode > main {
+    height:auto;
+    min-height:100vh;
+    overflow:visible;
+  }
+  body.teacher-course-open .course-workspace-page {
+    display:block;
+    height:auto;
+    min-height:100vh;
+  }
+  body.teacher-course-open .course-context-bar {
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  body.teacher-course-open .course-workspace-layout,
+  body.teacher-course-open .course-workspace-content {
+    overflow:visible;
+  }
+}
