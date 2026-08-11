@@ -304,6 +304,11 @@ function translateError(error) {
   return "No se pudo completar la operación. Revisa los datos e inténtalo otra vez.";
 }
 
+function supabaseErrorDetail(error) {
+  const parts = [error?.message, error?.details, error?.hint].filter(Boolean).map(String);
+  return parts.length ? `${parts.join(" ")}${error?.code ? ` (cÃ³digo ${error.code})` : ""}` : translateError(error);
+}
+
 async function initApp() {
   bindStaticEvents();
   setSessionMessage("Cargando sesión...");
@@ -2021,13 +2026,14 @@ function renderTeacherOverview() {
     const isDraft = !isPublishedCourse(course.id);
     const editClass = isDraft ? "edit-course" : "edit-published-course";
     const deleteClass = isDraft ? "delete-course" : "delete-published-course";
+    const publishAction = isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar</button>` : "";
     return `<article class="canvas-dashboard-card">
       <div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${isDraft ? "NO PUBLICADO" : "PUBLICADO"}</small></div>
       <div class="canvas-dashboard-card-body">
         <strong class="canvas-course-title">${esc(course.name)}</strong>
         <div class="canvas-dashboard-overview-actions">
           <button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button>
-          <button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar</button>
+          ${publishAction}<button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar</button>
           <button class="${deleteClass}" data-id="${esc(course.id)}" type="button">Eliminar</button>
         </div>
       </div>
@@ -2550,7 +2556,7 @@ async function publishSelectedCourseExams(event) {
     refreshedStatus.textContent = `${course.name} y ${quantity(exams.length, "examen")} se publicaron y verificaron correctamente.`;
   } catch (error) {
     console.error("Publicar curso:", error);
-    $("#publish-course-error").textContent = error.message || translateError(error);
+    $("#publish-course-error").textContent = supabaseErrorDetail(error);
     status.className = "course-publish-status error";
     status.textContent = "La publicación no se completó. El borrador local permanece intacto.";
   } finally {
