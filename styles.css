@@ -7293,6 +7293,23 @@ body.student-course-open .student-course-content-head {
   border-top:1px solid #e7e9ef;
   background:#fbfbfd;
 }
+.module-content-editor-card .activity-advanced-settings {
+  overflow:visible;
+  border:1px solid #d8dce7;
+  border-radius:9px;
+  background:#fff;
+}
+.module-content-editor-card .activity-advanced-settings > summary { display:none; }
+.module-content-editor-card .activity-advanced-settings::before {
+  content:"Opciones de la actividad\A Publicación, finalización, fechas y puntaje";
+  display:block;
+  padding:16px 18px 4px;
+  color:#1e3558;
+  font-size:15px;
+  font-weight:750;
+  white-space:pre-line;
+  line-height:1.5;
+}
 .module-content-editor-card #activity-exam-field,
 .module-content-editor-card #activity-submission-field {
   padding:18px 20px;

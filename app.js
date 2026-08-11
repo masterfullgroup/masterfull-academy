@@ -3341,6 +3341,10 @@ function toggleActivityFields() {
     const types = (option.dataset.configTypes || "").split(",");
     option.classList.toggle("hidden", !types.includes(type));
   });
+  ["#activity-duration", "#activity-attempts"].forEach(selector => {
+    const option = document.querySelector(selector)?.closest(".activity-config-option");
+    option?.classList.toggle("hidden", type === "quiz");
+  });
   $("#activity-completion-rule").disabled = isHeading;
   if (isHeading) $("#activity-completion-rule").value = "none";
   if (showExamSettings) {

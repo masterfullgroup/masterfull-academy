@@ -337,7 +337,7 @@
           </div>
         </div>
         <fieldset id="activity-submission-field" class="hidden activity-submission-types"><legend>Tipos de entrega permitidos</legend><label><input type="checkbox" name="activity-submission" value="file"> Archivos</label><label><input type="checkbox" name="activity-submission" value="text"> Texto en línea</label><label><input type="checkbox" name="activity-submission" value="url"> Enlace externo</label><label><input type="checkbox" name="activity-submission" value="questions"> Banco de preguntas</label><label><input type="checkbox" name="activity-submission" value="none"> Sin entrega digital</label></fieldset>
-        <details class="activity-advanced-settings hidden">
+        <section class="activity-advanced-settings hidden" aria-label="Opciones de la actividad">
           <summary><span>3</span><div><strong>Configuración avanzada</strong><small>Publicación, finalización, fechas y puntaje.</small></div><b aria-hidden="true">⌄</b></summary>
           <div class="activity-config-grid">
             <label class="activity-config-option" data-config-types="practice,task,quiz,discussion,live">Estado<select id="activity-published"><option value="true">Publicado</option><option value="false">Borrador</option></select></label>
@@ -347,7 +347,7 @@
             <label class="activity-config-option" data-config-types="quiz,live">Duración en minutos<input id="activity-duration" type="number" min="0" max="10000" value="0"></label>
             <label class="activity-config-option" data-config-types="task,quiz">Intentos (0 = sin límite)<input id="activity-attempts" type="number" min="0" max="100" value="0"></label>
           </div>
-        </details>
+        </section>
         <footer class="module-content-editor-footer"><p id="activity-error" class="error" aria-live="polite"></p><div class="module-content-editor-actions"><button class="btn secondary" data-close="activity-modal" type="button">Cancelar</button><button class="btn primary" type="submit">Agregar al módulo</button></div></footer>
       </form>
     </div>
