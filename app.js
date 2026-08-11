@@ -3190,7 +3190,7 @@ async function removeLegacyCourseModules(courseId) {
 function showCourseContentError(error) {
   console.error("Guardar contenido del curso:", error);
   const target = !$("#module-modal")?.classList.contains("hidden") ? $("#module-error") : $("#activity-error");
-  if (target) target.textContent = error?.message || translateError(error);
+  if (target) target.textContent = supabaseErrorDetail(error);
 }
 async function updateCourseModules(courseId, transform) {
   const localIndex = drafts.courses.findIndex(course => course.id === courseId);
@@ -3201,15 +3201,18 @@ async function updateCourseModules(courseId, transform) {
     drafts.courses[localIndex] = { ...drafts.courses[localIndex], modules, updatedAt: nowIso() };
     saveDrafts();
   } else {
-    const { error } = await sb.from("course_changes").upsert({ course_id: courseId, name: course.name, description: course.description || "", modules, deleted: false, updated_by: currentUser.id }, { onConflict: "course_id" });
-    if (error && isMissingModulesColumn(error)) {
-      const compatibleSave = await saveLegacyCourseModules(courseId, modules);
-      if (compatibleSave.error) { showCourseContentError(compatibleSave.error); return false; }
-    } else if (error) {
+    const { error } = await sb.from("academy_courses").update({
+      modules,
+      published: true,
+      updated_by: currentUser.id,
+      updated_at: nowIso()
+    }).eq("course_id", courseId);
+    if (error) {
       showCourseContentError(error);
       return false;
-    } else await removeLegacyCourseModules(courseId);
-    await loadCourseChanges();
+    }
+    await loadDynamicCourses();
+    applyCourseChanges();
   }
   refreshActiveCourseWorkspace();
   return true;
