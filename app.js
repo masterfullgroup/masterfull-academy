@@ -2024,16 +2024,13 @@ function renderTeacherOverview() {
   const allCourses = getTeacherCourses();
   const courseCards = allCourses.length ? allCourses.map(course => {
     const isDraft = !isPublishedCourse(course.id);
-    const editClass = isDraft ? "edit-course" : "edit-published-course";
     const deleteClass = isDraft ? "delete-course" : "delete-published-course";
-    const publishAction = isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar</button>` : "";
     return `<article class="canvas-dashboard-card">
       <div class="canvas-dashboard-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><small>${isDraft ? "NO PUBLICADO" : "PUBLICADO"}</small></div>
       <div class="canvas-dashboard-card-body">
         <strong class="canvas-course-title">${esc(course.name)}</strong>
         <div class="canvas-dashboard-overview-actions">
           <button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button>
-          ${publishAction}<button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar</button>
           <button class="${deleteClass}" data-id="${esc(course.id)}" type="button">Eliminar</button>
         </div>
       </div>
@@ -2069,11 +2066,10 @@ function renderCanvasCourseCard(course, isDraft, index) {
   const modules = normalizeModules(course.modules);
   const activities = modules.reduce((total, module) => total + module.activities.length, 0);
   const exams = [...publishedExams, ...drafts.exams].filter(exam => exam.courseId === course.id).length;
-  const editClass = isDraft ? "edit-course" : "edit-published-course";
   const deleteClass = isDraft ? "delete-course" : "delete-published-course";
   return `<article class="canvas-course-card tone-${index % 5} ${isDraft ? "draft" : ""}">
-    <div class="canvas-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span><details class="canvas-course-menu"><summary aria-label="Más acciones para ${esc(course.name)}">⋮</summary><div>${isDraft ? `<button class="publish-course" data-id="${esc(course.id)}" type="button">Publicar curso</button>` : ""}</div></details></div>
-    <div class="canvas-course-body"><strong class="canvas-course-title">${esc(course.name)}</strong><small>${isDraft ? "No publicado" : "Publicado"}</small><footer><span title="Módulos">${modernIcon("page")} ${modules.length}</span><span title="Recursos">${modernIcon("folder")} ${activities}</span><span title="Evaluaciones">${modernIcon("quiz")} ${exams}</span></footer><div class="canvas-course-actions"><button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button><button class="${editClass}" data-id="${esc(course.id)}" type="button">Editar</button><button class="${deleteClass} danger" data-id="${esc(course.id)}" type="button">Eliminar</button></div></div>
+    <div class="canvas-course-cover"><span>${esc(course.name.charAt(0).toLocaleUpperCase("es"))}</span></div>
+    <div class="canvas-course-body"><strong class="canvas-course-title">${esc(course.name)}</strong><small>${isDraft ? "No publicado" : "Publicado"}</small><footer><span title="Módulos">${modernIcon("page")} ${modules.length}</span><span title="Recursos">${modernIcon("folder")} ${activities}</span><span title="Evaluaciones">${modernIcon("quiz")} ${exams}</span></footer><div class="canvas-course-actions"><button class="manage-course-content" data-course-id="${esc(course.id)}" type="button">Abrir curso</button><button class="${deleteClass} danger" data-id="${esc(course.id)}" type="button">Eliminar</button></div></div>
   </article>`;
 }
 function renderTeacherQuickCourses() {
@@ -2357,7 +2353,8 @@ function openPublishCourseModal(id) {
   const course = drafts.courses.find(item => item.id === id);
   const exams = drafts.exams.filter(exam => exam.courseId === id);
   if (!course) return;
-  if (!exams.length && !normalizeModules(course.modules).length) {
+  // La validaciÃ³n histÃ³rica `if (!exams.length && !normalizeModules(course.modules).length)` ya no bloquea cursos vacÃ­os.
+  if (false && !exams.length && !normalizeModules(course.modules).length) {
     const status = $("#course-publish-status");
     status.className = "course-publish-status error";
     status.textContent = "Agrega al menos un módulo o una evaluación antes de publicar el curso.";
@@ -2524,7 +2521,7 @@ async function publishSelectedCourseExams(event) {
   const selectedIds = new Set($$('input[name="publish-exam"]:checked').map(input => input.value));
   const exams = drafts.exams.filter(exam => exam.courseId === courseId && selectedIds.has(exam.id));
   if (!course) return;
-  if (!exams.length && !normalizeModules(course.modules).length) { $("#publish-course-error").textContent = "Agrega al menos un módulo o una evaluación antes de publicar el curso."; return; }
+  if (false && !exams.length && !normalizeModules(course.modules).length) { $("#publish-course-error").textContent = "Agrega al menos un módulo o una evaluación antes de publicar el curso."; return; }
   const button = event.submitter;
   const status = $("#course-publish-status");
   if (button) button.disabled = true;
