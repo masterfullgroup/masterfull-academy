@@ -435,7 +435,7 @@ function applyCourseChanges() {
   publishedCourses = currentUser?.role === "teacher" ? mergedCourses : currentUser?.role === "student" ? mergedCourses.filter(course => enrolledCourseIds.has(course.id)) : [];
   const visibleCourseIds = new Set(publishedCourses.map(course => course.id));
   publishedExams = dynamicExams.filter(exam => visibleCourseIds.has(exam.courseId));
-  publishedQuestionBanks = dynamicQuestionBanks.filter(bank => visibleCourseIds.has(bank.courseId));
+  publishedQuestionBanks = dynamicQuestionBanks.filter(bank => bank.published && visibleCourseIds.has(bank.courseId));
   removePublishedLocalCopies();
 }
 function menuIcon(name) {
@@ -496,8 +496,9 @@ async function loadCourseAccess() {
   courseEnrollments = enrollmentResponse.data || [];
 }
 async function loadDynamicCourses() {
-  const query = async (table, columns) => {
-    let response = await sb.from(table).select(columns).eq("published", true);
+  const query = async (table, columns, publishedOnly = true) => {
+    let response = await sb.from(table).select(columns);
+    if (publishedOnly) response = response.eq("published", true);
     if (response.error?.code === "42703" && table === "academy_courses") response = await sb.from(table).select("course_id, name, description, teacher_name, updated_at").eq("published", true);
     if (response.error?.code === "42703" && table === "academy_exams") response = await sb.from(table).select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count").eq("published", true);
     return response;
@@ -506,8 +507,8 @@ async function loadDynamicCourses() {
     query("academy_courses", "course_id, name, description, teacher_name, modules, published, updated_by, created_at, updated_at"),
     query("academy_exams", "exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count, bank_id, published, updated_at"),
     sb.from("academy_questions").select("exam_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true }),
-    sb.from("academy_question_banks").select("bank_id, course_id, title, option_count, published, created_at, updated_at").eq("published", true),
-    sb.from("academy_bank_questions").select("bank_id, question_id, position, text, image, options, correct").eq("published", true).order("position", { ascending: true })
+    query("academy_question_banks", "bank_id, course_id, title, option_count, published, created_at, updated_at", false),
+    sb.from("academy_bank_questions").select("bank_id, question_id, position, text, image, options, correct, published").order("position", { ascending: true })
   ]);
   const [courseResponse, examResponse, questionResponse, bankResponse, bankQuestionResponse] = responses;
   if (courseResponse.error) {
@@ -531,7 +532,7 @@ async function loadDynamicCourses() {
     if (!questionsByBank.has(row.bank_id)) questionsByBank.set(row.bank_id, []);
     questionsByBank.get(row.bank_id).push({ id: row.question_id, text: row.text, image: row.image || "", options: row.options, correct: row.correct });
   });
-  dynamicQuestionBanks = rows(bankResponse).map(row => normalizeQuestionBank({ id:row.bank_id, course_id:row.course_id, title:row.title, option_count:row.option_count, published:true, questions:questionsByBank.get(row.bank_id) || [] }, `Supabase: ${row.title}`, row.course_id));
+  dynamicQuestionBanks = rows(bankResponse).map(row => normalizeQuestionBank({ id:row.bank_id, course_id:row.course_id, title:row.title, option_count:row.option_count, published:row.published === true, questions:questionsByBank.get(row.bank_id) || [] }, `Supabase: ${row.title}`, row.course_id));
   const questionsByExam = new Map();
   dynamicExams = rows(examResponse).map(row => normalizeExam({
     id: row.exam_id, course_id: row.course_id, title: row.title, minutes: row.minutes,
@@ -2013,7 +2014,7 @@ function getTeacherExams() {
 }
 function getTeacherQuestionBanks(courseId = "") {
   const publishedIds = new Set(publishedQuestionBanks.map(bank => bank.id));
-  const banks = [...drafts.banks.filter(bank => !publishedIds.has(bank.id)), ...publishedQuestionBanks];
+  const banks = [...drafts.banks.filter(bank => !publishedIds.has(bank.id)), ...dynamicQuestionBanks, ...publishedQuestionBanks];
   const byId = new Map(banks.map(bank => [bank.id, bank]));
   return [...byId.values()].filter(bank => !courseId || bank.courseId === courseId);
 }
@@ -2291,7 +2292,7 @@ function renderTeacherCourseQuestions(course) {
     <div class="course-subpage-head question-bank-heading"><div><span class="eyebrow">BIBLIOTECA CENTRAL</span><h2>Banco de preguntas</h2><p>Crea temas independientes y reutilízalos en una o varias evaluaciones.</p></div><button class="btn primary create-question-bank" data-course-id="${esc(course.id)}" type="button">+ Nuevo banco</button></div>
     <section class="question-bank-summary" aria-label="Resumen del banco"><article><span>${modernIcon("practice")}</span><div><small>Preguntas totales</small><strong>${questionCount}</strong></div></article><article><span>${modernIcon("quiz")}</span><div><small>Bancos activos</small><strong>${banks.length}</strong></div></article><article><span>${modernIcon("results")}</span><div><small>Publicados</small><strong>${publishedCount}</strong></div></article><article><span>${modernIcon("progress")}</span><div><small>Promedio por banco</small><strong>${average}</strong></div></article></section>
     <div class="question-bank-toolbar"><label><span>${modernIcon("courses")}</span><input id="question-bank-search" type="search" placeholder="Buscar un tema o banco…" autocomplete="off"></label><span>${quantity(banks.length, "banco disponible", "bancos disponibles")}</span></div>
-    <div class="course-question-banks question-bank-grid">${banks.length ? banks.map(bank => { const isPublished = publishedQuestionBanks.some(item => item.id === bank.id); const searchText = `${bank.title} ${isPublished ? "publicado" : "borrador"}`.toLocaleLowerCase("es"); return `<article class="course-question-bank" data-bank-search="${esc(searchText)}"><header><span class="question-bank-icon">${modernIcon("quiz")}</span><span class="status ${isPublished ? "published" : "draft"}">${isPublished ? "Publicado" : "Borrador"}</span></header><div class="question-bank-card-copy"><h3>${esc(bank.title)}</h3><p>Banco reutilizable para las evaluaciones del curso.</p></div><div class="question-bank-card-metrics"><span><b>${bank.questions.length}</b><small>Preguntas</small></span><span><b>${bank.optionCount}</b><small>Opciones por pregunta</small></span></div><footer><small>Curso: ${esc(course.name)}</small><button class="btn secondary edit-question-bank" data-id="${esc(bank.id)}" type="button">Administrar banco <span aria-hidden="true">→</span></button></footer></article>`; }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea el primer banco temático para reutilizar sus preguntas.</p><button class="btn primary create-question-bank" data-course-id="${esc(course.id)}" type="button">+ Crear primer banco</button></div>`}</div>
+    <div class="course-question-banks question-bank-grid">${banks.length ? banks.map(bank => { const isPublished = publishedQuestionBanks.some(item => item.id === bank.id); const searchText = `${bank.title} ${isPublished ? "publicado" : "borrador"}`.toLocaleLowerCase("es"); return `<article class="course-question-bank" data-bank-search="${esc(searchText)}"><header><span class="question-bank-icon">${modernIcon("quiz")}</span><span class="status ${isPublished ? "published" : "draft"}">${isPublished ? "Publicado" : "Borrador"}</span></header><div class="question-bank-card-copy"><h3>${esc(bank.title)}</h3><p>Banco reutilizable para las evaluaciones del curso.</p></div><div class="question-bank-card-metrics"><span><b>${bank.questions.length}</b><small>Preguntas</small></span><span><b>${bank.optionCount}</b><small>Opciones por pregunta</small></span></div><footer><small>Curso: ${esc(course.name)}</small><button class="btn secondary edit-question-bank" data-id="${esc(bank.id)}" type="button">Administrar banco <span aria-hidden="true">→</span></button></footer></article>`; }).join("") : `<div class="course-workspace-empty question-bank-empty"><strong>No hay bancos de preguntas</strong><p>Crea un banco desde el botón “+ Nuevo banco” para reutilizar sus preguntas.</p></div>`}</div>
     <div id="question-bank-filter-empty" class="course-workspace-empty question-bank-filter-empty hidden"><strong>No hay coincidencias</strong><p>Prueba con otro nombre de tema.</p></div>
   </div>`;
   /* Legacy markup retained below until the editor migration is complete. */
@@ -3811,7 +3812,8 @@ function openExamModal(id = null, courseId = null) {
   if (!courses.length) { alert("Primero crea un curso local o agrega cursos en data/catalog.json."); openCourseModal(); return; }
   const localBank = drafts.banks.find(item => item.id === id);
   const publishedBank = publishedQuestionBanks.find(item => item.id === id);
-  const bank = publishedBank || localBank;
+  const persistedBank = dynamicQuestionBanks.find(item => item.id === id);
+  const bank = publishedBank || localBank || persistedBank;
   $("#exam-modal-title").textContent = publishedBank ? "Modificar banco publicado" : localBank ? "Editar banco de preguntas" : "Crear banco de preguntas";
   $("#editor-exam-id").value = bank?.id || "";
   $("#editor-course").innerHTML = courses.map(course => `<option value="${esc(course.id)}">${esc(course.name)}</option>`).join("");
@@ -3998,6 +4000,34 @@ function buildQuestionBankFromEditor() {
     published: false
   }, "borrador del banco", $("#editor-course").value);
 }
+async function saveQuestionBankToSupabase(bank) {
+  const courseExists = publishedCourses.some(course => course.id === bank.courseId && course.dynamic === true);
+  if (!sb || !courseExists) return false;
+  const { error: bankError } = await sb.from("academy_question_banks").upsert({
+    bank_id: bank.id,
+    course_id: bank.courseId,
+    title: bank.title,
+    option_count: bank.optionCount,
+    published: false,
+    updated_by: currentUser?.id || null
+  }, { onConflict: "bank_id" });
+  if (bankError) throw bankError;
+  const { error: deleteError } = await sb.from("academy_bank_questions").delete().eq("bank_id", bank.id);
+  if (deleteError) throw deleteError;
+  const questionRows = bank.questions.map((question, position) => ({
+    bank_id: bank.id,
+    question_id: question.id,
+    position,
+    text: question.text,
+    image: question.image || "",
+    options: question.options,
+    correct: question.correct,
+    published: false
+  }));
+  const { error: questionsError } = await sb.from("academy_bank_questions").insert(questionRows);
+  if (questionsError) throw questionsError;
+  return true;
+}
 async function saveQuestionBank(event) {
   event.preventDefault();
   let bank;
@@ -4020,10 +4050,30 @@ async function saveQuestionBank(event) {
     finally { if (submit) submit.disabled = false; }
     return;
   }
-  const bankIndex = drafts.banks.findIndex(item => item.id === bank.id);
-  if (bankIndex >= 0) drafts.banks[bankIndex] = bank; else drafts.banks.push(bank);
-  drafts.exams = drafts.exams.map(exam => exam.questionBankId === bank.id ? examWithQuestionBank(exam, drafts.banks) : exam);
-  saveDrafts(); closeModal("exam-modal"); renderTeacher();
+  const submit = event.submitter || $(".editor-save");
+  if (submit) submit.disabled = true;
+  try {
+    const persisted = await saveQuestionBankToSupabase(bank);
+    if (persisted) {
+      drafts.banks = drafts.banks.filter(item => item.id !== bank.id);
+      drafts.exams = drafts.exams.map(exam => exam.questionBankId === bank.id ? examWithQuestionBank(exam, [bank]) : exam);
+      saveDrafts();
+      await loadDynamicCourses();
+      applyCourseChanges();
+    } else {
+      const bankIndex = drafts.banks.findIndex(item => item.id === bank.id);
+      if (bankIndex >= 0) drafts.banks[bankIndex] = bank; else drafts.banks.push(bank);
+      drafts.exams = drafts.exams.map(exam => exam.questionBankId === bank.id ? examWithQuestionBank(exam, drafts.banks) : exam);
+      saveDrafts();
+    }
+    closeModal("exam-modal");
+    renderTeacher();
+  } catch (error) {
+    $("#exam-editor-error").className = "error";
+    $("#exam-editor-error").textContent = supabaseErrorDetail(error);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
 }
 async function saveEvaluation(event) {
   event.preventDefault();
