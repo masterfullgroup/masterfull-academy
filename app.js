@@ -2878,6 +2878,17 @@ function closeLessonSidebar() {
   document.body.classList.remove("lesson-sidebar-open");
   $("#lesson-menu-toggle").setAttribute("aria-expanded", "false");
 }
+function moveExamSubmitToHeader() {
+  const submitBar = $(".exam-submit-bar");
+  const timer = $(".exam-head .timer");
+  const submitButton = submitBar?.querySelector(".submit-exam");
+  if (!submitBar || !timer || !submitButton || $(".exam-head-actions")) return;
+  const actions = document.createElement("div");
+  actions.className = "exam-head-actions";
+  timer.replaceWith(actions);
+  actions.append(timer, submitButton);
+  submitBar.classList.add("header-submit-moved");
+}
 function renderStudentExamRow(exam, myGrades) {
   const attempts = myGrades.filter(item => item.examId === exam.id);
   const best = attempts.length ? Math.max(...attempts.map(item => item.score)) : null;
@@ -2886,6 +2897,7 @@ function renderStudentExamRow(exam, myGrades) {
 }
 
 async function startExam(id) {
+  moveExamSubmitToHeader();
   await refreshResults();
   activeExam = publishedExams.find(exam => exam.id === id);
   if (!activeExam) return;

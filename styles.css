@@ -2755,6 +2755,9 @@ body:not(.app-shell-mode) .topbar .menu-icon { width: 16px; height: 16px; }
 .exam-submit-bar > div span { color: #7b8b99; font-size: 10.5px; }
 .exam-in-progress .submit-exam { min-width: 164px; min-height: 40px; margin: 0; padding: 9px 14px; border: 0; border-radius: 10px; background: #168da5; box-shadow: none; font-size: 12px; font-weight: 600; }
 .exam-in-progress .submit-exam:hover { background: #117b91; transform: translateY(-1px); }
+.exam-head-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.exam-head-actions .submit-exam { min-width: 148px; }
+.exam-submit-bar.header-submit-moved { display: none; }
 
 @media (max-width:700px) {
   .exam-in-progress main { padding: 12px 12px 36px; }
@@ -2764,6 +2767,8 @@ body:not(.app-shell-mode) .topbar .menu-icon { width: 16px; height: 16px; }
   .exam-progress-track { width: 100%; flex: 0 0 6px; }
   .exam-in-progress .timer { min-width: 118px; align-self: center; padding: 9px 11px; }
   .exam-in-progress .timer div { font-size: 17px; }
+  .exam-head-actions { align-items: stretch; flex-direction: column; gap: 8px; }
+  .exam-head-actions .submit-exam { width: 100%; min-width: 118px; }
   .exam-in-progress .exam-rules { padding: 11px 12px; }
   .exam-in-progress .question-card { scroll-margin-top: 132px; padding: 19px 16px 20px; border-radius: 14px; }
   .exam-in-progress .question-card h3 { font-size: 15px; }
