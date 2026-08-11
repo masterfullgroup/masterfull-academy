@@ -2355,6 +2355,32 @@ function openPublishCourseModal(id) {
   $("#publish-course-error").textContent = "";
   $("#publish-course-modal").classList.remove("hidden");
 }
+function buildCoursePublicationPayload(course, exams) {
+  const banksById = new Map(drafts.banks.filter(bank => bank.courseId === course.id).map(bank => [bank.id, bank]));
+  exams.forEach(exam => {
+    const bankId = exam.questionBankId || `${exam.id}-bank`;
+    if (!banksById.has(bankId) && exam.questions?.length) {
+      banksById.set(bankId, normalizeQuestionBank({
+        id: bankId,
+        course_id: course.id,
+        title: `${exam.title} · Banco`,
+        option_count: exam.optionCount,
+        questions: exam.questions
+      }, `Banco heredado de ${exam.title}`));
+    }
+  });
+  return {
+    course: {
+      id: course.id,
+      name: course.name,
+      description: course.description || "",
+      teacher_name: course.teacherName || currentUser.name,
+      modules: normalizeModules(course.modules)
+    },
+    banks: [...banksById.values()].filter(bank => exams.some(exam => (exam.questionBankId || `${exam.id}-bank`) === bank.id)),
+    exams: exams.map(exam => ({ ...examToJsonSchema(exam), question_bank_id: exam.questionBankId || `${exam.id}-bank`, published: true }))
+  };
+}
 function closeRowActionMenus() {
   $$(".row-action-popover").forEach(popover => popover.classList.add("hidden"));
   $$(".row-action-toggle").forEach(toggle => toggle.setAttribute("aria-expanded", "false"));
@@ -2491,14 +2517,11 @@ async function publishSelectedCourseExams(event) {
   if (!exams.length && !normalizeModules(course.modules).length) { $("#publish-course-error").textContent = "Agrega al menos un módulo o una evaluación antes de publicar el curso."; return; }
   const button = event.submitter;
   const status = $("#course-publish-status");
-  button.disabled = true;
+  if (button) button.disabled = true;
   $("#publish-course-error").textContent = "Publicando y verificando...";
   try {
-    const payload = {
-      course: { id: course.id, name: course.name, description: course.description || "", teacher_name: course.teacherName || currentUser.name, modules: normalizeModules(course.modules) },
-      banks: drafts.banks.filter(bank => exams.some(exam => exam.questionBankId === bank.id)),
-      exams: exams.map(exam => ({ ...examToJsonSchema(exam), question_bank_id: exam.questionBankId || `${exam.id}-bank`, published: true }))
-    };
+    if (!sb) throw new Error("No se configuró la conexión con Supabase. Revisa config.js.");
+    const payload = buildCoursePublicationPayload(course, exams);
     const { data, error } = await sb.rpc("publish_academy_course", { payload });
     if (error) throw error;
     if (!data || data.course_id !== course.id || Number(data.exam_count) !== exams.length) throw new Error("Supabase no confirmó todos los exámenes seleccionados.");
@@ -2525,7 +2548,7 @@ async function publishSelectedCourseExams(event) {
     status.className = "course-publish-status error";
     status.textContent = "La publicación no se completó. El borrador local permanece intacto.";
   } finally {
-    button.disabled = false;
+    if (button) button.disabled = false;
   }
 }
 

@@ -119,8 +119,8 @@ assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, 
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
-assert.match(htmlSource, /styles\.css\?v=20260810-05/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
-assert.match(htmlSource, /app\.js\?v=20260810-05/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /styles\.css\?v=20260810-06/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /app\.js\?v=20260810-06/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
 assert.match(cssSource, /\.course-setup-status\s*\{[\s\S]*?position:absolute;[\s\S]*?right:72px;/, "El estado del curso debe quedar anclado junto al cierre");
 assert.match(htmlSource, /course-setup-head[^>]*>[\s\S]*?class="modal-close"/, "El cierre del modal de curso debe pertenecer a la cabecera fija");
 assert.match(cssSource, /\.course-setup-head\s*\{[\s\S]*?position:sticky;[\s\S]*?top:0;/, "La cabecera del modal debe permanecer alineada durante el scroll");
@@ -128,6 +128,9 @@ assert.match(cssSource, /body\.student-course-open \.student-course-page\s*\{[\s
 assert.doesNotMatch(cssSource, /body\.student-course-open \.student-course-page\s*\{[^}]*height:\s*18px/, "El espacio del curso del alumno no debe colapsarse a una altura fija");
 
 assert.match(appSource, /function normalizeRole\(value\)/, "La aplicaciÃ³n debe normalizar roles histÃ³ricos de Supabase");
+assert.match(appSource, /function buildCoursePublicationPayload\(course, exams\)/, "La publicación debe construir un payload estable para cursos heredados");
+assert.match(appSource, /normalizeQuestionBank\(\{[\s\S]*?Banco heredado de \$\{exam\.title\}/, "La publicación debe reconstruir bancos ausentes desde las preguntas locales");
+assert.match(appSource, /if \(!exams\.length && !normalizeModules\(course\.modules\)\.length\)/, "Los cursos con módulos pueden publicarse sin evaluaciones");
 assert.match(appSource, /"administraci\\u00f3n":\s*"admin"/, "El rol administraciÃ³n debe abrir el panel administrador");
 assert.match(appSource, /maestro:\s*"teacher"/, "El rol maestro debe abrir el panel docente");
 assert.match(htmlSource, /id="admin-view" class="view admin-panel"/, "El panel administrador debe tener una vista renderizable");
