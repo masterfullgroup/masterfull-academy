@@ -8780,3 +8780,47 @@ body.admin-shell-mode #admin-view {
 
 /* End admin teachers improved table styles */
 .bank-editor-hidden { display: none !important; }
+/* Ajuste final del espacio docente: contenido directo, sin redundancias visuales. */
+body.teacher-course-open.app-shell-mode > main {
+  padding:0;
+  background:#fff;
+}
+body.teacher-course-open .course-workspace-page,
+body.teacher-course-open .course-workspace-page > .course-context-bar,
+body.teacher-course-open .course-workspace-layout,
+body.teacher-course-open .course-workspace-sidebar,
+body.teacher-course-open .course-workspace-content {
+  border-radius:0;
+}
+body.teacher-course-open .course-workspace-page {
+  width:100%;
+  max-width:none;
+  min-height:100vh;
+  margin:0;
+  box-shadow:none;
+  border:0;
+}
+body.teacher-course-open .course-sidebar-heading {
+  padding-top:24px;
+}
+body.teacher-course-open .course-sidebar-heading strong {
+  display:none;
+}
+body.teacher-course-open .course-sidebar-heading small {
+  margin-top:0;
+  color:#17233d;
+  font-size:12px;
+  font-weight:700;
+}
+body.teacher-course-open .teacher-activity-row {
+  grid-template-columns:minmax(0,1fr) auto;
+}
+body.teacher-course-open .teacher-activity-row .activity-type-icon,
+body.teacher-course-open .teacher-activity-row .activity-sequence,
+body.teacher-course-open .canvas-module-item .activity-sequence,
+body.teacher-course-open .canvas-module-item .canvas-item-icon {
+  display:none;
+}
+body.teacher-course-open .canvas-module-item {
+  grid-template-columns:20px minmax(0,1fr) auto auto;
+}
