@@ -2885,6 +2885,7 @@ function moveExamSubmitToHeader() {
   if (!submitBar || !timer || !submitButton || $(".exam-head-actions")) return;
   const actions = document.createElement("div");
   actions.className = "exam-head-actions";
+  submitButton.setAttribute("form", "take-exam-form");
   timer.replaceWith(actions);
   actions.append(timer, submitButton);
   submitBar.classList.add("header-submit-moved");
