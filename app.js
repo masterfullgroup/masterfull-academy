@@ -497,8 +497,9 @@ async function loadCourseAccess() {
 }
 async function loadDynamicCourses() {
   const query = async (table, columns, publishedOnly = true) => {
-    let response = await sb.from(table).select(columns);
-    if (publishedOnly) response = response.eq("published", true);
+    let request = sb.from(table).select(columns);
+    if (publishedOnly) request = request.eq("published", true);
+    let response = await request;
     if (response.error?.code === "42703" && table === "academy_courses") response = await sb.from(table).select("course_id, name, description, teacher_name, updated_at").eq("published", true);
     if (response.error?.code === "42703" && table === "academy_exams") response = await sb.from(table).select("exam_id, course_id, title, minutes, questions_to_show, attempts_allowed, option_count").eq("published", true);
     return response;
