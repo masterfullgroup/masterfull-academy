@@ -2164,7 +2164,29 @@ function renderTeacherCourseWorkspace(course, exams) {
 
 function renderTeacherCourseGrades(course) {
   const courseResults = results.filter(result => result.courseId === course.id);
-  return `<div class="course-subpage-head"><div><span class="eyebrow">SEGUIMIENTO</span><h2>Calificaciones</h2><p>Resultados registrados para las evaluaciones de este curso.</p></div></div><div class="course-data-list">${courseResults.length ? courseResults.map(result => `<article><span class="activity-type-icon">${modernIcon("results")}</span><div><strong>${esc(result.studentName || "Alumno")}</strong><small>${esc(result.examTitle)} · Intento ${result.attempt || 1}</small></div><b>${Number(result.score || 0).toFixed(1)} / 20</b></article>`).join("") : `<div class="course-workspace-empty"><strong>Aún no hay calificaciones</strong><p>Los resultados aparecerán cuando los alumnos entreguen evaluaciones.</p></div>`}</div>`;
+  const students = new Map();
+  courseResults.forEach(result => {
+    const key = result.studentId || result.studentEmail || result.studentName || "student-unknown";
+    if (!students.has(key)) students.set(key, { name: result.studentName || "Alumno", grades: [] });
+    students.get(key).grades.push(result);
+  });
+  const studentGroups = [...students.values()].sort((a, b) => a.name.localeCompare(b.name, "es"));
+  const renderedStudents = studentGroups.map(student => {
+    const grades = [...student.grades].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const bestScore = Math.max(...grades.map(grade => Number(grade.score) || 0));
+    const average = grades.reduce((sum, grade) => sum + (Number(grade.score) || 0), 0) / grades.length;
+    return `<details class="course-grade-student" data-student-search="${esc(student.name.toLocaleLowerCase("es"))}">
+      <summary><span class="course-grade-avatar" aria-hidden="true">${esc(student.name.charAt(0).toLocaleUpperCase("es"))}</span><span class="course-grade-student-copy"><strong>${esc(student.name)}</strong><small>${quantity(grades.length, "intento registrado", "intentos registrados")}</small></span><span class="course-grade-summary"><small>Promedio</small><strong>${average.toFixed(1)} / 20</strong><em>Mejor ${bestScore.toFixed(1)}</em></span><span class="course-grade-chevron" aria-hidden="true"></span></summary>
+      <div class="course-grade-attempts">${grades.map(grade => `<article class="course-grade-attempt">
+        <span class="activity-type-icon">${modernIcon("results")}</span>
+        <div class="course-grade-attempt-main"><strong>${esc(grade.examTitle || "Evaluación")}</strong><small>Intento ${grade.attempt || 1} · ${esc(grade.courseName || course.name)}</small></div>
+        <div class="course-grade-score"><small>Nota</small><strong>${Number(grade.score || 0).toFixed(1)} / 20</strong><span>${grade.correct || 0} de ${grade.total || 0} aciertos</span></div>
+        <div class="course-grade-duration"><small>Tiempo</small><strong>${Math.round((grade.secondsUsed || 0) / 60)} min</strong></div>
+        <div class="course-grade-date"><small>Entregado</small><strong>${formatDateOnly(grade.date)}</strong><span>${formatTimeOnly(grade.date)}</span></div>
+      </article>`).join("")}</div>
+    </details>`;
+  }).join("");
+  return `<div class="course-subpage-head"><div><span class="eyebrow">SEGUIMIENTO</span><h2>Calificaciones</h2><p>Selecciona un alumno para revisar sus notas e intentos.</p></div></div>${courseResults.length ? `<div class="course-grades-toolbar"><label><span class="sr-only">Buscar alumno</span><input class="course-grade-search" type="search" placeholder="Buscar alumno…" autocomplete="off"></label><span>${quantity(studentGroups.length, "alumno", "alumnos")}</span></div><div class="course-grade-students">${renderedStudents}</div>` : `<div class="course-workspace-empty"><strong>Aún no hay calificaciones</strong><p>Los resultados aparecerán cuando los alumnos entreguen evaluaciones.</p></div>`}`;
 }
 function renderTeacherCoursePeople(course) {
   const profilesById = new Map(studentProfiles.map(profile => [profile.id, profile]));
@@ -2453,6 +2475,12 @@ function bindTeacherExamWorkspaceActions() {
       if (match) visible++;
     });
     $("#question-bank-filter-empty")?.classList.toggle("hidden", visible > 0 || !cards.length);
+  });
+  $(".course-grade-search")?.addEventListener("input", event => {
+    const query = event.currentTarget.value.trim().toLocaleLowerCase("es");
+    $$(".course-grade-student[data-student-search]").forEach(student => {
+      student.classList.toggle("hidden", Boolean(query) && !student.dataset.studentSearch.includes(query));
+    });
   });
   $$("#teacher-course-workspace .edit-exam").forEach(button => button.addEventListener("click", () => openEvaluationModal(button.dataset.id)));
   $$("#teacher-course-workspace .delete-exam").forEach(button => button.addEventListener("click", () => deleteExamDraft(button.dataset.id)));
