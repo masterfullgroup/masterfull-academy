@@ -9139,14 +9139,15 @@ body.student-course-open .module-empty {
 .exam-editor-card {
   overflow-y:auto;
   overflow-x:hidden;
-  border:1px solid #1c2b4e;
+  border:0;
   border-radius:18px;
   background:#f6f8fc;
   box-shadow:0 26px 70px rgba(14,25,52,.28);
 }
 .exam-editor-card > .modal-close {
-  top:50%;
-  right:18px;
+  position:sticky;
+  top:39px;
+  right:auto;
   z-index:12;
   display:grid;
   width:38px;
@@ -9159,7 +9160,7 @@ body.student-course-open .module-empty {
   background:rgba(255,255,255,.08);
   font-size:23px;
   line-height:1;
-  transform:translateY(-50%);
+  margin:39px 18px -77px auto;
   transition:background .16s ease,border-color .16s ease,transform .16s ease;
 }
 .exam-editor-card > .modal-close:hover,
@@ -9168,7 +9169,7 @@ body.student-course-open .module-empty {
   border-color:rgba(255,255,255,.5);
   background:rgba(255,255,255,.18);
   outline:0;
-  transform:translateY(-50%) scale(1.04);
+  transform:scale(1.04);
 }
 .exam-editor-card .editor-sticky-bar {
   position:sticky;
@@ -9225,7 +9226,10 @@ body.student-course-open .module-empty {
   outline-offset:2px;
 }
 .exam-editor-card .exam-editor-nav {
-  margin:0 -28px 22px;
+  position:sticky;
+  top:116px;
+  z-index:9;
+  margin:0 -30px 22px;
   padding:0 28px;
   border-bottom:1px solid #dce2ed;
   background:#fff;
@@ -9276,8 +9280,8 @@ body.student-course-open .module-empty {
   }
   .exam-editor-card .editor-sticky-bar h2 { font-size:23px; }
   .exam-editor-card .editor-sticky-bar .editor-save { width:auto; min-width:0; margin-right:0; }
-  .exam-editor-card > .modal-close { top:50%; right:16px; }
-  .exam-editor-card .exam-editor-nav { margin-inline:-16px; padding-inline:16px; overflow-x:auto; }
+  .exam-editor-card > .modal-close { top:47px; margin:47px 16px -85px auto; }
+  .exam-editor-card .exam-editor-nav { top:132px; margin-inline:-16px; padding-inline:16px; overflow-x:auto; }
 }
 
 /* Calificaciones del curso: agrupadas por alumno y desplegables por intento. */
