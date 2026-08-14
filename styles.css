@@ -9139,9 +9139,9 @@ body.student-course-open .module-empty {
 .exam-editor-card {
   overflow-y:auto;
   overflow-x:hidden;
-  border:0;
+  border:1px solid #1c2d55;
   border-radius:18px;
-  background:#f6f8fc;
+  background:#1c2d55;
   box-shadow:0 26px 70px rgba(14,25,52,.28);
 }
 .exam-editor-card > .modal-close {
@@ -9153,7 +9153,6 @@ body.student-course-open .module-empty {
   width:38px;
   height:38px;
   place-items:center;
-  margin:0;
   color:#fff;
   border:1px solid rgba(255,255,255,.24);
   border-radius:10px;
@@ -9184,6 +9183,7 @@ body.student-course-open .module-empty {
   color:#fff;
   border:0;
   border-bottom:1px solid rgba(255,255,255,.12);
+  border-radius:17px 17px 0 0;
   background:linear-gradient(112deg,#1c2d55 0%,#2d3e70 62%,#374a7c 100%);
   box-shadow:0 14px 30px rgba(18,31,67,.18);
 }
@@ -9277,6 +9277,7 @@ body.student-course-open .module-empty {
     flex-direction:column;
     margin-inline:-16px;
     padding:20px 68px 18px 20px;
+    border-radius:0;
   }
   .exam-editor-card .editor-sticky-bar h2 { font-size:23px; }
   .exam-editor-card .editor-sticky-bar .editor-save { width:auto; min-width:0; margin-right:0; }
