@@ -9135,6 +9135,146 @@ body.student-course-open .module-empty {
   }
 }
 
+/* Editor del banco: encabezado oscuro, contraste alto y acciones alineadas. */
+.exam-editor-card {
+  overflow:hidden;
+  border:1px solid #1c2b4e;
+  border-radius:18px;
+  background:#f6f8fc;
+  box-shadow:0 26px 70px rgba(14,25,52,.28);
+}
+.exam-editor-card > .modal-close {
+  top:18px;
+  right:18px;
+  z-index:12;
+  display:grid;
+  width:38px;
+  height:38px;
+  place-items:center;
+  margin:0;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:10px;
+  background:rgba(255,255,255,.08);
+  font-size:23px;
+  line-height:1;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+.exam-editor-card > .modal-close:hover,
+.exam-editor-card > .modal-close:focus-visible {
+  color:#fff;
+  border-color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.18);
+  outline:0;
+  transform:scale(1.04);
+}
+.exam-editor-card .editor-sticky-bar {
+  display:flex;
+  min-height:116px;
+  align-items:center;
+  justify-content:space-between;
+  gap:22px;
+  margin:0 -28px 0;
+  padding:24px 78px 24px 28px;
+  color:#fff;
+  border:0;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(112deg,#1c2d55 0%,#2d3e70 62%,#374a7c 100%);
+  box-shadow:0 14px 30px rgba(18,31,67,.18);
+}
+.exam-editor-card .editor-sticky-bar > div { min-width:0; }
+.exam-editor-card .editor-sticky-bar .eyebrow {
+  display:block;
+  margin-bottom:6px;
+  color:#b9c8ff;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+}
+.exam-editor-card .editor-sticky-bar h2 {
+  margin:0;
+  color:#fff;
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:-.045em;
+  line-height:1.12;
+}
+.exam-editor-card .editor-sticky-bar .editor-save {
+  flex:0 0 auto;
+  min-width:154px;
+  min-height:44px;
+  margin-right:48px;
+  padding:11px 18px;
+  color:#24345c;
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 8px 18px rgba(4,14,38,.22);
+  font-size:13px;
+  font-weight:800;
+}
+.exam-editor-card .editor-sticky-bar .editor-save:hover,
+.exam-editor-card .editor-sticky-bar .editor-save:focus-visible {
+  color:#1b2a50;
+  background:#e9edff;
+  outline:2px solid rgba(255,255,255,.38);
+  outline-offset:2px;
+}
+.exam-editor-card .exam-editor-nav {
+  margin:0 -28px 22px;
+  padding:0 28px;
+  border-bottom:1px solid #dce2ed;
+  background:#fff;
+}
+.exam-editor-card .exam-editor-tab { color:#53627e; font-weight:700; }
+.exam-editor-card .exam-editor-tab.active { color:#4b3bc0; border-bottom-color:#5546c8; background:#fbfaff; }
+.exam-editor-card .editor-section,
+.exam-editor-card .question-tool-panel {
+  color:#253452;
+}
+.exam-editor-card .editor-section-head h3,
+.exam-editor-card .question-builder-head h3,
+.exam-editor-card .question-tool-panel strong,
+.exam-editor-card .import-info strong {
+  color:#1d2b48;
+}
+.exam-editor-card .editor-section-head > p,
+.exam-editor-card .question-builder-head p,
+.exam-editor-card .question-tool-panel p,
+.exam-editor-card .import-info p { color:#566681; }
+.exam-editor-card .question-tool-panel { border-color:#dce2ee; background:#f4f6fb; }
+.exam-editor-card .import-info code { color:#4235ae; border-color:#d8d4ff; background:#fff; }
+.exam-editor-card .file-label {
+  display:inline-flex;
+  min-height:40px;
+  align-items:center;
+  justify-content:center;
+  color:#fff !important;
+  border:1px solid #4b3bc0;
+  border-radius:10px;
+  background:#5546c8 !important;
+  box-shadow:0 7px 16px rgba(85,70,200,.2);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.exam-editor-card .file-label:hover,
+.exam-editor-card .file-label:focus-within { color:#fff !important; background:#4636b4 !important; outline:3px solid rgba(85,70,200,.18); outline-offset:2px; }
+.exam-editor-card .file-label input[type="file"] { display:none; }
+
+@media (max-width:600px) {
+  .exam-editor-card .editor-sticky-bar {
+    min-height:132px;
+    align-items:flex-start;
+    flex-direction:column;
+    padding:20px 68px 18px 20px;
+  }
+  .exam-editor-card .editor-sticky-bar h2 { font-size:23px; }
+  .exam-editor-card .editor-sticky-bar .editor-save { width:auto; min-width:0; margin-right:0; }
+  .exam-editor-card > .modal-close { top:17px; right:16px; }
+  .exam-editor-card .exam-editor-nav { margin-inline:-16px; padding-inline:16px; overflow-x:auto; }
+}
+
 /* Calificaciones del curso: agrupadas por alumno y desplegables por intento. */
 .course-grades-toolbar {
   display:flex;
