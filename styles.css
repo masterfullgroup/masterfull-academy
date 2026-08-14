@@ -9137,14 +9137,15 @@ body.student-course-open .module-empty {
 
 /* Editor del banco: encabezado oscuro, contraste alto y acciones alineadas. */
 .exam-editor-card {
-  overflow:hidden;
+  overflow-y:auto;
+  overflow-x:hidden;
   border:1px solid #1c2b4e;
   border-radius:18px;
   background:#f6f8fc;
   box-shadow:0 26px 70px rgba(14,25,52,.28);
 }
 .exam-editor-card > .modal-close {
-  top:18px;
+  top:50%;
   right:18px;
   z-index:12;
   display:grid;
@@ -9158,6 +9159,7 @@ body.student-course-open .module-empty {
   background:rgba(255,255,255,.08);
   font-size:23px;
   line-height:1;
+  transform:translateY(-50%);
   transition:background .16s ease,border-color .16s ease,transform .16s ease;
 }
 .exam-editor-card > .modal-close:hover,
@@ -9166,15 +9168,17 @@ body.student-course-open .module-empty {
   border-color:rgba(255,255,255,.5);
   background:rgba(255,255,255,.18);
   outline:0;
-  transform:scale(1.04);
+  transform:translateY(-50%) scale(1.04);
 }
 .exam-editor-card .editor-sticky-bar {
+  position:sticky;
+  top:0;
   display:flex;
   min-height:116px;
   align-items:center;
   justify-content:space-between;
   gap:22px;
-  margin:0 -28px 0;
+  margin:0 -30px 0;
   padding:24px 78px 24px 28px;
   color:#fff;
   border:0;
@@ -9203,7 +9207,7 @@ body.student-course-open .module-empty {
   flex:0 0 auto;
   min-width:154px;
   min-height:44px;
-  margin-right:48px;
+  margin-right:42px;
   padding:11px 18px;
   color:#24345c;
   border:1px solid rgba(255,255,255,.72);
@@ -9267,11 +9271,12 @@ body.student-course-open .module-empty {
     min-height:132px;
     align-items:flex-start;
     flex-direction:column;
+    margin-inline:-16px;
     padding:20px 68px 18px 20px;
   }
   .exam-editor-card .editor-sticky-bar h2 { font-size:23px; }
   .exam-editor-card .editor-sticky-bar .editor-save { width:auto; min-width:0; margin-right:0; }
-  .exam-editor-card > .modal-close { top:17px; right:16px; }
+  .exam-editor-card > .modal-close { top:50%; right:16px; }
   .exam-editor-card .exam-editor-nav { margin-inline:-16px; padding-inline:16px; overflow-x:auto; }
 }
 
