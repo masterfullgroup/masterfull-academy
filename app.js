@@ -2828,7 +2828,8 @@ function renderLesson() {
   $("#lesson-sidebar-course").textContent = course.name;
   $("#lesson-title").textContent = activity.title;
   $("#lesson-type").textContent = `${activity.moduleTitle} · ${activityTypeLabel(activity.type)}`;
-  $("#lesson-description").innerHTML = renderActivityContent(activity.description || "Esta página todavía no tiene contenido publicado.");
+  const hasDescription = Boolean(String(activity.description || "").trim());
+  $("#lesson-description").innerHTML = hasDescription ? renderActivityContent(activity.description) : "";
   const mediaMarkup = lessonMediaMarkup(activity);
   $("#lesson-media").innerHTML = mediaMarkup;
   $("#lesson-media").classList.toggle("hidden", !mediaMarkup);
@@ -2840,8 +2841,10 @@ function renderLesson() {
   $("#lesson-next").disabled = activityIndex === activities.length - 1;
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
   const url = safeActivityUrl(activity.url);
-  $("#lesson-materials-card").innerHTML = url ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Recurso de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Abrir recurso ↗</a>` : "";
-  $("#lesson-materials-card").classList.toggle("hidden", !url);
+  const showMaterials = Boolean(url) && activity.type !== "pdf";
+  $("#lesson-materials-card").innerHTML = showMaterials ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Recurso de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Abrir recurso ↗</a>` : "";
+  $("#lesson-materials-card").classList.toggle("hidden", !showMaterials);
+  $("#lesson-description").closest(".lesson-reading-panel").classList.toggle("hidden", !hasDescription && !showMaterials);
   renderLessonTree(course, activity.id);
   show("lesson-view");
   closeLessonSidebar();
