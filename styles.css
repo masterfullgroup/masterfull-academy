@@ -11416,3 +11416,309 @@ select:focus-visible {
   box-shadow:0 0 0 3px rgb(32 184 197 / .22) !important;
   outline:none !important;
 }
+
+/* Refinamiento del workspace interior del curso: ancho útil, ritmo y consistencia. */
+body.teacher-course-open {
+  overflow-x:hidden;
+}
+body.teacher-course-open .course-workspace-content {
+  min-width:0;
+  padding:clamp(28px,3vw,48px) clamp(24px,3.2vw,60px) 64px;
+}
+body.teacher-course-open .course-workspace-content > * {
+  width:min(100%,1600px);
+  max-width:1600px;
+  margin-inline:auto;
+}
+body.teacher-course-open .course-subpage-head {
+  min-width:0;
+  align-items:center;
+  gap:24px;
+  margin-bottom:24px;
+  padding-bottom:20px;
+}
+body.teacher-course-open .course-subpage-head > div {
+  min-width:0;
+}
+body.teacher-course-open .course-subpage-head h2 {
+  text-wrap:balance;
+}
+body.teacher-course-open .course-subpage-head p {
+  text-wrap:pretty;
+}
+body.teacher-course-open .course-subpage-head > .btn {
+  flex:0 0 auto;
+}
+body.teacher-course-open .canvas-module-list,
+body.teacher-course-open .course-exam-list,
+body.teacher-course-open .course-data-list,
+body.teacher-course-open .course-access-list,
+body.teacher-course-open .course-grade-students {
+  min-width:0;
+}
+body.teacher-course-open .canvas-module-list { gap:14px; }
+body.teacher-course-open .canvas-module-card {
+  border-radius:var(--academy-radius-md);
+  box-shadow:var(--academy-shadow-xs);
+}
+body.teacher-course-open .canvas-module-card > summary {
+  min-height:64px;
+  padding:12px 16px;
+}
+body.teacher-course-open .canvas-module-card > summary > div {
+  min-width:0;
+}
+body.teacher-course-open .canvas-module-card > summary h3,
+body.teacher-course-open .canvas-item-copy strong {
+  overflow-wrap:anywhere;
+}
+body.teacher-course-open .canvas-module-items {
+  border-top-color:var(--academy-border);
+}
+body.teacher-course-open .canvas-module-item,
+body.teacher-course-open .canvas-module-heading {
+  padding-inline:16px;
+}
+body.teacher-course-open .course-exam-list,
+body.teacher-course-open .course-data-list,
+body.teacher-course-open .course-access-list {
+  border-color:var(--academy-border);
+  border-radius:var(--academy-radius-md);
+}
+body.teacher-course-open .exam-module-item,
+body.teacher-course-open .course-data-list > article,
+body.teacher-course-open .course-access-list > article {
+  min-width:0;
+  padding-inline:18px;
+}
+body.teacher-course-open .exam-module-item-main,
+body.teacher-course-open .exam-module-title-line,
+body.teacher-course-open .course-data-list article > div,
+body.teacher-course-open .course-access-list article > div {
+  min-width:0;
+}
+body.teacher-course-open .exam-module-title-line h4,
+body.teacher-course-open .course-data-list article strong,
+body.teacher-course-open .course-access-list article strong {
+  overflow-wrap:anywhere;
+}
+body.teacher-course-open .course-access-form,
+body.teacher-course-open .course-settings-description,
+body.teacher-course-open .course-home-panel {
+  border-color:var(--academy-border);
+  border-radius:var(--academy-radius-md);
+  box-shadow:var(--academy-shadow-xs);
+}
+
+/* Banco de preguntas: tarjetas de altura pareja y lectura por capas. */
+body.teacher-course-open .question-bank-page {
+  display:grid;
+  gap:24px;
+}
+body.teacher-course-open .question-bank-heading {
+  margin-bottom:0;
+  padding-bottom:20px;
+}
+body.teacher-course-open .question-bank-summary {
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+body.teacher-course-open .question-bank-summary article {
+  min-width:0;
+  min-height:82px;
+  padding:16px;
+}
+body.teacher-course-open .question-bank-summary article > div {
+  min-width:0;
+}
+body.teacher-course-open .question-bank-summary article small {
+  display:block;
+  overflow-wrap:anywhere;
+}
+body.teacher-course-open .question-bank-summary article strong {
+  font-variant-numeric:tabular-nums;
+}
+body.teacher-course-open .question-bank-toolbar {
+  min-height:64px;
+  padding:12px 16px;
+}
+body.teacher-course-open .question-bank-toolbar label {
+  min-width:0;
+  width:min(560px,100%);
+}
+body.teacher-course-open .question-bank-toolbar label > span {
+  flex:0 0 auto;
+}
+body.teacher-course-open .question-bank-toolbar > span {
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+body.teacher-course-open .course-question-banks.question-bank-grid {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  align-items:stretch;
+}
+body.teacher-course-open .question-bank-grid .course-question-bank {
+  display:flex;
+  min-width:0;
+  min-height:100%;
+  flex-direction:column;
+  border-radius:var(--academy-radius-md);
+  box-shadow:var(--academy-shadow-xs);
+}
+body.teacher-course-open .question-bank-grid .course-question-bank > header {
+  min-height:60px;
+  padding:11px 16px;
+}
+body.teacher-course-open .question-bank-grid .question-bank-icon {
+  flex:0 0 34px;
+}
+body.teacher-course-open .question-bank-card-copy {
+  min-width:0;
+  min-height:92px;
+  padding:18px 18px 12px;
+}
+body.teacher-course-open .question-bank-card-copy h3 {
+  overflow-wrap:anywhere;
+  text-wrap:balance;
+}
+body.teacher-course-open .question-bank-card-copy p {
+  text-wrap:pretty;
+}
+body.teacher-course-open .question-bank-card-metrics {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  margin:0 18px;
+}
+body.teacher-course-open .question-bank-card-metrics span {
+  min-width:0;
+  padding:11px 8px;
+}
+body.teacher-course-open .question-bank-card-metrics b {
+  font-variant-numeric:tabular-nums;
+}
+body.teacher-course-open .question-bank-card-metrics small {
+  overflow-wrap:anywhere;
+}
+body.teacher-course-open .question-bank-grid .course-question-bank > footer {
+  min-width:0;
+  min-height:64px;
+  margin-top:auto;
+  padding:12px 18px;
+}
+body.teacher-course-open .question-bank-grid .course-question-bank > footer > small {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+body.teacher-course-open .question-bank-grid .course-question-bank > footer .btn {
+  flex:0 0 auto;
+  min-height:38px;
+  white-space:nowrap;
+}
+
+/* Inicio, seguimiento y configuración comparten la misma densidad del workspace. */
+body.teacher-course-open .course-home,
+body.teacher-course-open .canvas-modules-page {
+  display:grid;
+  gap:24px;
+}
+body.teacher-course-open .course-home-metrics,
+body.teacher-course-open .course-settings-grid {
+  gap:14px;
+}
+body.teacher-course-open .course-home-metrics article,
+body.teacher-course-open .course-settings-grid article {
+  min-width:0;
+}
+body.teacher-course-open .course-home-panel-head {
+  min-height:84px;
+  padding:20px 22px;
+}
+body.teacher-course-open .course-recent-list {
+  margin-top:0;
+  padding:0 22px;
+}
+body.teacher-course-open .course-recent-exam {
+  min-width:0;
+  padding-inline:0;
+}
+body.teacher-course-open .course-recent-copy {
+  min-width:0;
+}
+body.teacher-course-open .course-recent-copy strong {
+  overflow-wrap:anywhere;
+}
+
+@media (max-width:1100px) {
+  body.teacher-course-open .course-question-banks.question-bank-grid,
+  body.teacher-course-open .question-bank-summary {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  body.teacher-course-open .course-home-metrics {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width:760px) {
+  body.teacher-course-open .course-workspace-content {
+    padding:24px 20px 44px;
+  }
+  body.teacher-course-open .course-subpage-head {
+    align-items:stretch;
+    flex-direction:column;
+    gap:16px;
+  }
+  body.teacher-course-open .course-subpage-head > .btn {
+    width:100%;
+  }
+  body.teacher-course-open .question-bank-summary,
+  body.teacher-course-open .course-question-banks.question-bank-grid,
+  body.teacher-course-open .course-home-metrics,
+  body.teacher-course-open .course-settings-grid {
+    grid-template-columns:1fr;
+  }
+  body.teacher-course-open .question-bank-toolbar {
+    align-items:stretch;
+    flex-direction:column;
+    gap:10px;
+  }
+  body.teacher-course-open .question-bank-toolbar label {
+    width:100%;
+  }
+  body.teacher-course-open .question-bank-toolbar > span {
+    align-self:flex-start;
+  }
+  body.teacher-course-open .question-bank-grid .course-question-bank > footer {
+    align-items:stretch;
+    flex-direction:column;
+  }
+  body.teacher-course-open .question-bank-grid .course-question-bank > footer .btn {
+    width:100%;
+    justify-content:center;
+  }
+  body.teacher-course-open .course-access-list > article {
+    grid-template-columns:38px minmax(0,1fr);
+    gap:10px 12px;
+  }
+  body.teacher-course-open .course-access-list article > .status,
+  body.teacher-course-open .course-access-list .revoke-course-access {
+    grid-column:2;
+    justify-self:start;
+  }
+}
+@media (max-width:520px) {
+  body.teacher-course-open .course-workspace-content {
+    padding:22px 14px 36px;
+  }
+  body.teacher-course-open .question-bank-summary article {
+    min-height:76px;
+  }
+  body.teacher-course-open .question-bank-card-copy {
+    min-height:0;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  body.teacher-course-open .question-bank-grid .course-question-bank,
+  body.teacher-course-open .course-recent-exam {
+    transition:none;
+  }
+}
