@@ -11346,6 +11346,35 @@ body.teacher-course-open .course-workspace-page {
   margin:0;
 }
 
+/* El contenido docente debe reservar el ancho real de la barra lateral. */
+@media (min-width:901px) {
+  body.teacher-shell-mode.app-shell-mode > main {
+    width:calc(100% - 248px);
+    max-width:none;
+    margin-left:248px;
+    margin-right:0;
+    box-sizing:border-box;
+  }
+  body.teacher-shell-mode.app-shell-mode #teacher-view,
+  body.teacher-shell-mode.app-shell-mode #teacher-home,
+  body.teacher-shell-mode.app-shell-mode #teacher-overview,
+  body.teacher-shell-mode.app-shell-mode .canvas-dashboard-courses {
+    width:100%;
+    max-width:none;
+    margin:0;
+  }
+  body.teacher-shell-mode.app-shell-mode #teacher-overview .canvas-dashboard-grid {
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  }
+}
+@media (max-width:900px) {
+  body.teacher-shell-mode.app-shell-mode > main {
+    width:100%;
+    margin-left:0;
+    margin-right:0;
+  }
+}
+
 /* Autenticación: contraste corregido en el formulario sobre superficie blanca. */
 body.auth-game-mode .auth-card,
 body.auth-game-mode .auth-layout:has(#login-form:not(.hidden)) .auth-card,
