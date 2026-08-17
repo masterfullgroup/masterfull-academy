@@ -11185,6 +11185,196 @@ select:focus-visible {
   background-image:none !important;
 }
 
+/* Panel del alumno: misma composición institucional que el panel docente. */
+body.app-shell-mode:not(.teacher-shell-mode) #student-view {
+  width:100%;
+  max-width:none;
+  margin:0;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-view .dashboard-head {
+  min-height:106px;
+  margin:0 0 18px;
+  padding:22px 27px;
+  border:1px solid #dce3ea;
+  border-radius:7px;
+  background:#fff !important;
+  box-shadow:none;
+  color:#172b3f !important;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-view .dashboard-head::before,
+body.app-shell-mode:not(.teacher-shell-mode) #student-view .dashboard-head::after {
+  display:none;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-view .dashboard-head h2 {
+  margin:3px 0 2px;
+  color:#172b3f !important;
+  font-size:25px;
+  font-weight:600;
+  letter-spacing:-.02em;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-view .dashboard-head .eyebrow {
+  color:#2563eb !important;
+  font-size:8.5px;
+  font-weight:650;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-view .dashboard-head .muted {
+  margin:0;
+  color:#66788a !important;
+  font-size:11.5px;
+  opacity:1;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-grid {
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:18px;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-card {
+  border:1px solid #dce3ea;
+  border-radius:7px;
+  box-shadow:none;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-card:hover {
+  border-color:#b9c6d3;
+  box-shadow:0 8px 20px #1f314512;
+  transform:translateY(-1px);
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-cover {
+  height:146px;
+  background:#185a73;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-card:nth-child(4n+2) .canvas-dashboard-cover,
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-card:nth-child(4n+3) .canvas-dashboard-cover,
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-card:nth-child(4n) .canvas-dashboard-cover {
+  background:#185a73;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-course-title {
+  color:#172b3f;
+  font-size:15px;
+  font-weight:600;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-actions {
+  border-top-color:#e5e9ee;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .manage-course-content {
+  color:#185a73;
+  background:#e7f5f6;
+}
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .manage-course-content:hover,
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .manage-course-content:focus-visible {
+  color:#fff;
+  background:#185a73;
+}
+
+/* El recorrido del alumno comparte el lienzo y las proporciones del curso docente. */
+body.student-course-open.app-shell-mode > main {
+  width:100vw !important;
+  max-width:none !important;
+  min-height:100dvh;
+  margin:0 !important;
+  padding:0 !important;
+  background:#f5f8fa;
+}
+body.student-course-open #student-view,
+body.student-course-open #student-course-workspace,
+body.student-course-open .student-course-page {
+  width:100%;
+  max-width:none;
+  margin:0;
+}
+body.student-course-open .student-course-page {
+  grid-template-columns:230px minmax(0,1fr);
+  min-height:100dvh;
+}
+body.student-course-open .student-course-sidebar {
+  border-color:#dce3ea;
+  background:#fff;
+}
+body.student-course-open .student-course-sidebar-title h2,
+body.student-course-open .student-course-main-header h2 {
+  color:#172b3f;
+}
+body.student-course-open .student-course-nav-button {
+  color:#536176;
+  border-radius:6px;
+}
+body.student-course-open .student-course-nav-button:hover,
+body.student-course-open .student-course-nav-button.active {
+  color:#185a73;
+  background:#e7f5f6;
+}
+body.student-course-open .student-course-nav-button.active {
+  box-shadow:inset 3px 0 0 #20b8c5;
+}
+body.student-course-open .student-course-nav-button.active .modern-icon {
+  color:#185a73;
+}
+body.student-course-open .student-course-sidebar-progress strong {
+  color:#185a73;
+}
+body.student-course-open .student-course-sidebar-progress .course-progress-track > span {
+  background:#20b8c5;
+}
+body.student-course-open .student-course-sidebar > .course-workspace-back {
+  color:#185a73;
+  border-color:#b7dfe3;
+  background:#fff;
+}
+body.student-course-open .student-course-sidebar > .course-workspace-back:hover {
+  color:#fff;
+  border-color:#185a73;
+  background:#185a73;
+}
+body.student-course-open .student-course-content {
+  min-height:100dvh;
+  padding:28px clamp(24px,3vw,46px) 48px;
+  border:0;
+  border-left:1px solid #dce3ea;
+  border-radius:0;
+  background:#f5f8fa;
+  box-shadow:none;
+}
+body.student-course-open .student-course-main-header {
+  min-height:0;
+  margin:0 0 18px;
+  padding:0 0 17px;
+  border-bottom-color:#d9e0e7;
+}
+body.student-course-open .student-course-main-header h2 {
+  font-size:25px;
+  font-weight:600;
+  letter-spacing:-.02em;
+}
+body.student-course-open .student-module {
+  border-color:#dce3ea;
+  border-top:3px solid #185a73;
+  border-radius:7px;
+  box-shadow:none;
+}
+body.student-course-open .student-module:hover {
+  border-color:#b9c6d3;
+  border-top-color:#185a73;
+  box-shadow:0 8px 20px #1f314512;
+}
+body.student-course-open .student-module summary {
+  background:#fff;
+}
+body.student-course-open .student-module summary strong {
+  color:#172b3f;
+}
+
+@media (max-width:760px) {
+  body.app-shell-mode:not(.teacher-shell-mode) #student-view .dashboard-head {
+    min-height:0;
+    padding:20px;
+  }
+  body.student-course-open .student-course-page {
+    grid-template-columns:1fr;
+  }
+  body.student-course-open .student-course-content {
+    padding:24px 20px 40px;
+    border-left:0;
+  }
+}
+
 /* Modal Crear banco de preguntas: contenedor único y cabecera integrada. */
 .modal:has(> .exam-editor-card) {
   background:rgba(11,37,53,.60) !important;
