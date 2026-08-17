@@ -11375,6 +11375,61 @@ body.student-course-open .student-module summary strong {
   }
 }
 
+/* Ajuste final del alumno: proporciones del directorio docente y navegación fija. */
+body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-grid {
+  grid-template-columns:repeat(auto-fill,minmax(300px,360px));
+  align-items:stretch;
+  justify-content:start;
+}
+body.student-course-open.app-shell-mode {
+  overflow-x:hidden;
+}
+body.student-course-open .student-course-page,
+body.student-course-open .student-course-content {
+  min-width:0;
+}
+body.student-course-open .student-course-sidebar {
+  position:sticky;
+  top:0;
+  height:100dvh;
+  min-height:100dvh;
+  overflow-y:auto;
+}
+body.student-course-open .student-course-content > .course-workspace-back {
+  display:inline-flex;
+  min-height:36px;
+  align-items:center;
+  gap:7px;
+  margin:0 0 18px;
+  padding:8px 12px;
+  color:#185a73;
+  border:1px solid #b7dfe3;
+  border-radius:6px;
+  background:#fff;
+  font-size:12px;
+  font-weight:600;
+}
+body.student-course-open .student-course-content > .course-workspace-back:hover,
+body.student-course-open .student-course-content > .course-workspace-back:focus-visible {
+  color:#fff;
+  border-color:#185a73;
+  background:#185a73;
+}
+body.student-course-open .student-course-sidebar > .course-workspace-back,
+body.student-course-open .student-course-sidebar-progress {
+  display:none;
+}
+@media (max-width:760px) {
+  body.app-shell-mode:not(.teacher-shell-mode) #student-course-list .canvas-dashboard-grid {
+    grid-template-columns:1fr;
+  }
+  body.student-course-open .student-course-sidebar {
+    position:static;
+    height:auto;
+    min-height:0;
+  }
+}
+
 /* Modal Crear banco de preguntas: contenedor único y cabecera integrada. */
 .modal:has(> .exam-editor-card) {
   background:rgba(11,37,53,.60) !important;
