@@ -11391,9 +11391,30 @@ body.student-course-open .student-course-content {
   margin:0;
   min-width:0;
 }
+body.student-course-open #student-course-workspace,
+body.student-course-open #student-view,
+body.student-course-open .student-course-page {
+  padding:0 !important;
+}
+body.student-course-open .student-course-page {
+  display:grid !important;
+  grid-template-columns:230px minmax(0,1fr) !important;
+  column-gap:0 !important;
+  row-gap:0 !important;
+}
+body.student-course-open .student-course-content {
+  grid-column:2;
+  align-self:stretch;
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+  padding-inline:clamp(24px,3vw,46px) !important;
+}
 body.student-course-open .student-course-sidebar {
   position:sticky;
   top:0;
+  grid-column:1;
+  width:230px;
   height:100dvh;
   min-height:100dvh;
   overflow-y:auto;
@@ -11428,6 +11449,8 @@ body.student-course-open .student-course-sidebar-progress {
   }
   body.student-course-open .student-course-sidebar {
     position:static;
+    grid-column:1;
+    width:100%;
     height:auto;
     min-height:0;
   }
