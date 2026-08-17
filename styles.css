@@ -11386,6 +11386,9 @@ body.student-course-open.app-shell-mode {
 }
 body.student-course-open .student-course-page,
 body.student-course-open .student-course-content {
+  width:100%;
+  max-width:none;
+  margin:0;
   min-width:0;
 }
 body.student-course-open .student-course-sidebar {
