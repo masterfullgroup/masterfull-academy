@@ -11445,3 +11445,30 @@ select:focus-visible {
   box-shadow:0 0 0 3px rgb(32 184 197 / .22) !important;
   outline:none !important;
 }
+
+/* Correcciones de composición solicitadas: el curso abierto ocupa todo el viewport
+   y el tablero conserva visible su navegación lateral en escritorio. */
+@media (min-width:901px) {
+  body.teacher-course-open.app-shell-mode > main {
+    width:100vw !important;
+    max-width:none !important;
+    margin-left:0 !important;
+    margin-right:0 !important;
+    padding:0 !important;
+    transform:none !important;
+  }
+
+  body.teacher-shell-mode.app-shell-mode:not(.teacher-course-open).sidebar-collapsed > main {
+    width:calc(100% - 248px) !important;
+    margin-left:248px !important;
+    margin-right:0 !important;
+  }
+
+  body.teacher-shell-mode.app-shell-mode:not(.teacher-course-open).sidebar-collapsed > .topbar {
+    transform:none !important;
+  }
+
+  body.teacher-shell-mode.app-shell-mode:not(.teacher-course-open) > .sidebar-edge-control {
+    display:none !important;
+  }
+}
