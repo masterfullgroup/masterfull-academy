@@ -834,7 +834,7 @@ function bindStaticEvents() {
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; saveActiveLesson(); renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
-  $("#lesson-complete").addEventListener("click", completeActiveLesson);
+  $("#lesson-complete")?.addEventListener("click", completeActiveLesson);
   $("#lesson-previous").addEventListener("click", () => navigateLesson(-1));
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));
   $("#publish-course-form").addEventListener("submit", publishSelectedCourseExams);
@@ -2837,7 +2837,7 @@ function lessonMediaMarkup(activity) {
     if (url && /\.(mp4|webm|ogg)(?:\?|$)/i.test(url)) return `<video controls preload="metadata"><source src="${esc(url)}">Tu navegador no puede reproducir este video.</video>`;
     return `<div class="lesson-media-placeholder"><span>${modernIcon("video")}</span><strong>Clase en video</strong><p>${url ? "Usa el enlace del material para abrir el recurso audiovisual." : "El profesor todavía no ha agregado el video de esta clase."}</p></div>`;
   }
-  if (activity.type === "pdf" && url) return `<div class="lesson-document-preview"><span>${modernIcon("pdf")}</span><div><strong>Documento de la clase</strong><p>Consulta el PDF en una pestaña nueva o descárgalo para estudiar sin conexión.</p></div><a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Abrir PDF</a></div>`;
+  if (activity.type === "pdf" && url) return `<section class="lesson-pdf-viewer" aria-label="Documento PDF"><header class="lesson-pdf-head"><div class="lesson-pdf-identity"><span class="lesson-pdf-icon">${modernIcon("pdf")}</span><div><span class="eyebrow">DOCUMENTO DE LA CLASE</span><strong>${esc(activity.title)}</strong><small>Archivo PDF · Lectura dentro del curso</small></div></div><a class="btn secondary lesson-pdf-open" href="${esc(url)}" target="_blank" rel="noopener">Abrir aparte ↗</a></header><div class="lesson-pdf-frame-wrap"><iframe class="lesson-pdf-frame" src="${esc(url)}" title="PDF: ${esc(activity.title)}" loading="lazy"></iframe></div></section>`;
   return "";
 }
 function renderLesson() {
@@ -2852,7 +2852,6 @@ function renderLesson() {
     return;
   }
   const activity = activities[activityIndex];
-  const progress = courseProgress[course.id] || { completed:{}, lastActivityId:"" };
   $("#lesson-sidebar-course").textContent = course.name;
   $("#lesson-title").textContent = activity.title;
   $("#lesson-type").textContent = `${activity.moduleTitle} · ${activityTypeLabel(activity.type)}`;
@@ -2861,10 +2860,6 @@ function renderLesson() {
   const mediaMarkup = lessonMediaMarkup(activity);
   $("#lesson-media").innerHTML = mediaMarkup;
   $("#lesson-media").classList.toggle("hidden", !mediaMarkup);
-  const completed = Boolean(progress.completed?.[activity.id]);
-  $("#lesson-complete").textContent = completed ? "Actividad completada" : "Marcar como completado";
-  $("#lesson-complete").classList.toggle("completed-button", completed);
-  $("#lesson-complete").classList.toggle("hidden", activity.completionRule !== "manual");
   $("#lesson-previous").disabled = activityIndex === 0;
   $("#lesson-next").disabled = activityIndex === activities.length - 1;
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;

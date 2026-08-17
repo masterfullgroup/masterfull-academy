@@ -3226,6 +3226,162 @@ body:not(.app-shell-mode) .topbar .menu-icon { width: 16px; height: 16px; }
   .lesson-navigation > span { display:none; }
 }
 
+/* Vista de PDF del alumno: navegación lateral y documento como superficie principal. */
+@media (min-width:901px) {
+  body.lesson-mode .lesson-topbar {
+    display:none;
+  }
+  body.lesson-mode .lesson-shell {
+    grid-template-columns:280px minmax(0,1fr);
+  }
+  body.lesson-mode .lesson-content {
+    width:min(100%,1120px);
+    padding:42px clamp(28px,4vw,64px) 52px;
+  }
+}
+body.lesson-mode .lesson-sidebar-head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  row-gap:16px;
+}
+body.lesson-mode .lesson-sidebar-head > strong {
+  grid-column:1;
+  grid-row:1;
+  min-width:0;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return {
+  grid-column:1 / -1;
+  grid-row:2;
+  justify-self:start;
+  min-height:36px;
+  padding:8px 11px;
+  color:#dbe9ed;
+  border:1px solid rgb(255 255 255 / .18);
+  border-radius:6px;
+  background:rgb(255 255 255 / .06);
+  font-size:11.5px;
+  font-weight:600;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return:hover,
+body.lesson-mode .lesson-sidebar-head > .lesson-return:focus-visible {
+  color:#fff;
+  border-color:#20b8c5;
+  background:#185a73;
+  outline:0;
+}
+body.lesson-mode .lesson-title-row {
+  padding:0 2px 24px;
+}
+body.lesson-mode .lesson-pdf-viewer {
+  overflow:hidden;
+  border:1px solid var(--academy-border);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:var(--academy-shadow-xs);
+}
+body.lesson-mode .lesson-pdf-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px 20px;
+  border-bottom:1px solid var(--academy-border);
+  background:#fff;
+}
+body.lesson-mode .lesson-pdf-identity {
+  display:flex;
+  min-width:0;
+  align-items:center;
+  gap:13px;
+}
+body.lesson-mode .lesson-pdf-icon {
+  display:grid;
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  place-items:center;
+  color:var(--academy-petrol-800);
+  border-radius:9px;
+  background:#e7f5f6;
+}
+body.lesson-mode .lesson-pdf-icon .modern-icon {
+  width:21px;
+  height:21px;
+}
+body.lesson-mode .lesson-pdf-identity > div {
+  display:grid;
+  min-width:0;
+  gap:3px;
+}
+body.lesson-mode .lesson-pdf-identity .eyebrow {
+  color:var(--academy-petrol-800);
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+body.lesson-mode .lesson-pdf-identity strong {
+  overflow:hidden;
+  color:var(--academy-text);
+  font-size:15px;
+  font-weight:650;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+body.lesson-mode .lesson-pdf-identity small {
+  color:var(--academy-text-secondary);
+  font-size:10.5px;
+}
+body.lesson-mode .lesson-pdf-open {
+  flex:0 0 auto;
+  min-height:36px;
+  padding:8px 12px;
+  border-color:#b7dfe3;
+  border-radius:6px;
+  color:var(--academy-petrol-900);
+  background:#e7f5f6;
+  font-size:11px;
+  font-weight:600;
+}
+body.lesson-mode .lesson-pdf-open:hover,
+body.lesson-mode .lesson-pdf-open:focus-visible {
+  color:#fff;
+  border-color:var(--academy-petrol-800);
+  background:var(--academy-petrol-800);
+}
+body.lesson-mode .lesson-pdf-frame-wrap {
+  min-height:520px;
+  padding:16px;
+  background:#eef3f7;
+}
+body.lesson-mode .lesson-pdf-frame {
+  display:block;
+  width:100%;
+  height:min(72vh,720px);
+  min-height:520px;
+  border:1px solid #d5dee5;
+  border-radius:6px;
+  background:#fff;
+}
+@media (max-width:900px) {
+  body.lesson-mode .lesson-pdf-head {
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  body.lesson-mode .lesson-pdf-open {
+    width:100%;
+    justify-content:center;
+  }
+  body.lesson-mode .lesson-pdf-frame-wrap {
+    min-height:420px;
+    padding:10px;
+  }
+  body.lesson-mode .lesson-pdf-frame {
+    height:70vh;
+    min-height:420px;
+  }
+}
+
 /* Lectura enfocada del contenido del alumno */
 .lesson-mode > .topbar,
 .lesson-mode > .sidebar-edge-control,
