@@ -11650,6 +11650,50 @@ body.student-course-open .student-course-sidebar-progress {
   }
 }
 
+/* Vista del alumno: cabecera y navegación persistentes, contenido con scroll propio. */
+body.student-course-open #student-course-workspace,
+body.student-course-open .student-course-workspace-shell {
+  height:100dvh;
+  min-height:0;
+  overflow:hidden;
+}
+body.student-course-open .student-course-workspace-shell {
+  display:flex;
+  flex-direction:column;
+}
+body.student-course-open .student-course-context-bar {
+  position:relative;
+  z-index:20;
+  flex:0 0 76px;
+  border-radius:0 !important;
+}
+body.student-course-open .student-course-page {
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+}
+body.student-course-open .student-course-sidebar {
+  position:relative;
+  top:auto;
+  height:auto;
+  min-height:0;
+  overflow-y:auto;
+  border-radius:0 !important;
+}
+body.student-course-open .student-course-content {
+  height:100%;
+  min-height:0;
+  overflow-y:auto;
+  border-radius:0 !important;
+}
+body.student-course-open .student-course-nav-button,
+body.student-course-open .student-module,
+body.student-course-open .student-module summary::after,
+body.student-course-open .student-course-empty,
+body.student-course-open .student-course-grade-row {
+  border-radius:0 !important;
+}
+
 /* Modal Crear banco de preguntas: contenedor único y cabecera integrada. */
 .modal:has(> .exam-editor-card) {
   background:rgba(11,37,53,.60) !important;
