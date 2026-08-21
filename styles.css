@@ -11755,11 +11755,12 @@ body.student-course-open .student-course-sidebar-progress {
 .modal:has(> .exam-editor-card) .editor-sticky-bar > .modal-close { right:14px; }
 }
 
-/* Geometría rectangular del editor: tarjetas con esquinas suaves y consistentes. */
+/* Geometría rectangular del editor: tarjetas y paneles con esquinas cuadradas. */
+.modal:has(> .exam-editor-card) > .exam-editor-card,
 .modal:has(> .exam-editor-card) .editor-section,
 .modal:has(> .exam-editor-card) .question-mode,
 .modal:has(> .exam-editor-card) .question-tool-panel {
-  border-radius:14px;
+  border-radius:0 !important;
 }
 .modal:has(> .exam-editor-card) .editor-section input,
 .modal:has(> .exam-editor-card) .editor-section select,
