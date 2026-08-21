@@ -5180,6 +5180,31 @@ body.result-game-mode #return-student:focus-visible {
   font-size: 11.5px;
 }
 
+/* Botón contextual compartido: misma posición y jerarquía para profesor y alumno. */
+.course-context-bar .course-context-title .course-workspace-back {
+  min-height: 40px;
+  padding: 9px 14px;
+  color: #fff;
+  border: 1px solid rgb(255 255 255 / .34);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgb(255 255 255 / .18), rgb(255 255 255 / .08));
+  box-shadow: 0 5px 14px rgb(5 35 52 / .18), inset 0 1px 0 rgb(255 255 255 / .12);
+  font-size: 12px;
+  font-weight: 700;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.course-context-bar .course-context-title .course-workspace-back:hover,
+.course-context-bar .course-context-title .course-workspace-back:focus-visible {
+  color: #fff;
+  border-color: rgb(255 255 255 / .68);
+  outline: 0;
+  background: linear-gradient(135deg, rgb(255 255 255 / .28), rgb(255 255 255 / .14));
+  box-shadow: 0 8px 18px rgb(5 35 52 / .24), inset 0 1px 0 rgb(255 255 255 / .18);
+  transform: translateY(-1px);
+}
+.course-context-bar .course-context-title .course-workspace-back:active { transform: translateY(0) scale(.98); }
+.course-context-bar .course-context-title .course-workspace-back > span { font-size: 14px; line-height: 1; }
+
 .course-context-bar .course-context-divider {
   width: 1px;
   height: 28px;
@@ -8233,6 +8258,19 @@ body.teacher-course-open .course-workspace-page {
 .course-workspace-page > .course-context-bar {
   min-height:76px;
   padding:12px 20px;
+}
+.student-course-context-bar {
+  grid-template-columns:minmax(0,1fr);
+  min-height:76px;
+  padding:12px 20px;
+}
+@media (max-width:760px) {
+  .student-course-context-bar {
+    min-height:76px;
+    padding:12px 14px;
+  }
+  .student-course-context-bar .course-context-title { gap:10px; }
+  .student-course-context-bar .course-context-title h1 { font-size:17px; }
 }
 .course-context-copy {
   min-width:0;
@@ -11438,7 +11476,7 @@ body.student-course-open .student-course-page {
 }
 body.student-course-open .student-course-page {
   grid-template-columns:230px minmax(0,1fr);
-  min-height:100dvh;
+  min-height:calc(100dvh - 76px);
 }
 body.student-course-open .student-course-sidebar {
   border-color:#dce3ea;
@@ -11568,11 +11606,11 @@ body.student-course-open .student-course-content {
 }
 body.student-course-open .student-course-sidebar {
   position:sticky;
-  top:0;
+  top:76px;
   grid-column:1;
   width:230px;
-  height:100dvh;
-  min-height:100dvh;
+  height:calc(100dvh - 76px);
+  min-height:calc(100dvh - 76px);
   overflow-y:auto;
 }
 body.student-course-open .student-course-content > .course-workspace-back {
