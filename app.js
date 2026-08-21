@@ -57,6 +57,7 @@ let activeTeacherCourseSection = "modules";
 let activeTeacherWorkspaceOrigin = "exams";
 let activeStudentCourseId = null;
 let activeStudentCourseSection = "modules";
+const calendarMonths = { teacher: new Date(), student: new Date() };
 const savedLesson = load(ACTIVE_LESSON_KEY, { courseId:"", activityId:"" });
 let activeLessonCourseId = savedLesson.courseId || null;
 let activeLessonActivityId = savedLesson.activityId || null;
@@ -219,6 +220,7 @@ function modernIcon(name) {
     ,modules: `<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>`
     ,clipboard: `<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4"/>`
     ,grade: `<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.2 2.2 4.8-5"/>`
+    ,calendar: `<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18M8 13h3M13 13h3M8 17h3"/>`
     ,users: `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>`
     ,folder: `<path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>`
     ,library: `<path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h7M8 11h7"/>`
@@ -444,6 +446,7 @@ function menuIcon(name) {
     muted: `<path d="M11 5 6.5 8.5H3v7h3.5L11 19z"/><path d="m16 10 5 5m0-5-5 5"/>`,
     courses: `<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/>`,
     grades: `<path d="M5 4h14v16H5z"/><path d="m8 13 2 2 5-6M8 7h4"/>`,
+    calendar: `<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18M8 13h3M13 13h3M8 17h3"/>`,
     profile: `<circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>`,
     logout: `<path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/>`
   };
@@ -688,6 +691,7 @@ function renderApp() {
   const accountLabel = isAdmin ? "Administrador" : isTeacher ? "Profesor" : "Alumno";
   const studentNavigation = !isTeacher ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
     <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
+    <button class="shell-nav-item ${activeStudentTab === "student-calendar" ? "active" : ""}" data-student-tab="student-calendar" type="button">${menuIcon("calendar")}<span>Calendario</span></button>
     <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
   </nav>` : "";
   $("#session-area").innerHTML = `${teacherNavigation}${studentNavigation}<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span><div class="user-actions"><button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button><button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div></div>`;
@@ -1994,10 +1998,55 @@ function renderTeacher() {
   renderTeacherOverview();
   renderTeacherCourseList(false);
   renderTeacherExamWorkspace(courses, exams);
+  renderCalendar("teacher");
   fillTeacherFilters();
   renderTeacherGrades(filteredTeacherResults());
   bindTeacherActions();
   bindTeacherExamWorkspaceActions();
+}
+function calendarKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+function calendarEventType(activity) {
+  return activity.type === "quiz" ? "Evaluación" : activity.type === "task" ? "Tarea" : activity.type === "live" ? "Sesión" : "Actividad";
+}
+function getCalendarEvents(role) {
+  const courses = role === "teacher" ? getTeacherCourses() : publishedCourses;
+  return courses.flatMap(course => normalizeModules(course.modules).flatMap(module => module.activities
+    .filter(activity => activity.dueAt && (role === "teacher" || activity.published !== false))
+    .map(activity => {
+      const date = new Date(activity.dueAt);
+      if (Number.isNaN(date.getTime())) return null;
+      return { date, dateKey: calendarKey(date), title: activity.title, course: course.name, module: module.title, type: calendarEventType(activity), rawType: activity.type };
+    }).filter(Boolean))).sort((left, right) => left.date - right.date);
+}
+function renderCalendar(role) {
+  const target = $(`#${role}-calendar-panel`);
+  if (!target) return;
+  const month = calendarMonths[role];
+  const year = month.getFullYear();
+  const monthIndex = month.getMonth();
+  const firstDayOffset = (new Date(year, monthIndex, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const totalCells = Math.ceil((firstDayOffset + daysInMonth) / 7) * 7;
+  const events = getCalendarEvents(role);
+  const todayKey = calendarKey(new Date());
+  const monthLabel = month.toLocaleDateString("es-PE", { month: "long", year: "numeric" });
+  const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+  const cells = Array.from({ length: totalCells }, (_, index) => {
+    const date = new Date(year, monthIndex, index - firstDayOffset + 1);
+    const inMonth = date.getMonth() === monthIndex;
+    const dayEvents = inMonth ? events.filter(event => event.dateKey === calendarKey(date)) : [];
+    const eventMarkup = dayEvents.slice(0, 2).map(event => `<div class="lms-calendar-event type-${esc(event.rawType || "activity")}" title="${esc(`${event.title} · ${event.course}`)}"><span>${esc(event.title)}</span></div>`).join("");
+    const more = dayEvents.length > 2 ? `<small class="lms-calendar-more">+${dayEvents.length - 2} más</small>` : "";
+    return `<article class="lms-calendar-day ${inMonth ? "" : "is-outside"} ${calendarKey(date) === todayKey ? "is-today" : ""}" role="gridcell"><time datetime="${calendarKey(date)}">${date.getDate()}</time><div class="lms-calendar-day-events">${eventMarkup}${more}</div></article>`;
+  }).join("");
+  const upcoming = events.filter(event => event.date >= new Date()).slice(0, 6);
+  const upcomingMarkup = upcoming.length ? upcoming.map(event => `<article class="lms-calendar-agenda-item"><time datetime="${calendarKey(event.date)}"><strong>${event.date.getDate()}</strong><span>${event.date.toLocaleDateString("es-PE", { month: "short" }).replace(".", "")}</span></time><div><strong>${esc(event.title)}</strong><small>${esc(event.course)} · ${esc(event.type)}</small></div></article>`).join("") : `<div class="lms-calendar-empty"><span>${modernIcon("calendar")}</span><strong>No hay próximas fechas</strong><p>Las actividades con fecha aparecerán aquí.</p></div>`;
+  target.innerHTML = `<div class="lms-calendar-page"><header class="lms-calendar-heading"><div><span class="eyebrow">PLANIFICACIÓN ACADÉMICA</span><h2>Calendario</h2><p>${role === "teacher" ? "Organiza entregas y sesiones de tus cursos." : "Consulta tus próximas entregas y actividades."}</p></div><div class="lms-calendar-summary"><strong>${events.length}</strong><span>fechas programadas</span></div></header><div class="lms-calendar-layout"><section class="lms-calendar-card" aria-label="Calendario mensual"><div class="lms-calendar-toolbar"><button class="lms-calendar-icon-btn" data-calendar-action="prev" type="button" aria-label="Mes anterior">‹</button><div><strong>${esc(monthLabel.charAt(0).toLocaleUpperCase("es") + monthLabel.slice(1))}</strong><button data-calendar-action="today" type="button">Hoy</button></div><button class="lms-calendar-icon-btn" data-calendar-action="next" type="button" aria-label="Mes siguiente">›</button></div><div class="lms-calendar-weekdays" role="row">${dayNames.map(day => `<span role="columnheader">${day}</span>`).join("")}</div><div class="lms-calendar-grid" role="grid">${cells}</div></section><aside class="lms-calendar-agenda"><div class="lms-calendar-agenda-head"><span class="eyebrow">PRÓXIMAMENTE</span><h3>Agenda</h3></div><div class="lms-calendar-agenda-list">${upcomingMarkup}</div></aside></div></div>`;
+  target.querySelector('[data-calendar-action="prev"]').addEventListener("click", () => { calendarMonths[role] = new Date(year, monthIndex - 1, 1); renderCalendar(role); });
+  target.querySelector('[data-calendar-action="next"]').addEventListener("click", () => { calendarMonths[role] = new Date(year, monthIndex + 1, 1); renderCalendar(role); });
+  target.querySelector('[data-calendar-action="today"]').addEventListener("click", () => { calendarMonths[role] = new Date(); renderCalendar(role); });
 }
 function getTeacherCourses() {
   const publishedIds = new Set(publishedCourses.map(course => course.id));
@@ -2700,6 +2749,7 @@ function renderStudent() {
   const summaries = courses.map(courseStudentSummary);
   $("#student-stats").innerHTML = "";
   renderStudentOverview(courses, summaries);
+  renderCalendar("student");
   const activeStudentCourse = courses.find(course => course.id === activeStudentCourseId);
   if (activeStudentCourseId && !activeStudentCourse) activeStudentCourseId = null;
   document.body.classList.toggle("student-course-open", Boolean(activeStudentCourse));

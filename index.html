@@ -127,7 +127,7 @@
         <div class="teacher-workspace">
           <header class="teacher-page-head">
             <div><span class="eyebrow">CURSOS</span><h2 id="teacher-welcome">Tablero</h2><p>Mis cursos</p></div>
-            <div class="teacher-head-actions"><button class="btn primary" id="teacher-head-new-course" type="button">+ Curso</button></div>
+            <div class="teacher-head-actions"><button class="btn secondary" data-teacher-tab="teacher-calendar" type="button">Calendario</button><button class="btn primary" id="teacher-head-new-course" type="button">+ Curso</button></div>
           </header>
 
           <div id="teacher-home" class="tab-content active">
@@ -164,6 +164,9 @@
             <p id="teacher-results-status" class="muted small"></p>
             <div id="teacher-grades-body" class="student-results-list"></div>
           </div>
+          <div id="teacher-calendar" class="tab-content">
+            <div id="teacher-calendar-panel" aria-live="polite"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -176,6 +179,9 @@
       <div id="student-courses" class="tab-content active"><div id="student-overview" class="student-dashboard-overview" aria-live="polite"></div><div id="student-course-list"></div><div id="student-course-workspace" class="hidden" aria-live="polite"></div></div>
       <div id="student-grades" class="tab-content">
         <div class="table-wrap"><table><thead><tr><th>Curso</th><th>Examen</th><th>Intento</th><th>Nota</th><th>Aciertos</th><th>Fecha</th><th>Revisión</th></tr></thead><tbody id="student-grades-body"></tbody></table></div>
+      </div>
+      <div id="student-calendar" class="tab-content">
+        <div id="student-calendar-panel" aria-live="polite"></div>
       </div>
     </section>
 
