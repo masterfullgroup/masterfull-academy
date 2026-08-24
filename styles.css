@@ -6627,6 +6627,21 @@ body.student-course-open .student-course-content-head {
   border-color:var(--mf-indigo);
   background:var(--mf-indigo);
 }
+body.student-course-open .student-module-toolbar {
+  justify-content:flex-end;
+  margin:0 0 16px;
+}
+body.student-course-open .student-module-toolbar .btn {
+  color:#172b3f;
+  border-color:#c9d6e3;
+  background:#fff;
+}
+body.student-course-open .student-module-toolbar .btn:hover,
+body.student-course-open .student-module-toolbar .btn:focus-visible {
+  color:#185a73;
+  border-color:#20b8c5;
+  background:#f2fbfc;
+}
 .canvas-module-list {
   display:grid;
   gap:17px;

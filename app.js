@@ -2759,6 +2759,12 @@ function renderStudent() {
   $$(".open-student-course").forEach(button => button.addEventListener("click", () => { activeStudentCourseId = button.dataset.courseId; activeStudentCourseSection = "modules"; renderStudent(); }));
   $("#back-to-student-courses")?.addEventListener("click", () => { activeStudentCourseId = null; activeStudentCourseSection = "modules"; renderStudent(); });
   $$(".student-course-nav-button").forEach(button => button.addEventListener("click", () => { activeStudentCourseSection = button.dataset.section; renderStudent(); }));
+  $$("#student-course-workspace .collapse-all-modules").forEach(button => button.addEventListener("click", () => {
+    $$("#student-course-workspace .student-module").forEach(module => { module.open = false; });
+  }));
+  $$("#student-course-workspace .expand-all-modules").forEach(button => button.addEventListener("click", () => {
+    $$("#student-course-workspace .student-module:not(.is-locked)").forEach(module => { module.open = true; });
+  }));
 }
 function renderStudentCourseDirectory(courses, summaries) {
   if (!courses.length) return `<div class="student-library-empty">${modernIcon("course")}<strong>Aún no tienes cursos autorizados</strong><p>Cuando un profesor te conceda acceso, el curso aparecerá aquí.</p></div>`;
@@ -2811,7 +2817,7 @@ function renderStudentCourseModules(course, myGrades) {
   if (!modules.length) return "";
   const progress = courseProgress[course.id] || { completed: {}, lastActivityId:"" };
   let previousComplete = true;
-  return `<section class="student-module-space"><div class="student-module-list">${modules.map((module, index) => {
+  return `<section class="student-module-space"><div class="student-module-toolbar canvas-module-toolbar" aria-label="Acciones de módulos"><button class="btn secondary collapse-all-modules" type="button">Contraer todo</button><button class="btn secondary expand-all-modules" type="button">Expandir todo</button></div><div class="student-module-list">${modules.map((module, index) => {
       const passedEvaluation = myGrades.some(grade => grade.courseId === course.id && Number(grade.score) >= 11);
       const dateAvailable = module.unlockRule !== "date" || (module.unlockDetail && new Date(module.unlockDetail) <= new Date());
       const locked = (module.unlockRule === "previous" && !previousComplete) || (module.unlockRule === "evaluation" && !passedEvaluation) || !dateAvailable;
