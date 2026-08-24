@@ -12306,6 +12306,17 @@ body.app-shell-mode .tab-content.active {
   .lms-calendar-agenda { order:-1; }
 }
 
+/* Corrección global: la navegación del curso no debe heredar espacio superior en ningún breakpoint. */
+body.teacher-course-open #teacher-view,
+body.teacher-course-open #teacher-course-workspace,
+body.teacher-course-open .course-workspace-page,
+body.teacher-course-open .course-workspace-layout,
+body.teacher-course-open .course-workspace-sidebar,
+body.teacher-course-open .course-sidebar-heading {
+  margin-top:0 !important;
+  padding-top:0 !important;
+}
+
 /* Espacio de curso: encabezado y navegación persistentes, scroll únicamente en el contenido. */
 @media (min-width:821px) {
   body.teacher-course-open.app-shell-mode {
