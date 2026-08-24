@@ -12209,3 +12209,37 @@ select:focus-visible {
     display:none !important;
   }
 }
+
+/* Calendario responsive: el contenido se mantiene dentro del viewport. */
+body.app-shell-mode {
+  overflow-x:hidden;
+}
+body.app-shell-mode > main,
+body.app-shell-mode .view.active,
+body.app-shell-mode .tab-content.active {
+  min-width:0;
+  max-width:100%;
+  overflow-x:hidden;
+}
+.lms-calendar-page,
+.lms-calendar-layout,
+.lms-calendar-card,
+.lms-calendar-agenda {
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+.lms-calendar-layout {
+  grid-template-columns:minmax(0,1fr) minmax(220px,290px);
+}
+.lms-calendar-card,
+.lms-calendar-agenda {
+  overflow:hidden;
+}
+@media (max-width:1200px) and (min-width:901px) {
+  .lms-calendar-layout { grid-template-columns:minmax(0,1fr) minmax(200px,240px); }
+}
+@media (max-width:900px) {
+  .lms-calendar-layout { grid-template-columns:1fr; }
+  .lms-calendar-agenda { order:-1; }
+}
