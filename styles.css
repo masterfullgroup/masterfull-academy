@@ -471,6 +471,8 @@ footer { text-align: center; padding: 20px; color: var(--muted); font-size: 13px
 .attempts-finished { color: var(--muted); font-size: 12px; font-weight: 700; }
 .result-panel { text-align: center; }
 .result-panel.narrow { max-width: 820px; }
+.result-navigation { display:flex; justify-content:flex-start; margin-bottom:18px; }
+.result-navigation #return-student { margin:0; }
 .result-details { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 22px auto 0; max-width: 680px; text-align: left; }
 .result-details > div { display: flex; flex-direction: column; gap: 5px; padding: 14px 15px; border: 1px solid var(--line); border-radius: 11px; background: #fbfbff; }
 .result-details small { color: var(--muted); font-size: 12px; }

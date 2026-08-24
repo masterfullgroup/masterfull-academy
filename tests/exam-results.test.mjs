@@ -5,6 +5,7 @@ const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8")
 const htmlSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
 assert.match(htmlSource, /id="result-title"/, "La pantalla de resultados debe tener un título actualizable");
+assert.match(htmlSource, /class="result-navigation"[\s\S]*id="return-student"/, "La pantalla de resultados debe ofrecer un retorno visible");
 for (const id of ["result-correct", "result-incorrect", "result-time", "result-attempt"]) {
   assert.match(htmlSource, new RegExp(`id="${id}"`), `Falta el detalle ${id}`);
 }
