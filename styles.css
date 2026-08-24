@@ -12341,6 +12341,14 @@ body.app-shell-mode .tab-content.active {
     overflow-x:hidden;
     overscroll-behavior:contain;
   }
+
+  /* La navegación debe arrancar al ras del encabezado, sin colchón superior heredado. */
+  body.teacher-course-open .course-workspace-layout,
+  body.teacher-course-open .course-workspace-sidebar,
+  body.teacher-course-open .course-sidebar-heading {
+    margin-top:0 !important;
+    padding-top:0 !important;
+  }
 }
 
 /* Panel del alumno: barra lateral fija y contenido calculado sin desbordamiento. */
