@@ -9835,7 +9835,13 @@ body.exam-in-progress .exam-rules {
 body.exam-in-progress .exam-head h2,
 body.exam-in-progress .question-card h3 { color:var(--academy-text); font-weight:700; }
 body.exam-in-progress .exam-head .eyebrow,
-body.exam-in-progress .question-number { color:var(--academy-petrol-800); }
+body.exam-in-progress .question-number {
+  color:#fff;
+  border:1px solid var(--academy-petrol-900);
+  background:var(--academy-petrol-800);
+  box-shadow:0 3px 8px #0e4e6330;
+}
+body.exam-in-progress .question-number small { color:#d9f5f9; }
 body.exam-in-progress .exam-progress { color:var(--academy-petrol-800); background:#e7f5f6; }
 body.exam-in-progress .exam-progress-track { background:var(--academy-border); }
 body.exam-in-progress .exam-progress-track span { background:var(--academy-turquoise); }
