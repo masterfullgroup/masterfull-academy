@@ -58,7 +58,9 @@ assert.doesNotMatch(appSource, /shell-nav-label/, "La barra lateral no debe repe
 assert.doesNotMatch(appSource, /courses-tab-count/, "La navegación no debe repetir el total de cursos");
 assert.match(cssSource, /\.app-shell-mode \.brand\s*\{[\s\S]*?align-items:center;[\s\S]*?text-align:center;/, "La marca y su subtítulo deben quedar centrados");
 assert.match(cssSource, /\.app-shell-mode #session-area\s*\{[\s\S]*?flex:0 0 auto;/, "La cuenta debe quedar junto a la navegación sin un vacío artificial");
-assert.doesNotMatch(appSource, /<nav class="shell-teacher-nav"/, "La barra docente no debe repetir la única sección Cursos");
+assert.match(appSource, /class="shell-teacher-nav"/, "La barra docente debe incluir navegación propia");
+assert.match(appSource, /data-teacher-tab="teacher-courses"/, "La barra docente debe incluir Cursos");
+assert.match(appSource, /data-teacher-tab="teacher-calendar"/, "La barra docente debe incluir Calendario");
 assert.doesNotMatch(appSource, /canvas-course-meta/, "Las tarjetas del tablero no deben repetir métricas visibles dentro del curso");
 assert.match(appSource, /canvas-dashboard-actions/, "Cada curso debe mostrar acciones directas");
 assert.doesNotMatch(appSource, /canvas-dashboard-actions[\s\S]*?class="\$\{deleteClass\}"/, "Las tarjetas del tablero deben mostrar solo la accion de abrir curso");

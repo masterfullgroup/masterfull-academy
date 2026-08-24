@@ -693,7 +693,11 @@ function renderApp() {
     return;
   }
   const activeStudentTab = $("#student-view .tab-content.active")?.id || "student-courses";
-  const teacherNavigation = "";
+  const activeTeacherTab = $("#teacher-view .tab-content.active")?.id || "teacher-home";
+  const teacherNavigation = isTeacher ? `<nav class="shell-teacher-nav" aria-label="Secciones del profesor">
+    <button class="shell-nav-item ${["teacher-home", "teacher-courses"].includes(activeTeacherTab) ? "active" : ""}" data-teacher-tab="teacher-courses" type="button">${menuIcon("courses")}<span>Cursos</span></button>
+    <button class="shell-nav-item ${activeTeacherTab === "teacher-calendar" ? "active" : ""}" data-teacher-tab="teacher-calendar" type="button">${menuIcon("calendar")}<span>Calendario</span></button>
+  </nav>` : "";
   const accountLabel = isAdmin ? "Administrador" : isTeacher ? "Profesor" : "Alumno";
   const studentNavigation = !isTeacher ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
     <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
@@ -705,7 +709,7 @@ function renderApp() {
   $("#profile-btn").addEventListener("click", openProfile);
   $("#logout-btn").addEventListener("click", logout);
   $$("#session-area [data-teacher-tab]").forEach(button => button.addEventListener("click", () => {
-    if (button.dataset.teacherTab === "teacher-exams" || button.dataset.teacherTab === "teacher-courses") {
+    if (["teacher-exams", "teacher-courses", "teacher-calendar"].includes(button.dataset.teacherTab)) {
       activeTeacherCourseId = null;
       activeTeacherCourseSection = "modules";
       renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
