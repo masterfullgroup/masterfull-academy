@@ -12291,6 +12291,58 @@ body.app-shell-mode .tab-content.active {
   .lms-calendar-agenda { order:-1; }
 }
 
+/* Espacio de curso: encabezado y navegación persistentes, scroll únicamente en el contenido. */
+@media (min-width:821px) {
+  body.teacher-course-open.app-shell-mode {
+    height:100dvh;
+    overflow:hidden !important;
+  }
+
+  body.teacher-course-open.app-shell-mode > main,
+  body.teacher-course-open #teacher-view,
+  body.teacher-course-open #teacher-course-workspace {
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  body.teacher-course-open .course-workspace-page {
+    display:flex;
+    flex-direction:column;
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  body.teacher-course-open .course-workspace-page > .course-context-bar {
+    position:relative;
+    z-index:10;
+    flex:0 0 auto;
+  }
+
+  body.teacher-course-open .course-workspace-layout {
+    flex:1 1 auto;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  body.teacher-course-open .course-workspace-sidebar {
+    position:relative;
+    z-index:2;
+    height:100%;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  body.teacher-course-open .course-workspace-content {
+    height:100%;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+  }
+}
+
 /* Panel del alumno: barra lateral fija y contenido calculado sin desbordamiento. */
 @media (min-width:901px) {
   body.app-shell-mode:not(.teacher-shell-mode) > .topbar {
