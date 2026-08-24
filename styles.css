@@ -12243,3 +12243,32 @@ body.app-shell-mode .tab-content.active {
   .lms-calendar-layout { grid-template-columns:1fr; }
   .lms-calendar-agenda { order:-1; }
 }
+
+/* Panel del alumno: barra lateral fija y contenido calculado sin desbordamiento. */
+@media (min-width:901px) {
+  body.app-shell-mode:not(.teacher-shell-mode) > .topbar {
+    position:fixed;
+    inset:0 auto 0 0;
+    z-index:20;
+    width:230px;
+    height:100vh;
+    transform:none !important;
+  }
+  body.app-shell-mode:not(.teacher-shell-mode) > .sidebar-edge-control {
+    display:none !important;
+  }
+  body.app-shell-mode:not(.teacher-shell-mode) > main {
+    width:calc(100% - 230px);
+    max-width:none;
+    margin-left:230px;
+    margin-right:0;
+    box-sizing:border-box;
+  }
+  body.app-shell-mode:not(.teacher-shell-mode) .view.active,
+  body.app-shell-mode:not(.teacher-shell-mode) #student-view {
+    width:100%;
+    max-width:none;
+    margin-left:0;
+    margin-right:0;
+  }
+}
