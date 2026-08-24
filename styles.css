@@ -2625,6 +2625,25 @@ body:not(.app-shell-mode) .topbar .menu-icon { width: 16px; height: 16px; }
   font-weight: 650;
   letter-spacing: .08em;
 }
+.exam-in-progress .exam-head .exam-course-name {
+  display:inline-flex;
+  width:max-content;
+  max-width:100%;
+  align-items:center;
+  margin-bottom:3px;
+  padding:5px 10px;
+  overflow:hidden;
+  color:#fff;
+  border:1px solid rgb(255 255 255 / .56);
+  border-radius:7px;
+  background:var(--course-accent, #0e7185);
+  box-shadow:0 4px 10px rgb(16 53 76 / .18);
+  font-size:9.5px;
+  font-weight:750;
+  letter-spacing:.04em;
+  line-height:1.1;
+  text-transform:none;
+}
 .exam-in-progress .exam-head h2 {
   margin: 4px 0 10px;
   color: #26384b;
@@ -12208,6 +12227,34 @@ select:focus-visible {
   body.teacher-shell-mode.app-shell-mode:not(.teacher-course-open) > .sidebar-edge-control {
     display:none !important;
   }
+}
+
+/* Encabezado del examen: jerarquía limpia y color propio del curso. */
+body.exam-in-progress .exam-head {
+  padding:20px 24px;
+  border-radius:20px;
+}
+body.exam-in-progress .exam-head .exam-course-name {
+  display:inline-flex;
+  width:max-content;
+  max-width:100%;
+  align-items:center;
+  margin-bottom:4px;
+  padding:5px 10px;
+  overflow:hidden;
+  color:#fff !important;
+  border:1px solid rgb(255 255 255 / .56);
+  border-radius:7px;
+  background:var(--course-accent, #0e7185) !important;
+  box-shadow:0 4px 10px rgb(16 53 76 / .18);
+  font-size:9.5px;
+  font-weight:750;
+  letter-spacing:.04em;
+  line-height:1.1;
+  text-transform:none;
+}
+@media (max-width:700px) {
+  body.exam-in-progress .exam-head { padding:16px; }
 }
 
 /* Calendario responsive: el contenido se mantiene dentro del viewport. */

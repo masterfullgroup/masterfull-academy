@@ -188,6 +188,12 @@ function isMissingModulesColumn(error) {
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[char]));
 }
+function courseAccent(course) {
+  const palette = ["#0e7185", "#2b5daf", "#147d6d", "#7650a8", "#a65f27"];
+  const value = String(course?.id || course?.name || "curso");
+  const hash = [...value].reduce((total, char) => total + char.charCodeAt(0), 0);
+  return palette[hash % palette.length];
+}
 function empty(message, colspan = 1) { return `<tr><td colspan="${colspan}" class="empty">${esc(message)}</td></tr>`; }
 function emptyCard(message) { return `<div class="empty">${esc(message)}</div>`; }
 function quantity(value, singular, plural = `${singular}s`) { return `${value} ${value === 1 ? singular : plural}`; }
@@ -2987,7 +2993,9 @@ async function startExam(id) {
   secondsLeft = activeExam.minutes * 60;
   minuteWarningPlayed = false;
   finishingExam = false;
-  $("#exam-course-name").textContent = activeCourse?.name || "CURSO";
+  const examCourseName = $("#exam-course-name");
+  examCourseName.textContent = activeCourse?.name || "CURSO";
+  examCourseName.style.setProperty("--course-accent", courseAccent(activeCourse));
   $("#exam-title").textContent = activeExam.title;
   $("#questions-container").innerHTML = activeQuestions.map((question, index) => `<article class="question-card" data-question-id="${esc(question.id)}"><div class="question-card-head"><span class="question-number">Pregunta ${index + 1} <small>de ${activeQuestions.length}</small></span><span class="question-status">Pendiente</span></div><h3>${esc(question.text)}</h3>${questionImageMarkup(question)}<div class="options-list">${question.options.map((option, i) => `<label class="option"><input type="radio" name="q-${esc(question.id)}" value="${i}"><span class="option-letter" aria-hidden="true">${"ABCDEFGH"[i] || i + 1}</span><span class="option-copy">${esc(option)}</span><span class="option-check" aria-hidden="true">✓</span></label>`).join("")}</div></article>`).join("");
   $("#take-exam-form").querySelectorAll('input[type="radio"]').forEach(input => input.addEventListener("change", () => { updateQuestionCardState(input); updateExamProgress(); saveActiveAttempt(); }));
