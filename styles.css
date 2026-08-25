@@ -10346,6 +10346,41 @@ body.teacher-shell-mode .user-actions > #logout-btn {
   text-align:left;
   transform:none;
 }
+/* Navegación docente con el mismo lenguaje visual que las acciones de cuenta. */
+body.teacher-shell-mode .shell-nav-item {
+  display:flex;
+  width:100%;
+  min-height:41px;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  margin:0;
+  padding:9px 11px;
+  border:1px solid #2a617a;
+  border-radius:8px;
+  color:#f8fafc;
+  background:#1a4a62;
+  box-shadow:none;
+  font-family:"Plus Jakarta Sans",ui-sans-serif,system-ui,sans-serif;
+  font-size:12.5px;
+  font-weight:500;
+  line-height:1.2;
+  text-align:left;
+}
+body.teacher-shell-mode .shell-nav-item > span {
+  color:inherit;
+  font-size:18px;
+  text-align:center;
+}
+body.teacher-shell-mode .shell-nav-item:hover,
+body.teacher-shell-mode .shell-nav-item:focus-visible,
+body.teacher-shell-mode .shell-nav-item.active {
+  color:#fff;
+  border-color:#20b8c5;
+  background:#185a73;
+  box-shadow:0 0 0 2px rgb(32 184 197 / .12);
+  outline:none;
+}
 body.teacher-shell-mode .user-actions > #profile-btn:hover,
 body.teacher-shell-mode .user-actions > #profile-btn:focus-visible {
   color:#fff;
