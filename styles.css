@@ -3659,7 +3659,7 @@ body.lesson-mode .lesson-pdf-frame {
 }
 .course-access-list > article {
   display:grid;
-  grid-template-columns:42px minmax(0,1fr) auto auto;
+  grid-template-columns:42px minmax(0,1fr) auto auto auto;
   min-height:70px;
   align-items:center;
   gap:13px;
@@ -3688,6 +3688,19 @@ body.lesson-mode .lesson-pdf-frame {
   border-color:#ead0d4;
   background:#fff7f8;
 }
+.profile-edit-permission {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#536078;
+  font-size:11px;
+  white-space:nowrap;
+}
+.profile-edit-permission input {
+  width:16px;
+  height:16px;
+  accent-color:#0f8fa8;
+}
 .course-access-list > .course-workspace-empty {
   border:0;
   border-radius:0;
@@ -3699,6 +3712,7 @@ body.lesson-mode .lesson-pdf-frame {
   .course-access-list > article {
     grid-template-columns:38px minmax(0,1fr);
   }
+  .course-access-list article > .profile-edit-permission,
   .course-access-list article > .status,
   .course-access-list .revoke-course-access {
     grid-column:2;
