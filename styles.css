@@ -10367,10 +10367,9 @@ body.teacher-shell-mode .shell-nav-item {
   line-height:1.2;
   text-align:left;
 }
-body.teacher-shell-mode .shell-nav-item > span {
-  color:inherit;
-  font-size:18px;
-  text-align:center;
+body.teacher-shell-mode .shell-nav-item .menu-icon {
+  width:18px;
+  height:18px;
 }
 body.teacher-shell-mode .shell-nav-item:hover,
 body.teacher-shell-mode .shell-nav-item:focus-visible,
