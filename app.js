@@ -2565,7 +2565,7 @@ async function toggleStudentProfilePermission(input) {
   const nextValue = input.checked;
   input.disabled = true;
   try {
-    const { error } = await sb.from("course_enrollments").update({ can_edit_profile: nextValue }).eq("course_id", courseId).eq("student_id", studentId);
+    const { error } = await sb.rpc("set_course_profile_edit_permission", { target_course_id:courseId, target_student_id:studentId, allow_edit:nextValue });
     if (error) throw error;
     await loadCourseAccess();
     renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
