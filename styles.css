@@ -10397,6 +10397,26 @@ body.teacher-shell-mode .user-actions > #logout-btn:focus-visible {
   box-shadow:0 0 0 2px rgb(157 75 80 / .16);
   outline:none;
 }
+/* Los cuatro controles del sidebar comparten tamaño, estado y ritmo vertical. */
+body.teacher-shell-mode #session-area { gap:8px; }
+body.teacher-shell-mode #session-area > .shell-teacher-nav {
+  gap:8px;
+  margin:0;
+}
+body.teacher-shell-mode #session-area > .user-actions { gap:8px; }
+body.teacher-shell-mode .shell-nav-item.active {
+  color:#f8fafc;
+  border-color:#2a617a;
+  background:#1a4a62;
+  box-shadow:none;
+}
+body.teacher-shell-mode .user-actions > #logout-btn:hover,
+body.teacher-shell-mode .user-actions > #logout-btn:focus-visible {
+  color:#fff;
+  border-color:#20b8c5;
+  background:#185a73;
+  box-shadow:0 0 0 2px rgb(32 184 197 / .16);
+}
 body.teacher-shell-mode .user-actions > #profile-btn:disabled,
 body.teacher-shell-mode .user-actions > #logout-btn:disabled {
   color:#94a3b8;
@@ -10413,8 +10433,8 @@ body.teacher-shell-mode .user-actions > #logout-btn svg {
 @media (max-width:620px) {
   body.teacher-shell-mode .user-actions > #profile-btn,
   body.teacher-shell-mode .user-actions > #logout-btn {
-    min-height:40px;
-    font-size:12px;
+    min-height:41px;
+    font-size:12.5px;
   }
   body.teacher-shell-mode .user-actions > #profile-btn span,
   body.teacher-shell-mode .user-actions > #logout-btn span { display:inline; }
