@@ -714,7 +714,8 @@ function renderApp() {
       activeTeacherCourseSection = "modules";
       renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     }
-    switchTab("teacher", button.dataset.teacherTab, button);
+    const targetTab = button.dataset.teacherTab === "teacher-courses" ? "teacher-home" : button.dataset.teacherTab;
+    switchTab("teacher", targetTab, button);
   }));
   $$("#session-area [data-student-tab]").forEach(button => button.addEventListener("click", () => {
     if (activeStudentCourseId) {
