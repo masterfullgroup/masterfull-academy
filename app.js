@@ -302,6 +302,9 @@ function initSupabase() {
 function translateError(error) {
   const msg = String(error?.message || error || "").toLowerCase();
   if (!msg) return "Ocurrió un problema. Inténtalo nuevamente.";
+  if (msg.includes("set_course_profile_edit_permission") || msg.includes("function") && msg.includes("does not exist")) {
+    return "Falta aplicar la actualización de permisos en Supabase. Publica las migraciones y vuelve a intentarlo.";
+  }
   if (msg.includes("invalid login credentials")) return "Correo o contraseña incorrectos.";
   if (msg.includes("email not confirmed")) return "Debes confirmar tu correo antes de ingresar.";
   if (msg.includes("already registered") || msg.includes("user already")) return "Este correo ya está registrado.";
@@ -2565,7 +2568,11 @@ async function toggleStudentProfilePermission(input) {
   const nextValue = input.checked;
   input.disabled = true;
   try {
-    const { error } = await sb.rpc("set_course_profile_edit_permission", { target_course_id:courseId, target_student_id:studentId, allow_edit:nextValue });
+    let { error } = await sb.rpc("set_course_profile_edit_permission", { target_course_id:courseId, target_student_id:studentId, allow_edit:nextValue });
+    // Permite operar mientras el endpoint RPC termina de exponerse en proyectos existentes.
+    if (error && (error.code === "PGRST202" || error.code === "42883")) {
+      ({ error } = await sb.from("course_enrollments").update({ can_edit_profile:nextValue }).eq("course_id", courseId).eq("student_id", studentId));
+    }
     if (error) throw error;
     await loadCourseAccess();
     renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
