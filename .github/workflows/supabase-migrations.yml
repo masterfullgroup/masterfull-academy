@@ -41,4 +41,14 @@ jobs:
           exit 1
 
       - name: Aplicar migraciones pendientes
-        run: supabase db push --password "$SUPABASE_DB_PASSWORD" --include-all
+        shell: bash
+        run: |
+          set +e
+          output="$(supabase db push --password "$SUPABASE_DB_PASSWORD" --include-all 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            summary="$(printf '%s' "$output" | tail -c 3000 | tr '\n' ' ')"
+            echo "::error title=Error en migraciones de Supabase::$summary"
+            exit "$status"
+          fi
