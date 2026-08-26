@@ -12363,6 +12363,75 @@ body.app-shell-mode .tab-content.active {
   max-width:100%;
   overflow-x:hidden;
 }
+
+/* Gestión individual de la navegación de alumnos. */
+body.teacher-shell-mode .teacher-students-page {
+  max-width:1120px;
+  margin:0 auto;
+  padding:4px 0 28px;
+}
+.teacher-students-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:20px;
+  padding:22px 24px;
+  border:1px solid var(--ds-border);
+  border-radius:var(--ds-radius-md);
+  background:var(--ds-surface);
+  box-shadow:var(--ds-shadow-xs);
+}
+.teacher-students-head .eyebrow { color:var(--ds-petrol-600); font-size:11px; font-weight:600; letter-spacing:.1em; }
+.teacher-students-head h3 { margin:5px 0 4px; color:var(--ds-text); font-size:25px; font-weight:700; letter-spacing:-.03em; }
+.teacher-students-head p { margin:0; color:var(--ds-text-secondary); font-size:14px; }
+.teacher-students-count { flex:0 0 auto; padding:7px 10px; color:var(--ds-petrol-800); border:1px solid #b9dde3; border-radius:999px; background:#eaf7f8; font-size:12px; font-weight:650; }
+.teacher-student-list { display:grid; gap:14px; }
+.teacher-student-card {
+  display:grid;
+  grid-template-columns:minmax(210px,.82fr) minmax(0,1.5fr);
+  gap:24px;
+  align-items:start;
+  padding:20px 22px;
+  border:1px solid var(--ds-border);
+  border-radius:var(--ds-radius-md);
+  background:var(--ds-surface);
+  box-shadow:var(--ds-shadow-xs);
+}
+.teacher-student-identity { display:flex; gap:12px; align-items:flex-start; min-width:0; }
+.teacher-student-avatar { display:grid; flex:0 0 42px; width:42px; height:42px; place-items:center; color:#fff; border-radius:50%; background:var(--ds-petrol-800); font-size:16px; font-weight:700; }
+.teacher-student-identity > div { min-width:0; }
+.teacher-student-identity strong,.teacher-student-identity small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.teacher-student-identity strong { color:var(--ds-text); font-size:14px; font-weight:650; }
+.teacher-student-identity small { margin-top:3px; color:var(--ds-text-secondary); font-size:12px; }
+.teacher-student-courses { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+.teacher-student-courses span { max-width:100%; overflow:hidden; color:#3b6473; border:1px solid #c9e2e7; border-radius:999px; background:#f1fafb; padding:3px 7px; text-overflow:ellipsis; white-space:nowrap; font-size:10.5px; font-weight:600; }
+.student-navigation-settings { min-width:0; margin:0; padding:0; border:0; }
+.student-navigation-settings legend { margin-bottom:9px; color:var(--ds-text); font-size:12px; font-weight:700; }
+.student-navigation-settings > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.student-navigation-settings label { display:flex; align-items:flex-start; gap:9px; min-width:0; padding:9px 10px; color:var(--ds-text); border:1px solid #dce8eb; border-radius:10px; background:#fbfdfd; cursor:pointer; }
+.student-navigation-settings label:hover { border-color:#9bcdd5; background:#f5fbfc; }
+.student-navigation-settings input { flex:0 0 auto; width:16px; height:16px; margin:2px 0 0; accent-color:var(--ds-petrol-700); }
+.student-navigation-settings input:focus-visible { outline:3px solid rgb(32 184 197 / .28); outline-offset:2px; }
+.student-navigation-settings input:disabled + span { opacity:.58; }
+.student-navigation-settings span { min-width:0; }
+.student-navigation-settings strong,.student-navigation-settings small { display:block; }
+.student-navigation-settings strong { font-size:12px; font-weight:650; }
+.student-navigation-settings small { margin-top:2px; color:var(--ds-text-secondary); font-size:10.5px; line-height:1.35; }
+.student-navigation-status { min-height:17px; margin:8px 0 0; color:var(--ds-text-secondary); font-size:11px; font-weight:600; }
+.student-navigation-status.success { color:#13705f; }
+.student-navigation-status.error { color:#b23c49; }
+.teacher-students-empty { display:grid; justify-items:center; gap:8px; padding:48px 24px; text-align:center; border:1px dashed #b8d5dc; border-radius:var(--ds-radius-md); background:#fafdfe; }
+.teacher-students-empty svg { width:30px; color:var(--ds-petrol-700); }
+.teacher-students-empty strong { color:var(--ds-text); font-size:15px; }
+.teacher-students-empty p { max-width:380px; margin:0; color:var(--ds-text-secondary); font-size:13px; }
+@media (max-width:760px) {
+  .teacher-students-head { align-items:flex-start; flex-direction:column; padding:18px; }
+  .teacher-student-card { grid-template-columns:1fr; gap:18px; padding:18px; }
+}
+@media (max-width:460px) {
+  .student-navigation-settings > div { grid-template-columns:1fr; }
+}
 .lms-calendar-page,
 .lms-calendar-layout,
 .lms-calendar-card,

@@ -23,6 +23,9 @@ let courseChanges = [];
 let legacyCourseModules = new Map();
 let courseEnrollments = [];
 let studentProfiles = [];
+const DEFAULT_STUDENT_NAVIGATION = Object.freeze({ courses:true, calendar:true, grades:true, profile:false });
+let studentNavigationPreferences = new Map();
+let currentStudentNavigation = { ...DEFAULT_STUDENT_NAVIGATION };
 let adminProfiles = [];
 let activeAdminSection = "dashboard";
 let adminTeacherPage = 1;
@@ -384,6 +387,8 @@ async function setSessionFromSupabase(session, shouldRender = true) {
   if (!session?.user) {
     currentUser = null;
     results = [];
+    currentStudentNavigation = { ...DEFAULT_STUDENT_NAVIGATION };
+    studentNavigationPreferences = new Map();
     if (shouldRender) renderApp();
     return;
   }
@@ -456,6 +461,7 @@ function menuIcon(name) {
     courses: `<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/>`,
     grades: `<path d="M5 4h14v16H5z"/><path d="m8 13 2 2 5-6M8 7h4"/>`,
     calendar: `<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18M8 13h3M13 13h3M8 17h3"/>`,
+    students: `<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 4.5a3 3 0 0 1 0 5.8M18.5 20a5.5 5.5 0 0 0-3.6-5.15"/>`,
     profile: `<circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>`,
     logout: `<path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/>`
   };
@@ -465,6 +471,7 @@ function menuIcon(name) {
 async function loadCourseChanges() {
   if (!sb || !currentUser) return;
   await loadCourseAccess();
+  await loadStudentNavigationPreferences();
   await loadDynamicCourses();
   let { data, error } = await sb.from("course_changes").select("course_id, name, description, modules, deleted, updated_at");
   if (error?.code === "42703") ({ data, error } = await sb.from("course_changes").select("course_id, name, description, deleted, updated_at"));
@@ -513,6 +520,34 @@ async function loadCourseAccess() {
     studentProfiles = profileResponse.data || [];
   }
   courseEnrollments = enrollmentResponse.data || [];
+}
+function normalizeStudentNavigationPreference(preference = {}) {
+  return {
+    courses: preference.show_courses !== false,
+    calendar: preference.show_calendar !== false,
+    grades: preference.show_grades !== false,
+    profile: preference.show_profile === true
+  };
+}
+async function loadStudentNavigationPreferences() {
+  studentNavigationPreferences = new Map();
+  currentStudentNavigation = { ...DEFAULT_STUDENT_NAVIGATION };
+  if (!sb || !currentUser) return;
+  const query = sb.from("student_navigation_preferences").select("student_id, show_courses, show_calendar, show_grades, show_profile");
+  const response = currentUser.role === "teacher"
+    ? await query
+    : currentUser.role === "student"
+      ? await query.eq("student_id", currentUser.id).maybeSingle()
+      : { data:null, error:null };
+  if (response.error) {
+    if (response.error.code !== "42P01") console.error("Preferencias de navegación:", response.error);
+    return;
+  }
+  if (currentUser.role === "teacher") {
+    (response.data || []).forEach(preference => studentNavigationPreferences.set(preference.student_id, normalizeStudentNavigationPreference(preference)));
+  } else if (response.data) {
+    currentStudentNavigation = normalizeStudentNavigationPreference(response.data);
+  }
 }
 async function loadDynamicCourses() {
   const query = async (table, columns, publishedOnly = true) => {
@@ -706,27 +741,29 @@ function renderApp() {
   const activeTeacherTab = $("#teacher-view .tab-content.active")?.id || "teacher-home";
   const teacherNavigation = isTeacher ? `<nav class="shell-teacher-nav" aria-label="Secciones del profesor">
     <button class="shell-nav-item ${["teacher-home", "teacher-courses"].includes(activeTeacherTab) ? "active" : ""}" data-teacher-tab="teacher-courses" type="button">${menuIcon("courses")}<span>Cursos</span></button>
+    <button class="shell-nav-item ${activeTeacherTab === "teacher-students" ? "active" : ""}" data-teacher-tab="teacher-students" type="button">${menuIcon("students")}<span>Alumnos</span></button>
     <button class="shell-nav-item ${activeTeacherTab === "teacher-calendar" ? "active" : ""}" data-teacher-tab="teacher-calendar" type="button">${menuIcon("calendar")}<span>Calendario</span></button>
   </nav>` : "";
   const accountLabel = isAdmin ? "Administrador" : isTeacher ? "Profesor" : "Alumno";
-  const studentNavigation = !isTeacher ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
-    <button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>
-    <button class="shell-nav-item ${activeStudentTab === "student-calendar" ? "active" : ""}" data-student-tab="student-calendar" type="button">${menuIcon("calendar")}<span>Calendario</span></button>
-    <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
+  const studentNavigation = currentUser?.role === "student" ? `<nav class="shell-student-nav" aria-label="Secciones del alumno">
+    ${currentStudentNavigation.courses ? `<button class="shell-nav-item ${activeStudentTab === "student-courses" ? "active" : ""}" data-student-tab="student-courses" type="button">${menuIcon("courses")}<span>Mis cursos</span></button>` : ""}
+    ${currentStudentNavigation.calendar ? `<button class="shell-nav-item ${activeStudentTab === "student-calendar" ? "active" : ""}" data-student-tab="student-calendar" type="button">${menuIcon("calendar")}<span>Calendario</span></button>` : ""}
+    ${currentStudentNavigation.grades ? `<button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>` : ""}
   </nav>` : "";
-  const profileButton = isTeacher ? `<button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button>` : "";
+  const profileButton = isTeacher || currentUser?.role === "student" && currentStudentNavigation.profile ? `<button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button>` : "";
   $("#session-area").innerHTML = `<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span></div>${teacherNavigation}${studentNavigation}<div class="user-actions">${profileButton}<button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div>`;
   $("#session-area .user-identity small").textContent = accountLabel;
   $("#profile-btn")?.addEventListener("click", openProfile);
   $("#logout-btn").addEventListener("click", logout);
   $$("#session-area [data-teacher-tab]").forEach(button => button.addEventListener("click", () => {
-    if (["teacher-exams", "teacher-courses", "teacher-calendar"].includes(button.dataset.teacherTab)) {
+    if (["teacher-exams", "teacher-courses", "teacher-calendar", "teacher-students"].includes(button.dataset.teacherTab)) {
       activeTeacherCourseId = null;
       activeTeacherCourseSection = "modules";
       renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
     }
     const targetTab = button.dataset.teacherTab === "teacher-courses" ? "teacher-home" : button.dataset.teacherTab;
     switchTab("teacher", targetTab, button);
+    renderTeacher();
   }));
   $$("#session-area [data-student-tab]").forEach(button => button.addEventListener("click", () => {
     if (activeStudentCourseId) {
@@ -2012,7 +2049,11 @@ function bindAdminTeacherActions() {
 
 function renderTeacher() {
   show("teacher-view");
-  $("#teacher-welcome").textContent = "Tablero";
+  const studentsTabActive = $("#teacher-students").classList.contains("active");
+  $("#teacher-welcome").textContent = studentsTabActive ? "Alumnos" : "Tablero";
+  $("#teacher-view .teacher-page-head .eyebrow").textContent = studentsTabActive ? "GESTIÓN DE ALUMNOS" : "CURSOS";
+  $("#teacher-view .teacher-page-head p").textContent = studentsTabActive ? "Configura la navegación de cada alumno." : "Mis cursos";
+  $("#teacher-head-new-course").classList.toggle("hidden", studentsTabActive);
   const courses = getTeacherCourses();
   const exams = getTeacherExams();
   if ($("#exams-tab-count")) $("#exams-tab-count").textContent = exams.length;
@@ -2023,8 +2064,77 @@ function renderTeacher() {
   renderCalendar("teacher");
   fillTeacherFilters();
   renderTeacherGrades(filteredTeacherResults());
+  renderTeacherStudents();
   bindTeacherActions();
   bindTeacherExamWorkspaceActions();
+  bindTeacherStudentActions();
+}
+function getTeacherManagedStudents() {
+  if (currentUser?.role !== "teacher") return [];
+  const coursesById = new Map(getTeacherCourses().map(course => [course.id, course]));
+  const profilesById = new Map(studentProfiles.map(profile => [profile.id, profile]));
+  const students = new Map();
+  courseEnrollments
+    .filter(enrollment => enrollment.status === "active" && enrollment.granted_by === currentUser.id && coursesById.has(enrollment.course_id))
+    .forEach(enrollment => {
+      const profile = profilesById.get(enrollment.student_id);
+      if (!profile) return;
+      const entry = students.get(profile.id) || { profile, courses:[] };
+      entry.courses.push(coursesById.get(enrollment.course_id));
+      students.set(profile.id, entry);
+    });
+  return [...students.values()].sort((left, right) => (left.profile.full_name || left.profile.email).localeCompare(right.profile.full_name || right.profile.email, "es"));
+}
+function renderTeacherStudents() {
+  const target = $("#teacher-students");
+  if (!target) return;
+  const students = getTeacherManagedStudents();
+  const navigationOptions = [
+    ["courses", "Mis cursos", "Acceso a los cursos autorizados"],
+    ["calendar", "Calendario", "Fechas y actividades programadas"],
+    ["grades", "Calificaciones", "Notas e intentos realizados"],
+    ["profile", "Mi perfil", "Datos y seguridad de la cuenta"]
+  ];
+  target.innerHTML = `<section class="teacher-students-page"><header class="teacher-students-head"><div><span class="eyebrow">ACCESO PERSONALIZADO</span><h3>Alumnos</h3><p>Elige los botones que verá cada alumno en su barra lateral.</p></div><span class="teacher-students-count">${students.length} ${students.length === 1 ? "alumno" : "alumnos"}</span></header>${students.length ? `<div class="teacher-student-list">${students.map(({ profile, courses }) => {
+    const permissions = studentNavigationPreferences.get(profile.id) || { ...DEFAULT_STUDENT_NAVIGATION };
+    const name = profile.full_name || profile.email || "Alumno";
+    return `<article class="teacher-student-card"><div class="teacher-student-identity"><span class="teacher-student-avatar" aria-hidden="true">${esc(name.charAt(0).toUpperCase())}</span><div><strong>${esc(name)}</strong><small>${esc(profile.email || "Sin correo registrado")}</small><div class="teacher-student-courses">${courses.map(course => `<span>${esc(course.name)}</span>`).join("")}</div></div></div><fieldset class="student-navigation-settings" data-student-id="${esc(profile.id)}"><legend>Botones visibles</legend><div>${navigationOptions.map(([key, label, description]) => `<label title="${esc(description)}"><input type="checkbox" data-student-navigation="${key}" ${permissions[key] ? "checked" : ""}><span><strong>${label}</strong><small>${description}</small></span></label>`).join("")}</div><p class="student-navigation-status" aria-live="polite"></p></fieldset></article>`;
+  }).join("")}</div>` : `<div class="teacher-students-empty"><span>${menuIcon("students")}</span><strong>Aún no tienes alumnos</strong><p>Los alumnos aparecerán aquí cuando los autorices en uno de tus cursos.</p></div>`}</section>`;
+}
+function bindTeacherStudentActions() {
+  $$("#teacher-students [data-student-navigation]").forEach(input => input.addEventListener("change", () => saveStudentNavigationPreference(input)));
+}
+async function saveStudentNavigationPreference(input) {
+  if (!sb || currentUser?.role !== "teacher") return;
+  const settings = input.closest(".student-navigation-settings");
+  const studentId = settings?.dataset.studentId;
+  if (!studentId) return;
+  const previous = { ...(studentNavigationPreferences.get(studentId) || DEFAULT_STUDENT_NAVIGATION) };
+  const next = { ...previous, [input.dataset.studentNavigation]:input.checked };
+  const controls = $$(`[data-student-id="${studentId}"] [data-student-navigation]`);
+  const status = settings.querySelector(".student-navigation-status");
+  controls.forEach(control => { control.disabled = true; });
+  status.textContent = "Guardando cambios…";
+  try {
+    const { error } = await sb.rpc("set_student_navigation_preferences", {
+      target_student_id: studentId,
+      show_courses: next.courses,
+      show_calendar: next.calendar,
+      show_grades: next.grades,
+      show_profile: next.profile
+    });
+    if (error) throw error;
+    studentNavigationPreferences.set(studentId, next);
+    status.className = "student-navigation-status success";
+    status.textContent = "Cambios guardados.";
+  } catch (error) {
+    console.error("Navegación del alumno:", error);
+    input.checked = previous[input.dataset.studentNavigation];
+    status.className = "student-navigation-status error";
+    status.textContent = translateError(error);
+  } finally {
+    controls.forEach(control => { control.disabled = false; });
+  }
 }
 function calendarKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -4421,7 +4531,7 @@ async function saveProfile(event) {
   }
 }
 function canCurrentUserEditProfile() {
-  return Boolean(currentUser && currentUser.role !== "student");
+  return Boolean(currentUser && (currentUser.role !== "student" || currentStudentNavigation.profile));
 }
 
 function toggleSound() {
