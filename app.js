@@ -305,6 +305,9 @@ function initSupabase() {
 function translateError(error) {
   const msg = String(error?.message || error || "").toLowerCase();
   if (!msg) return "Ocurrió un problema. Inténtalo nuevamente.";
+  if (msg.includes("student_navigation_preferences") || msg.includes("set_student_navigation_preferences")) {
+    return "No se pudieron guardar los botones del alumno. Actualiza la página y vuelve a intentarlo.";
+  }
   if (msg.includes("set_course_profile_edit_permission") || msg.includes("function") && msg.includes("does not exist")) {
     return "Falta aplicar la actualización de permisos en Supabase. Publica las migraciones y vuelve a intentarlo.";
   }
@@ -2116,13 +2119,25 @@ async function saveStudentNavigationPreference(input) {
   controls.forEach(control => { control.disabled = true; });
   status.textContent = "Guardando cambios…";
   try {
-    const { error } = await sb.rpc("set_student_navigation_preferences", {
+    const preferencePayload = {
       target_student_id: studentId,
       show_courses: next.courses,
       show_calendar: next.calendar,
       show_grades: next.grades,
       show_profile: next.profile
-    });
+    };
+    let { error } = await sb.rpc("set_student_navigation_preferences", preferencePayload);
+    if (error) {
+      // Compatibilidad con proyectos donde el RPC aún no está disponible en PostgREST.
+      const fallback = await sb.from("student_navigation_preferences").upsert({
+        student_id: studentId,
+        show_courses: next.courses,
+        show_calendar: next.calendar,
+        show_grades: next.grades,
+        show_profile: next.profile
+      }, { onConflict:"student_id" });
+      error = fallback.error;
+    }
     if (error) throw error;
     studentNavigationPreferences.set(studentId, next);
     status.className = "student-navigation-status success";

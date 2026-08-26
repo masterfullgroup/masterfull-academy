@@ -11,6 +11,7 @@ assert.match(appSource, /function getTeacherManagedStudents\(\)/, "La lista debe
 assert.match(appSource, /function renderTeacherStudents\(\)/, "El profesor debe poder ver a sus alumnos");
 assert.match(appSource, /data-student-navigation="\$\{key\}"/, "Cada alumno debe tener controles de navegación individuales");
 assert.match(appSource, /set_student_navigation_preferences/, "Los permisos deben guardarse en Supabase");
+assert.match(appSource, /student_navigation_preferences.*upsert|upsert\(\{[\s\S]*show_profile/, "El guardado debe tener compatibilidad con proyectos sin RPC expuesto");
 assert.match(appSource, /currentStudentNavigation\.profile/, "El perfil del alumno debe depender de su permiso");
 assert.match(migrationSource, /create table if not exists public\.student_navigation_preferences/, "La preferencia debe persistirse por alumno");
 assert.match(migrationSource, /enrollment\.granted_by = auth\.uid\(\)/, "Solo el profesor del alumno debe cambiar sus preferencias");
