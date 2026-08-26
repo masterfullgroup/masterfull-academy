@@ -714,7 +714,7 @@ function renderApp() {
     <button class="shell-nav-item ${activeStudentTab === "student-calendar" ? "active" : ""}" data-student-tab="student-calendar" type="button">${menuIcon("calendar")}<span>Calendario</span></button>
     <button class="shell-nav-item ${activeStudentTab === "student-grades" ? "active" : ""}" data-student-tab="student-grades" type="button">${menuIcon("grades")}<span>Calificaciones</span></button>
   </nav>` : "";
-  const profileButton = isTeacher || canCurrentUserEditProfile() ? `<button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button>` : "";
+  const profileButton = isTeacher ? `<button id="profile-btn" class="btn ghost">${menuIcon("profile")}<span>Mi perfil</span></button>` : "";
   $("#session-area").innerHTML = `<div class="user-menu"><span class="user-avatar">${esc(currentUser.name.charAt(0).toUpperCase())}</span><span class="user-identity"><strong>${esc(currentUser.name)}</strong><small>${isTeacher ? "Profesor" : "Alumno"}</small><small class="user-email">${esc(currentUser.email || "")}</small></span></div>${teacherNavigation}${studentNavigation}<div class="user-actions">${profileButton}<button id="logout-btn" class="btn ghost logout-btn">${menuIcon("logout")}<span>Cerrar sesión</span></button></div>`;
   $("#session-area .user-identity small").textContent = accountLabel;
   $("#profile-btn")?.addEventListener("click", openProfile);
@@ -2265,8 +2265,7 @@ function renderTeacherCoursePeople(course) {
     <div class="course-access-list">${authorized.length ? authorized.map(enrollment => {
       const profile = profilesById.get(enrollment.student_id);
       const name = profile?.full_name || "Alumno";
-      const canEditProfile = enrollment.can_edit_profile !== false;
-      return `<article><span class="course-person-avatar">${esc(name.charAt(0).toUpperCase())}</span><div><strong>${esc(name)}</strong><small>${esc(profile?.email || "Cuenta registrada")}</small></div><label class="profile-edit-permission"><input type="checkbox" data-course-id="${esc(course.id)}" data-student-id="${esc(enrollment.student_id)}" ${canEditProfile ? "checked" : ""}> <span>Puede editar perfil</span></label><span class="status published">Autorizado</span><button class="btn secondary revoke-course-access" data-course-id="${esc(course.id)}" data-student-id="${esc(enrollment.student_id)}" type="button">Retirar acceso</button></article>`;
+      return `<article><span class="course-person-avatar">${esc(name.charAt(0).toUpperCase())}</span><div><strong>${esc(name)}</strong><small>${esc(profile?.email || "Cuenta registrada")}</small></div><span class="status published">Autorizado</span><button class="btn secondary revoke-course-access" data-course-id="${esc(course.id)}" data-student-id="${esc(enrollment.student_id)}" type="button">Retirar acceso</button></article>`;
     }).join("") : `<div class="course-workspace-empty"><strong>Ningún alumno autorizado</strong><p>Agrega el correo de un alumno registrado para permitirle acceder al curso.</p></div>`}</div>`;
 }
 function renderTeacherCourseResources(course, types, title, icon) {
@@ -2550,7 +2549,6 @@ function bindTeacherExamWorkspaceActions() {
     $$("#teacher-course-workspace .canvas-module-card").forEach(module => { module.open = true; });
   }));
   $$("#teacher-course-workspace .course-access-form").forEach(form => form.addEventListener("submit", authorizeCourseStudent));
-  $$("#teacher-course-workspace .profile-edit-permission input").forEach(input => input.addEventListener("change", () => toggleStudentProfilePermission(input)));
   $$("#teacher-course-workspace .revoke-course-access").forEach(button => button.addEventListener("click", () => revokeCourseStudent(button.dataset.courseId, button.dataset.studentId)));
   $$("#teacher-course-workspace .edit-published-course").forEach(button => button.addEventListener("click", () => openCourseModal(button.dataset.id)));
   $$("#teacher-course-workspace .edit-module").forEach(button => button.addEventListener("click", () => openModuleModal(button.dataset.courseId, button.dataset.moduleId)));
@@ -2560,29 +2558,6 @@ function bindTeacherExamWorkspaceActions() {
   $$("#teacher-course-workspace .move-module").forEach(button => button.addEventListener("click", () => moveModule(button.dataset.courseId, button.dataset.moduleId, button.dataset.direction)));
   $$("#teacher-course-workspace .move-activity").forEach(button => button.addEventListener("click", () => moveActivity(button.dataset.courseId, button.dataset.moduleId, button.dataset.activityId, button.dataset.direction)));
   bindModuleDragAndDrop();
-}
-async function toggleStudentProfilePermission(input) {
-  if (!sb || currentUser?.role !== "teacher") return;
-  const courseId = input.dataset.courseId;
-  const studentId = input.dataset.studentId;
-  const nextValue = input.checked;
-  input.disabled = true;
-  try {
-    let { error } = await sb.rpc("set_course_profile_edit_permission", { target_course_id:courseId, target_student_id:studentId, allow_edit:nextValue });
-    // Permite operar mientras el endpoint RPC termina de exponerse en proyectos existentes.
-    if (error && (error.code === "PGRST202" || error.code === "42883")) {
-      ({ error } = await sb.from("course_enrollments").update({ can_edit_profile:nextValue }).eq("course_id", courseId).eq("student_id", studentId));
-    }
-    if (error) throw error;
-    await loadCourseAccess();
-    renderTeacherExamWorkspace(getTeacherCourses(), getTeacherExams());
-    bindTeacherExamWorkspaceActions();
-  } catch (error) {
-    console.error("Permiso de edición de perfil:", error);
-    input.checked = !nextValue;
-    input.disabled = false;
-    alert(translateError(error));
-  }
 }
 async function authorizeCourseStudent(event) {
   event.preventDefault();
@@ -4446,8 +4421,7 @@ async function saveProfile(event) {
   }
 }
 function canCurrentUserEditProfile() {
-  if (!currentUser || currentUser.role !== "student") return true;
-  return !courseEnrollments.some(enrollment => enrollment.student_id === currentUser.id && enrollment.status === "active" && enrollment.can_edit_profile === false);
+  return Boolean(currentUser && currentUser.role !== "student");
 }
 
 function toggleSound() {
