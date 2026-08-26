@@ -41,4 +41,4 @@ jobs:
           exit 1
 
       - name: Aplicar migraciones pendientes
-        run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+        run: supabase db push --password "$SUPABASE_DB_PASSWORD" --include-all
