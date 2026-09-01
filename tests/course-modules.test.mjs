@@ -36,6 +36,8 @@ assert.match(appSource, /updateActivityEditorStats/, "El editor debe actualizar 
 assert.match(appSource, /formatActivityDescription/, "Las herramientas de formato deben ser funcionales");
 assert.match(appSource, /sanitizeActivityHtml/, "El contenido visual debe limpiarse antes de guardarse o mostrarse");
 assert.match(appSource, /renderActivityContent/, "El alumno debe recibir el contenido con su formato visual");
+assert.match(htmlSource, /config\.js\?v=20260831-01/, "La configuración debe invalidar la caché al publicar cambios");
+assert.match(htmlSource, /app\.js\?v=20260831-01&cache=20260831-01/, "El código principal debe invalidar la caché al publicar cambios");
 assert.match(appSource, /Registro de actividad/, "El curso docente debe incluir el registro de actividad");
 assert.match(appSource, /start_course_activity_session/, "El alumno debe iniciar una sesión al abrir un curso");
 assert.match(appSource, /course-activity-table/, "El registro debe mostrar una tabla de actividad");
@@ -133,8 +135,8 @@ assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, 
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
-assert.match(htmlSource, /styles\.css\?v=20260825-02/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
-assert.match(htmlSource, /app\.js\?v=20260825-02/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /styles\.css\?v=20260831-01&cache=20260831-01/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /app\.js\?v=20260831-01&cache=20260831-01/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
 assert.match(cssSource, /\.course-setup-status\s*\{[\s\S]*?position:absolute;[\s\S]*?right:72px;/, "El estado del curso debe quedar anclado junto al cierre");
 assert.match(htmlSource, /course-setup-head[^>]*>[\s\S]*?class="modal-close"/, "El cierre del modal de curso debe pertenecer a la cabecera fija");
 assert.match(cssSource, /\.course-setup-head\s*\{[\s\S]*?position:sticky;[\s\S]*?top:0;/, "La cabecera del modal debe permanecer alineada durante el scroll");
