@@ -31,6 +31,9 @@ assert.match(appSource, /updateActivityEditorStats/, "El editor debe actualizar 
 assert.match(appSource, /formatActivityDescription/, "Las herramientas de formato deben ser funcionales");
 assert.match(appSource, /sanitizeActivityHtml/, "El contenido visual debe limpiarse antes de guardarse o mostrarse");
 assert.match(appSource, /renderActivityContent/, "El alumno debe recibir el contenido con su formato visual");
+assert.match(appSource, /function isPlatformUrl/, "El visor PDF debe detectar rutas que apuntan a la propia plataforma");
+assert.doesNotMatch(appSource, /lesson-pdf-frame[^\n]*loading="lazy"/, "El PDF no debe diferirse dentro de una vista inicialmente oculta");
+assert.match(appSource, /lesson-pdf-error/, "El visor PDF debe mostrar un error comprensible para una ruta inválida");
 assert.match(appSource, /rememberActivityEditorSelection/, "La barra debe conservar la selección al aplicar formato");
 assert.doesNotMatch(appSource, /setRangeText/, "Las herramientas no deben escribir etiquetas de formato en un textarea");
 assert.match(appSource, /teacher-course-open/, "Al abrir un curso debe activarse el modo de enfoque");

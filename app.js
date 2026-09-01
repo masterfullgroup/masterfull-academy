@@ -3010,6 +3010,15 @@ function safeActivityUrl(value) {
   const url = String(value || "").trim();
   return /^(https?:\/\/|\.\/|\/)/i.test(url) ? url : "";
 }
+function isPlatformUrl(url) {
+  try {
+    const target = new URL(url, document.baseURI);
+    const current = new URL(window.location.href);
+    return target.origin === current.origin && target.pathname.replace(/\/$/, "") === current.pathname.replace(/\/$/, "");
+  } catch {
+    return false;
+  }
+}
 function youtubeEmbedUrl(url) {
   const match = String(url || "").match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
   return match ? `https://www.youtube-nocookie.com/embed/${match[1]}` : "";
@@ -3029,7 +3038,10 @@ function lessonMediaMarkup(activity) {
     if (url && /\.(mp4|webm|ogg)(?:\?|$)/i.test(url)) return `<video controls preload="metadata"><source src="${esc(url)}">Tu navegador no puede reproducir este video.</video>`;
     if (activity.type === "video") return `<div class="lesson-media-placeholder"><span>${modernIcon("video")}</span><strong>Clase en video</strong><p>${url ? "Usa un enlace de YouTube, Vimeo o un archivo MP4/WebM/OGG para verlo aquí." : "El profesor todavía no ha agregado el video de esta clase."}</p></div>`;
   }
-  if (activity.type === "pdf" && url) return `<section class="lesson-pdf-viewer" aria-label="Documento PDF"><header class="lesson-pdf-head"><div class="lesson-pdf-identity"><span class="lesson-pdf-icon">${modernIcon("pdf")}</span><div><span class="eyebrow">DOCUMENTO DE LA CLASE</span><strong>${esc(activity.title)}</strong><small>Archivo PDF · Lectura dentro del curso</small></div></div><a class="btn secondary lesson-pdf-open" href="${esc(url)}" target="_blank" rel="noopener">Abrir aparte ↗</a></header><div class="lesson-pdf-frame-wrap"><iframe class="lesson-pdf-frame" src="${esc(url)}" title="PDF: ${esc(activity.title)}" loading="lazy"></iframe></div></section>`;
+  if (activity.type === "pdf" && url) {
+    if (isPlatformUrl(url)) return `<section class="lesson-pdf-viewer lesson-pdf-invalid" aria-label="Documento PDF"><header class="lesson-pdf-head"><div class="lesson-pdf-identity"><span class="lesson-pdf-icon">${modernIcon("pdf")}</span><div><span class="eyebrow">DOCUMENTO DE LA CLASE</span><strong>${esc(activity.title)}</strong><small>La ruta configurada apunta a la plataforma, no al archivo PDF.</small></div></div></header><div class="lesson-pdf-error"><strong>No se pudo cargar este PDF</strong><p>Solicita al profesor que revise la ruta del archivo en la actividad.</p></div></section>`;
+    return `<section class="lesson-pdf-viewer" aria-label="Documento PDF"><header class="lesson-pdf-head"><div class="lesson-pdf-identity"><span class="lesson-pdf-icon">${modernIcon("pdf")}</span><div><span class="eyebrow">DOCUMENTO DE LA CLASE</span><strong>${esc(activity.title)}</strong><small>Archivo PDF · Lectura dentro del curso</small></div></div><a class="btn secondary lesson-pdf-open" href="${esc(url)}" target="_blank" rel="noopener">Abrir aparte ↗</a></header><div class="lesson-pdf-frame-wrap"><iframe class="lesson-pdf-frame" src="${esc(url)}" title="PDF: ${esc(activity.title)}"></iframe></div></section>`;
+  }
   return "";
 }
 function renderLesson() {
