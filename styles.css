@@ -3708,6 +3708,141 @@ body.lesson-mode .lesson-pdf-frame {
   border-color:#ead0d4;
   background:#fff7f8;
 }
+
+/* Barra lateral del curso del alumno: navegación compacta y orientada al contenido. */
+body.lesson-mode .lesson-sidebar {
+  color:#dbe9f0;
+  border-right:1px solid #21465b;
+  background:#0d3046;
+}
+body.lesson-mode .lesson-sidebar-head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:start;
+  gap:18px;
+  padding:28px 22px 22px;
+  border-bottom:1px solid #ffffff18;
+  background:#0d3046f2;
+  backdrop-filter:blur(16px);
+}
+body.lesson-mode .lesson-sidebar-course-identity { min-width:0; }
+body.lesson-mode .lesson-sidebar-kicker {
+  display:block;
+  margin-bottom:8px;
+  color:#63d2d5;
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.12em;
+}
+body.lesson-mode .lesson-sidebar-head strong {
+  display:block;
+  overflow:hidden;
+  color:#fff;
+  font-size:19px;
+  font-weight:720;
+  line-height:1.25;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return {
+  grid-column:1 / -1;
+  min-height:38px;
+  padding:9px 12px;
+  color:#d9f1f2;
+  border:1px solid #5b8a9b;
+  border-radius:8px;
+  background:#ffffff0a;
+  font-size:11px;
+  font-weight:650;
+  text-align:left;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return:hover,
+body.lesson-mode .lesson-sidebar-head > .lesson-return:focus-visible {
+  color:#fff;
+  border-color:#55d1d3;
+  background:#1a5b70;
+  outline:0;
+}
+body.lesson-mode .lesson-sidebar-head > .icon-btn {
+  display:grid;
+  width:32px;
+  height:32px;
+  place-items:center;
+  color:#d9f1f2;
+  border-color:#ffffff2b;
+  border-radius:8px;
+  background:#ffffff0a;
+}
+body.lesson-mode .lesson-module-tree {
+  padding:20px 14px 28px;
+}
+body.lesson-mode .lesson-tree-module {
+  margin-bottom:10px;
+  border:1px solid #ffffff1c;
+  border-radius:12px;
+  background:#ffffff08;
+  box-shadow:0 1px 2px #061b2a20;
+}
+body.lesson-mode .lesson-tree-module[open] {
+  border-color:#ffffff2b;
+  background:#ffffff0d;
+}
+body.lesson-mode .lesson-tree-module > summary {
+  min-height:58px;
+  padding:12px 13px;
+}
+body.lesson-mode .lesson-tree-module > summary strong {
+  color:#f0f8fa;
+  font-size:12px;
+  font-weight:700;
+}
+body.lesson-mode .lesson-tree-module > summary b {
+  display:grid;
+  width:30px;
+  height:30px;
+  place-items:center;
+  color:#c8e2e7;
+  border:1px solid #ffffff2b;
+  border-radius:8px;
+  background:#ffffff0a;
+  font-size:0;
+}
+body.lesson-mode .lesson-tree-module > summary b::before {
+  content:"›";
+  display:block;
+  font-size:20px;
+  font-weight:400;
+  line-height:1;
+  transform:rotate(0deg);
+  transition:transform .18s ease;
+}
+body.lesson-mode .lesson-tree-module[open] > summary b::before { transform:rotate(90deg); }
+body.lesson-mode .lesson-tree-module > div { padding:0 8px 9px; }
+body.lesson-mode .lesson-tree-activity {
+  min-height:52px;
+  padding:9px 11px;
+  border:1px solid transparent;
+  border-radius:9px;
+  background:transparent;
+}
+body.lesson-mode .lesson-tree-activity:hover {
+  color:#fff;
+  background:#ffffff12;
+}
+body.lesson-mode .lesson-tree-activity.active {
+  color:#fff;
+  border-color:#2ebdca66;
+  background:#17617a;
+  box-shadow:inset 3px 0 #51d3d2, 0 5px 12px #061b2a25;
+}
+body.lesson-mode .lesson-tree-activity strong { font-size:11px; font-weight:650; }
+body.lesson-mode .lesson-tree-activity small { color:#9fbfc8; font-size:9px; }
+body.lesson-mode .lesson-tree-activity.active small,
+body.lesson-mode .lesson-tree-activity:hover small { color:#d6f5f4; }
+@media (max-width:900px) {
+  body.lesson-mode .lesson-sidebar-head { padding:22px 18px 18px; }
+  body.lesson-mode .lesson-sidebar-head strong { font-size:17px; }
+}
 .course-activity-live-note { color:#718096; font-size:10px; }
 .course-activity-table-wrap { overflow:auto; border:1px solid var(--academy-border); border-radius:10px; background:#fff; box-shadow:var(--academy-shadow-xs); }
 .course-activity-table { width:100%; min-width:700px; border-collapse:collapse; text-align:left; }

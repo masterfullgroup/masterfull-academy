@@ -9,6 +9,9 @@ assert.doesNotMatch(appSource, /course-context-mark/, "La cabecera no debe repet
 assert.doesNotMatch(appSource, /<span>CURSO<\/span><h1>/, "La cabecera no debe repetir la etiqueta Curso");
 assert.match(appSource, /course-context-actions/, "La cabecera debe agrupar el estado y la vista del alumno");
 assert.match(appSource, /renderTeacherCourseModulesCanvas/, "El curso docente debe usar la estructura compacta de módulos");
+assert.match(htmlSource, /lesson-sidebar-kicker/, "La barra del alumno debe identificar el curso actual");
+assert.match(cssSource, /body\.lesson-mode \.lesson-sidebar \{[\s\S]*?background:#0d3046/, "La barra del alumno debe usar la nueva superficie visual");
+assert.match(cssSource, /lesson-tree-activity\.active[\s\S]*?box-shadow:inset 3px 0/, "La actividad activa debe tener un indicador visual claro");
 assert.match(appSource, /collapse-all-modules/, "Los módulos deben poder contraerse en conjunto");
 assert.match(appSource, /row-action-menu/, "Las acciones de filas deben agruparse en menús verticales");
 assert.match(appSource, /\["settings", "Configuraci/, "La navegación del curso debe incluir configuración");
