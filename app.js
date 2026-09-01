@@ -3069,7 +3069,7 @@ function renderLesson() {
   $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
   const url = safeActivityUrl(activity.url);
   const showMaterials = Boolean(url) && activity.type !== "pdf" && !mediaMarkup;
-  $("#lesson-materials-card").innerHTML = showMaterials ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Recurso de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary" href="${esc(url)}" target="_blank" rel="noopener">Abrir recurso ↗</a>` : "";
+  $("#lesson-materials-card").innerHTML = showMaterials ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Recurso de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary lesson-resource-open" href="${esc(url)}" target="_blank" rel="noopener">Abrir</a>` : "";
   $("#lesson-materials-card").classList.toggle("hidden", !showMaterials);
   $("#lesson-description").closest(".lesson-reading-panel").classList.toggle("hidden", !hasDescription && !showMaterials);
   renderLessonTree(course, activity.id);

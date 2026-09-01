@@ -31,6 +31,8 @@ assert.match(appSource, /updateActivityEditorStats/, "El editor debe actualizar 
 assert.match(appSource, /formatActivityDescription/, "Las herramientas de formato deben ser funcionales");
 assert.match(appSource, /sanitizeActivityHtml/, "El contenido visual debe limpiarse antes de guardarse o mostrarse");
 assert.match(appSource, /renderActivityContent/, "El alumno debe recibir el contenido con su formato visual");
+assert.match(appSource, /class="btn secondary lesson-resource-open"[^>]*>Abrir<\/a>/, "El recurso del alumno debe mostrar solo el texto Abrir");
+assert.match(cssSource, /lesson-resource-open[\s\S]*?color:#fff[\s\S]*?background:var\(--academy-petrol-800\)/, "El botón del recurso debe usar texto blanco y fondo oscuro");
 assert.match(appSource, /function isPlatformUrl/, "El visor PDF debe detectar rutas que apuntan a la propia plataforma");
 assert.doesNotMatch(appSource, /lesson-pdf-frame[^\n]*loading="lazy"/, "El PDF no debe diferirse dentro de una vista inicialmente oculta");
 assert.match(appSource, /lesson-pdf-error/, "El visor PDF debe mostrar un error comprensible para una ruta inválida");

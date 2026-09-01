@@ -3208,6 +3208,26 @@ body:not(.app-shell-mode) .topbar .menu-icon { width: 16px; height: 16px; }
 .lesson-materials-card strong,.lesson-materials-card small { display:block; }
 .lesson-materials-card strong { color:#0f172a; font-size:12px; font-weight:600; }
 .lesson-materials-card small { margin-top:4px; color:#64748b; font-size:10px; }
+.lesson-materials-card .lesson-resource-open {
+  min-width:82px;
+  padding:11px 17px;
+  color:#fff;
+  border-color:var(--academy-petrol-800);
+  border-radius:8px;
+  background:var(--academy-petrol-800);
+  font-weight:700;
+  text-align:center;
+}
+.lesson-materials-card .lesson-resource-open:hover,
+.lesson-materials-card .lesson-resource-open:focus-visible {
+  color:#fff;
+  border-color:var(--academy-petrol-900);
+  background:var(--academy-petrol-900);
+}
+.lesson-materials-card .lesson-resource-open:focus-visible {
+  outline:3px solid rgb(32 184 197 / .35);
+  outline-offset:2px;
+}
 .lesson-tabs { gap:0; overflow-x:auto; border-bottom:1px solid #cbd5e1; }
 .lesson-tab { flex:0 0 auto; padding:13px 15px; color:#64748b; border:0; border-bottom:3px solid transparent; background:transparent; font-size:11px; font-weight:600; }
 .lesson-tab.active { color:#2563eb; border-bottom-color:#2563eb; }
