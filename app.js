@@ -905,7 +905,7 @@ function bindStaticEvents() {
   document.addEventListener("selectionchange", rememberActivityEditorSelection);
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; saveActiveLesson(); renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
-  $("#lesson-sidebar-close").addEventListener("click", closeLessonSidebar);
+  $("#lesson-sidebar-close")?.addEventListener("click", closeLessonSidebar);
   $("#lesson-complete")?.addEventListener("click", completeActiveLesson);
   $("#lesson-previous").addEventListener("click", () => navigateLesson(-1));
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));

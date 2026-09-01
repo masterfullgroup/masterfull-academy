@@ -12,6 +12,8 @@ assert.match(appSource, /renderTeacherCourseModulesCanvas/, "El curso docente de
 assert.match(htmlSource, /lesson-sidebar-kicker/, "La barra del alumno debe identificar el curso actual");
 assert.match(cssSource, /body\.lesson-mode \.lesson-sidebar \{[\s\S]*?background:#0d3046/, "La barra del alumno debe usar la nueva superficie visual");
 assert.match(cssSource, /lesson-tree-activity\.active[\s\S]*?box-shadow:inset 3px 0/, "La actividad activa debe tener un indicador visual claro");
+assert.doesNotMatch(htmlSource, /id="lesson-sidebar-close"/, "La barra del alumno no debe mostrar el botón X");
+assert.match(cssSource, /lesson-tree-module > div \{ row-gap:6px; \}/, "Las actividades deben tener separación vertical sin aumentar su altura");
 assert.match(appSource, /collapse-all-modules/, "Los módulos deben poder contraerse en conjunto");
 assert.match(appSource, /row-action-menu/, "Las acciones de filas deben agruparse en menús verticales");
 assert.match(appSource, /\["settings", "Configuraci/, "La navegación del curso debe incluir configuración");

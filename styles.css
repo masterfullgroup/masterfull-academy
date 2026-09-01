@@ -3818,13 +3818,15 @@ body.lesson-mode .lesson-tree-module > summary b::before {
 }
 body.lesson-mode .lesson-tree-module[open] > summary b::before { transform:rotate(90deg); }
 body.lesson-mode .lesson-tree-module > div { padding:0 8px 9px; }
+body.lesson-mode .lesson-tree-module > div { row-gap:6px; }
 body.lesson-mode .lesson-tree-activity {
-  min-height:52px;
+  min-height:50px;
   padding:9px 11px;
   border:1px solid transparent;
   border-radius:9px;
   background:transparent;
 }
+body.lesson-mode .lesson-tree-activity + .lesson-tree-activity { margin-top:0; }
 body.lesson-mode .lesson-tree-activity:hover {
   color:#fff;
   background:#ffffff12;
