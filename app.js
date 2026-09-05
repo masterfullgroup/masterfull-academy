@@ -2938,7 +2938,7 @@ function renderStudent() {
     $$("#student-course-workspace .student-module").forEach(module => { module.open = false; });
   }));
   $$("#student-course-workspace .expand-all-modules").forEach(button => button.addEventListener("click", () => {
-    $$("#student-course-workspace .student-module:not(.is-locked)").forEach(module => { module.open = true; });
+    $$("#student-course-workspace .student-module").forEach(module => { module.open = true; });
   }));
 }
 function renderStudentCourseDirectory(courses, summaries) {
@@ -3020,14 +3020,14 @@ function renderStudentCourseModules(course, myGrades) {
   if (!modules.length) return "";
   const progress = courseProgress[course.id] || { completed: {}, lastActivityId:"" };
   let previousComplete = true;
-  return `<section class="student-module-space"><div class="student-module-toolbar canvas-module-toolbar" aria-label="Acciones de módulos"><button class="btn secondary collapse-all-modules" type="button">Contraer todo</button><button class="btn secondary expand-all-modules" type="button">Expandir todo</button></div><div class="student-module-list">${modules.map((module, index) => {
+  return `<section class="student-module-space"><div class="student-module-toolbar canvas-module-toolbar" aria-label="Acciones de módulos"><button class="btn collapse-all-modules" type="button">Contraer todo</button><button class="btn expand-all-modules" type="button">Expandir todo</button></div><div class="student-module-list">${modules.map((module, index) => {
       const passedEvaluation = myGrades.some(grade => grade.courseId === course.id && Number(grade.score) >= 11);
       const dateAvailable = module.unlockRule !== "date" || (module.unlockDetail && new Date(module.unlockDetail) <= new Date());
       const locked = (module.unlockRule === "previous" && !previousComplete) || (module.unlockRule === "evaluation" && !passedEvaluation) || !dateAvailable;
       const progressItems = module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none");
       const moduleCompletedCount = progressItems.filter(activity => activityCompleted(activity, progress, myGrades)).length;
       const moduleComplete = progressItems.length > 0 && moduleCompletedCount === progressItems.length;
-      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" ${index === 0 && !locked ? "open" : ""}><summary><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `Bloqueado · ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
+      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" open><summary><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `Bloqueado · ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
         if (activity.type === "heading") return `<h5 class="student-module-heading">${esc(activity.title)}</h5>`;
         const exam = activity.examId ? publishedExams.find(item => item.id === activity.examId) : null;
         const actionClass = exam && ["practice","quiz"].includes(activity.type) ? "start-exam" : "open-lesson";
