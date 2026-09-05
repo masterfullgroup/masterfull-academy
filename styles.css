@@ -9275,6 +9275,11 @@ body.teacher-course-open .canvas-module-item {
   grid-template-columns:20px minmax(0,1fr) auto auto;
 }
 
+/* El índice del curso debe comenzar justo debajo de la cabecera, sin el desplazamiento heredado. */
+body.teacher-course-open .course-workspace-sidebar {
+  top:0 !important;
+}
+
 /* El editor del curso ocupa todo el viewport al entrar en un curso. */
 body.teacher-course-open > main,
 body.teacher-course-open.app-shell-mode > main {
