@@ -2592,18 +2592,22 @@ function formatActivityDuration(startedAt, endedAt) {
 function renderTeacherCourseActivity(course) {
   const profilesById = new Map(studentProfiles.map(profile => [profile.id, profile]));
   const authorized = courseEnrollments.filter(enrollment => enrollment.course_id === course.id && enrollment.status === "active");
-  const latestByStudent = new Map();
+  const sessionsByStudent = new Map();
   courseActivitySessions.filter(session => session.course_id === course.id).forEach(session => {
-    if (!latestByStudent.has(session.student_id)) latestByStudent.set(session.student_id, session);
+    if (!sessionsByStudent.has(session.student_id)) sessionsByStudent.set(session.student_id, []);
+    sessionsByStudent.get(session.student_id).push(session);
   });
-  const rows = authorized.map(enrollment => {
+  const rows = authorized.flatMap(enrollment => {
     const profile = profilesById.get(enrollment.student_id);
-    const session = latestByStudent.get(enrollment.student_id);
     const name = profile?.full_name || profile?.email || "Alumno";
-    const connected = session?.status === "active" && (Date.now() - new Date(session.last_seen_at).getTime()) < 120000;
-    return `<tr><td><strong>${esc(name)}</strong><small>${esc(profile?.email || "Cuenta registrada")}</small></td><td>${session ? formatDate(session.started_at) : "—"}</td><td>${session?.ended_at ? formatDate(session.ended_at) : "—"}</td><td>${session ? formatActivityDuration(session.started_at, session.ended_at || session.last_seen_at) : "—"}</td><td><span class="status ${connected ? "published" : session ? "draft" : "muted"}">${connected ? "Conectada" : session ? "Desconectado" : "Sin registro"}</span></td></tr>`;
+    const sessions = sessionsByStudent.get(enrollment.student_id) || [];
+    if (!sessions.length) return [`<tr><td><strong>${esc(name)}</strong><small>${esc(profile?.email || "Cuenta registrada")}</small></td><td>—</td><td>—</td><td>—</td><td><span class="status muted">Sin registro</span></td></tr>`];
+    return sessions.map(session => {
+      const connected = session.status === "active" && (Date.now() - new Date(session.last_seen_at).getTime()) < 120000;
+      return `<tr><td><strong>${esc(name)}</strong><small>${esc(profile?.email || "Cuenta registrada")}</small></td><td>${formatDate(session.started_at)}</td><td>${session.ended_at ? formatDate(session.ended_at) : "—"}</td><td>${formatActivityDuration(session.started_at, session.ended_at || session.last_seen_at)}</td><td><span class="status ${connected ? "published" : "draft"}">${connected ? "Conectada" : "Desconectado"}</span></td></tr>`;
+    });
   }).join("");
-  return `<div class="course-subpage-head"><div><span class="eyebrow">SEGUIMIENTO</span><h2>Registro de actividad</h2><p>Consulta cuándo ingresó cada alumno y cuánto tiempo permaneció en el curso.</p></div><span class="course-activity-live-note">Actualización automática cada minuto</span></div>${rows ? `<div class="course-activity-table-wrap"><table class="course-activity-table"><thead><tr><th>Usuario</th><th>Ingreso</th><th>Salida</th><th>Permanencia</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="course-workspace-empty"><strong>Ningún alumno autorizado</strong><p>Los registros aparecerán cuando un alumno ingrese al curso.</p></div>`}`;
+  return `<div class="course-subpage-head"><div><span class="eyebrow">SEGUIMIENTO</span><h2>Registro de actividad</h2><p>Historial acumulado de cada ingreso y permanencia de los alumnos.</p></div><span class="course-activity-live-note">Actualización automática cada minuto</span></div>${rows ? `<div class="course-activity-table-wrap"><table class="course-activity-table"><thead><tr><th>Usuario</th><th>Ingreso</th><th>Salida</th><th>Permanencia</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="course-workspace-empty"><strong>Ningún alumno autorizado</strong><p>Los registros aparecerán cuando un alumno ingrese al curso.</p></div>`}`;
 }
 function buildCoursePublicationPayload(course, exams) {
   const extraBanks = arguments[2] || [];
