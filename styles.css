@@ -12901,3 +12901,19 @@ body.lesson-mode .lesson-menu-toggle { display:none !important; }
   body.lesson-mode .lesson-sidebar { min-height:0; }
   body.lesson-mode .lesson-module-tree { max-height:none; }
 }
+
+/* Espaciado final del panel docente: aire consistente entre encabezado y opciones. */
+body.teacher-course-open .course-workspace-sidebar {
+  padding:18px 16px 28px !important;
+}
+body.teacher-course-open .course-sidebar-heading {
+  margin:0 8px 22px !important;
+  padding-bottom:18px !important;
+}
+body.teacher-course-open .course-workspace-nav {
+  gap:8px !important;
+}
+body.teacher-course-open .course-subpage {
+  min-height:46px;
+  padding:11px 13px;
+}
