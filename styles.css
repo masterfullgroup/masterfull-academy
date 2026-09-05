@@ -7903,6 +7903,10 @@ body.teacher-course-open .course-workspace-page {
 .canvas-module-list {
   gap:22px;
 }
+.canvas-modules-page {
+  width:min(100%,960px);
+  margin-inline:auto;
+}
 .canvas-module-card {
   overflow:visible;
   border:1px solid #d8dce7;
