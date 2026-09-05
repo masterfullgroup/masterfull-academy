@@ -905,6 +905,7 @@ function bindStaticEvents() {
   document.addEventListener("selectionchange", rememberActivityEditorSelection);
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; saveActiveLesson(); renderStudent(); });
   $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
+  $("#lesson-sidebar-collapse").addEventListener("click", toggleLessonSidebar);
   $("#lesson-sidebar-close")?.addEventListener("click", closeLessonSidebar);
   $("#lesson-complete")?.addEventListener("click", completeActiveLesson);
   $("#lesson-previous").addEventListener("click", () => navigateLesson(-1));
@@ -3024,10 +3025,12 @@ function renderStudentCourseModules(course, myGrades) {
       const passedEvaluation = myGrades.some(grade => grade.courseId === course.id && Number(grade.score) >= 11);
       const dateAvailable = module.unlockRule !== "date" || (module.unlockDetail && new Date(module.unlockDetail) <= new Date());
       const locked = (module.unlockRule === "previous" && !previousComplete) || (module.unlockRule === "evaluation" && !passedEvaluation) || !dateAvailable;
-      const progressItems = module.activities.filter(activity => activity.type !== "heading" && activity.completionRule !== "none");
+      const publishedActivities = module.activities.filter(activity => activity.type !== "heading");
+      const progressItems = publishedActivities.filter(activity => activity.completionRule !== "none");
       const moduleCompletedCount = progressItems.filter(activity => activityCompleted(activity, progress, myGrades)).length;
       const moduleComplete = progressItems.length > 0 && moduleCompletedCount === progressItems.length;
-      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" open><summary><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${locked ? `Bloqueado · ${unlockRuleLabel(module, index)}` : `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}`}</small></span></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${module.activities.length ? module.activities.map(activity => {
+      const status = locked ? `Bloqueado · ${unlockRuleLabel(module, index)}` : publishedActivities.length ? `${moduleCompletedCount} de ${progressItems.length} completados · ${moduleComplete ? "Completado" : "En progreso"}` : "Sin actividades publicadas";
+      const markup = `<details class="student-module ${locked ? "is-locked" : ""}" open><summary><span class="module-disclosure" aria-hidden="true">›</span><span class="module-sequence">${index + 1}</span><span><strong>${esc(module.title)}</strong><small>${status}</small></span></summary>${locked ? `<p class="module-lock-message">Este módulo está bloqueado. ${unlockRuleLabel(module, index)}.</p>` : `<div class="student-activity-list">${publishedActivities.length ? module.activities.map(activity => {
         if (activity.type === "heading") return `<h5 class="student-module-heading">${esc(activity.title)}</h5>`;
         const exam = activity.examId ? publishedExams.find(item => item.id === activity.examId) : null;
         const actionClass = exam && ["practice","quiz"].includes(activity.type) ? "start-exam" : "open-lesson";
@@ -3119,6 +3122,7 @@ function renderLesson() {
   }
   const activity = activities[activityIndex];
   $("#lesson-sidebar-course").textContent = course.name;
+  $("#lesson-return").textContent = `← ${course.name}`;
   $("#lesson-title").textContent = activity.title;
   $("#lesson-type").textContent = `${activity.moduleTitle} · ${activityTypeLabel(activity.type)}`;
   const hasDescription = Boolean(String(activity.description || "").trim());
@@ -3128,7 +3132,7 @@ function renderLesson() {
   $("#lesson-media").classList.toggle("hidden", !mediaMarkup);
   $("#lesson-previous").disabled = activityIndex === 0;
   $("#lesson-next").disabled = activityIndex === activities.length - 1;
-  $("#lesson-position").textContent = `${activityIndex + 1} de ${activities.length}`;
+  $("#lesson-position").textContent = `Actividad ${activityIndex + 1} de ${activities.length}`;
   const url = safeActivityUrl(activity.url);
   const showMaterials = Boolean(url) && activity.type !== "pdf" && !mediaMarkup;
   $("#lesson-materials-card").innerHTML = showMaterials ? `<div><span class="activity-type-icon">${modernIcon(activity.type === "video" ? "download" : activity.type)}</span><span><strong>Recurso de la actividad</strong><small>${activityTypeLabel(activity.type)} disponible</small></span></div><a class="btn secondary lesson-resource-open" href="${esc(url)}" target="_blank" rel="noopener">Abrir</a>` : "";
@@ -3163,8 +3167,11 @@ function navigateLesson(direction) {
   if (target) openLesson(course.id, target.id);
 }
 function toggleLessonSidebar() {
-  const open = document.body.classList.toggle("lesson-sidebar-open");
-  $("#lesson-menu-toggle").setAttribute("aria-expanded", String(open));
+  const isMobile = window.matchMedia("(max-width: 900px)").matches;
+  const className = isMobile ? "lesson-sidebar-open" : "lesson-sidebar-collapsed";
+  const open = document.body.classList.toggle(className);
+  $("#lesson-menu-toggle").setAttribute("aria-expanded", String(isMobile ? open : !open));
+  $("#lesson-sidebar-collapse")?.setAttribute("aria-expanded", String(!open));
 }
 function closeLessonSidebar() {
   document.body.classList.remove("lesson-sidebar-open");

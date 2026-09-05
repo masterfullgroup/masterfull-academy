@@ -12829,3 +12829,41 @@ body.student-course-open .module-lock-message {
 @media (prefers-reduced-motion:reduce) {
   body.student-course-open .student-module summary::after { transition:none; }
 }
+
+/* Índice de la lección: plegable en escritorio y panel superpuesto en móvil. */
+body.lesson-mode .lesson-sidebar-head .lesson-sidebar-kicker { margin:0; color:var(--academy-turquoise); font-size:11px; }
+body.lesson-mode .lesson-sidebar-head #lesson-sidebar-course { display:none; }
+body.lesson-mode .lesson-sidebar-head #lesson-sidebar-collapse {
+  display:grid;
+  width:34px;
+  height:34px;
+  place-items:center;
+  color:#d9f1f2;
+  border:1px solid #ffffff2b;
+  border-radius:8px;
+  background:#ffffff0a;
+  font-size:24px;
+  line-height:1;
+}
+body.lesson-mode .lesson-sidebar-head #lesson-sidebar-collapse:hover,
+body.lesson-mode .lesson-sidebar-head #lesson-sidebar-collapse:focus-visible { color:#fff; border-color:var(--academy-turquoise); background:var(--academy-petrol-800); outline:0; }
+@media (min-width:901px) {
+  body.lesson-mode .lesson-topbar { display:grid; }
+  body.lesson-mode .lesson-sidebar { width:auto; transition:width .18s ease, transform .18s ease; }
+  body.lesson-mode.lesson-sidebar-collapsed .lesson-shell { grid-template-columns:0 minmax(0,1fr); }
+  body.lesson-mode.lesson-sidebar-collapsed .lesson-sidebar { width:0; overflow:hidden; border-right:0; }
+  body.lesson-mode.lesson-sidebar-collapsed .lesson-topbar { display:grid; grid-template-columns:1fr auto; }
+  body.lesson-mode.lesson-sidebar-collapsed .lesson-menu-toggle { display:inline-flex; justify-self:end; width:42px; overflow:hidden; padding:9px 12px; }
+  body.lesson-mode.lesson-sidebar-collapsed .lesson-menu-toggle span { display:none; }
+  body.lesson-mode.lesson-sidebar-collapsed .lesson-menu-icon { display:none; }
+  body.lesson-mode.lesson-sidebar-collapsed .lesson-menu-toggle::before { content:"›"; font-size:25px; line-height:1; }
+}
+@media (max-width:900px) {
+  body.lesson-mode .lesson-sidebar-head #lesson-sidebar-collapse { display:none; }
+  body.lesson-mode .lesson-return { justify-self:start; }
+  body.lesson-mode .lesson-topbar .lesson-menu-toggle { justify-self:end; }
+}
+@media (max-width:560px) {
+  body.lesson-mode .lesson-navigation > span { display:inline; flex:0 0 auto; text-align:center; }
+  body.lesson-mode .lesson-navigation { gap:8px; }
+}
