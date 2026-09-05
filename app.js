@@ -904,9 +904,6 @@ function bindStaticEvents() {
   });
   document.addEventListener("selectionchange", rememberActivityEditorSelection);
   $("#lesson-return").addEventListener("click", () => { activeLessonCourseId = null; activeLessonActivityId = null; saveActiveLesson(); renderStudent(); });
-  $("#lesson-menu-toggle").addEventListener("click", toggleLessonSidebar);
-  $("#lesson-sidebar-collapse").addEventListener("click", toggleLessonSidebar);
-  $("#lesson-sidebar-close")?.addEventListener("click", closeLessonSidebar);
   $("#lesson-complete")?.addEventListener("click", completeActiveLesson);
   $("#lesson-previous").addEventListener("click", () => navigateLesson(-1));
   $("#lesson-next").addEventListener("click", () => navigateLesson(1));
@@ -3175,7 +3172,7 @@ function toggleLessonSidebar() {
 }
 function closeLessonSidebar() {
   document.body.classList.remove("lesson-sidebar-open");
-  $("#lesson-menu-toggle").setAttribute("aria-expanded", "false");
+  $("#lesson-menu-toggle")?.setAttribute("aria-expanded", "false");
 }
 function moveExamSubmitToHeader() {
   const submitBar = $(".exam-submit-bar");
