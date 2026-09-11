@@ -135,7 +135,7 @@ assert.match(cssSource, /\.lesson-menu-toggle\s*\{[\s\S]*?background:#4c568f;/, 
 assert.match(cssSource, /body\.student-course-open #student-view > \.dashboard-head,[\s\S]*?display:none !important;/, "El saludo general debe ocultarse al entrar en un curso");
 assert.match(appSource, /module\.activities\.map\(\(?activity/, "El alumno debe recibir las evaluaciones dentro de la secuencia de cada módulo");
 
-assert.match(htmlSource, /styles\.css\?v=20260831-01&cache=20260905-01/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
+assert.match(htmlSource, /styles\.css\?v=20260911-02/, "La hoja de estilos debe invalidar la cachÃ© al publicar cambios del panel");
 assert.match(htmlSource, /app\.js\?v=20260831-01&cache=20260905-01/, "El script debe invalidar la cachÃ© al publicar cambios del panel");
 assert.match(cssSource, /\.course-setup-status\s*\{[\s\S]*?position:absolute;[\s\S]*?right:72px;/, "El estado del curso debe quedar anclado junto al cierre");
 assert.match(htmlSource, /course-setup-head[^>]*>[\s\S]*?class="modal-close"/, "El cierre del modal de curso debe pertenecer a la cabecera fija");

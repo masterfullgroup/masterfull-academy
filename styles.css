@@ -13150,3 +13150,187 @@ td {
     transition-duration:.01ms !important;
   }
 }
+
+/* Refinamiento visible: mismas vistas y colores, con componentes más definidos y legibles. */
+body.auth-game-mode .auth-card {
+  border-radius:20px;
+  box-shadow:var(--academy-shadow-sm);
+}
+
+body.auth-game-mode .auth-card input,
+body.auth-game-mode .auth-card select {
+  min-height:50px;
+  padding:13px 16px;
+  border-radius:12px;
+}
+
+body.auth-game-mode .auth-card .primary,
+body.auth-game-mode .portal-button {
+  min-height:48px;
+  padding:12px 18px;
+  border-radius:12px;
+  font-weight:700;
+  box-shadow:var(--academy-shadow-sm);
+}
+
+body.teacher-shell-mode .shell-nav-item,
+body.app-shell-mode:not(.teacher-shell-mode) .shell-nav-item,
+body.admin-shell-mode .admin-nav-item {
+  min-height:48px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:600;
+  line-height:1.35;
+}
+
+body.teacher-course-open .course-subpage,
+body.student-course-open .student-course-nav-button {
+  min-height:48px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:600;
+}
+
+body.lesson-mode .lesson-tree-module {
+  border-radius:12px;
+  box-shadow:var(--academy-shadow-xs);
+}
+
+body.lesson-mode .lesson-tree-module > summary {
+  min-height:52px;
+  padding:12px 14px;
+  line-height:1.4;
+}
+
+body.lesson-mode .lesson-tree-activity {
+  min-height:48px;
+  padding:10px 12px;
+  border-radius:10px;
+}
+
+body.lesson-mode .lesson-tree-activity strong {
+  font-size:12px;
+  line-height:1.4;
+}
+
+body.lesson-mode .lesson-tree-activity small {
+  margin-top:3px;
+  font-size:10px;
+  line-height:1.35;
+}
+
+body.teacher-shell-mode .canvas-dashboard-card,
+body.app-shell-mode:not(.teacher-shell-mode) .canvas-dashboard-card,
+body.admin-shell-mode .admin-stat-card,
+body.admin-shell-mode .admin-panel-card,
+body.admin-shell-mode .admin-content-card,
+body.teacher-course-open .teacher-module-card,
+body.teacher-course-open .canvas-module-card,
+body.teacher-course-open .course-question-bank,
+body.student-course-open .student-module {
+  border-radius:14px;
+  box-shadow:var(--academy-shadow-sm);
+}
+
+body.teacher-shell-mode .canvas-dashboard-card-body,
+body.app-shell-mode:not(.teacher-shell-mode) .canvas-dashboard-card-body {
+  padding:20px;
+}
+
+body.teacher-shell-mode .canvas-course-title,
+body.app-shell-mode:not(.teacher-shell-mode) .canvas-course-title {
+  font-size:17px;
+  font-weight:650;
+  line-height:1.4;
+}
+
+body.teacher-course-open .course-workspace-content,
+body.student-course-open .student-course-content {
+  line-height:1.55;
+}
+
+.modal-card {
+  border-radius:20px;
+  box-shadow:var(--academy-shadow-sm);
+}
+
+.modal-card:not(.large) { padding:28px; }
+
+.modal-card h2 {
+  line-height:1.25;
+  letter-spacing:-.025em;
+}
+
+.modal-card label {
+  margin-block:18px;
+  font-weight:600;
+}
+
+.tabs,
+.exam-editor-nav,
+.question-mode-tabs { gap:8px; }
+
+.tab,
+.exam-editor-tab,
+.question-mode {
+  min-height:46px;
+  padding:12px 16px;
+  border-radius:10px 10px 0 0;
+  font-weight:650;
+}
+
+.table-wrap,
+.admin-table-wrap,
+.course-activity-table-wrap {
+  border-radius:14px;
+  box-shadow:var(--academy-shadow-xs);
+}
+
+th {
+  padding:14px 18px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.055em;
+}
+
+td {
+  min-height:48px;
+  padding:16px 18px;
+}
+
+.question-card,
+.option {
+  border-radius:14px;
+  box-shadow:var(--academy-shadow-xs);
+}
+
+.option {
+  min-height:52px;
+  padding:13px 15px;
+  line-height:1.45;
+}
+
+.exam-progress-track,
+.course-progress-track,
+.student-course-card .course-progress { min-height:10px; }
+
+@media (max-width:640px) {
+  body.auth-game-mode .auth-card { border-radius:16px; }
+
+  body.teacher-shell-mode .shell-nav-item,
+  body.app-shell-mode:not(.teacher-shell-mode) .shell-nav-item,
+  body.admin-shell-mode .admin-nav-item,
+  body.teacher-course-open .course-subpage,
+  body.student-course-open .student-course-nav-button {
+    min-height:50px;
+    padding:13px 14px;
+  }
+
+  .modal-card:not(.large) { padding:22px; }
+
+  .tab,
+  .exam-editor-tab,
+  .question-mode { padding-inline:14px; }
+}
