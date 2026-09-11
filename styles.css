@@ -12902,6 +12902,45 @@ body.lesson-mode .lesson-menu-toggle { display:none !important; }
   body.lesson-mode .lesson-module-tree { max-height:none; }
 }
 
+/* Regreso al curso, integrado encima del índice de contenido. */
+body.lesson-mode .lesson-sidebar-head {
+  grid-template-columns:minmax(0,1fr);
+  gap:20px;
+  padding:20px 18px;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return {
+  justify-self:stretch;
+  width:100%;
+  min-height:48px;
+  padding:12px 16px;
+  border:1px solid #ffffff30;
+  border-radius:10px;
+  background:var(--academy-petrol-800);
+  color:#fff;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+  line-height:1.5;
+  text-align:left;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  cursor:pointer;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return:hover {
+  background:var(--academy-petrol-700);
+  border-color:var(--academy-turquoise);
+  color:#fff;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return:focus-visible {
+  background:var(--academy-petrol-800);
+  outline:2px solid var(--academy-turquoise);
+  outline-offset:3px;
+}
+body.lesson-mode .lesson-sidebar-head > .lesson-return:active {
+  background:var(--academy-petrol-900);
+}
+body.lesson-mode .lesson-sidebar-course-identity { padding-inline:8px; }
+
 /* Espaciado final del panel docente: aire consistente entre encabezado y opciones. */
 body.teacher-course-open .course-workspace-sidebar {
   padding:18px 16px 28px !important;
